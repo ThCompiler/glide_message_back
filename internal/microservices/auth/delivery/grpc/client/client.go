@@ -2,9 +2,9 @@ package client
 
 import (
 	"context"
-	"patreon/internal/microservices/auth/sessions/models"
+	"glide/internal/microservices/auth/sessions/models"
 
-	proto "patreon/internal/microservices/auth/delivery/grpc/protobuf"
+	proto "glide/internal/microservices/auth/delivery/grpc/protobuf"
 
 	"google.golang.org/grpc"
 )

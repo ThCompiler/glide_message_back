@@ -3,8 +3,8 @@ package sessions_manager
 import (
 	"encoding/hex"
 	"fmt"
-	"patreon/internal/microservices/auth/sessions"
-	"patreon/internal/microservices/auth/sessions/models"
+	"glide/internal/microservices/auth/sessions"
+	"glide/internal/microservices/auth/sessions/models"
 	"strconv"
 	"time"
 

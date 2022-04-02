@@ -1,11 +1,11 @@
 package middleware
 
 import (
+	usecase_csrf "glide/internal/app/csrf/usecase"
+	hf "glide/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/utilits"
 	"net/http"
-	usecase_csrf "patreon/internal/app/csrf/usecase"
-	hf "patreon/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/utilits"
 
 	"github.com/sirupsen/logrus"
 )

@@ -1,6 +1,6 @@
 package app
 
-import "patreon/internal"
+import "glide/internal"
 
 const (
 	LoadFileUrl  = "media/"

@@ -20,13 +20,13 @@ const (
 )
 
 type BaseHandler struct {
-	handlerMethods map[string]http.HandlerFunc
+	handlerMethods map[string]hf.HandlerFunc
 	middlewares    []hf.HMiddlewareFunc
 	HelpHandlers
 }
 
 func NewBaseHandler(log *logrus.Logger) *BaseHandler {
-	h := &BaseHandler{handlerMethods: map[string]http.HandlerFunc{}, middlewares: []hf.HMiddlewareFunc{},
+	h := &BaseHandler{handlerMethods: map[string]hf.HandlerFunc{}, middlewares: []hf.HMiddlewareFunc{},
 		HelpHandlers: HelpHandlers{
 			ErrorConvertor: delivery.ErrorConvertor{
 				Responder: delivery.Responder{
@@ -42,12 +42,12 @@ func (h *BaseHandler) AddMiddleware(middleware ...hf.HMiddlewareFunc) {
 	h.middlewares = append(h.middlewares, middleware...)
 }
 
-func (h *BaseHandler) AddMethod(method string, handlerMethod http.HandlerFunc, middlewares ...hf.HFMiddlewareFunc) {
+func (h *BaseHandler) AddMethod(method string, handlerMethod hf.HandlerFunc, middlewares ...hf.HFMiddlewareFunc) {
 	h.handlerMethods[method] = h.applyHFMiddleware(handlerMethod, middlewares...)
 }
 
-func (h *BaseHandler) applyHFMiddleware(handlerMethod http.HandlerFunc,
-	middlewares ...hf.HFMiddlewareFunc) http.HandlerFunc {
+func (h *BaseHandler) applyHFMiddleware(handlerMethod hf.HandlerFunc,
+	middlewares ...hf.HFMiddlewareFunc) hf.HandlerFunc {
 	resultHandlerMethod := handlerMethod
 	for index := len(middlewares) - 1; index >= 0; index-- {
 		resultHandlerMethod = middlewares[index](resultHandlerMethod)
@@ -55,7 +55,7 @@ func (h *BaseHandler) applyHFMiddleware(handlerMethod http.HandlerFunc,
 	return resultHandlerMethod
 }
 
-func (h *BaseHandler) applyMiddleware(handler http.Handler) http.Handler {
+func (h *BaseHandler) applyMiddleware(handler hf.Handler) hf.Handler {
 	resultHandler := handler
 	for index := len(h.middlewares) - 1; index >= 0; index-- {
 		resultHandler = h.middlewares[index](resultHandler)
@@ -87,7 +87,7 @@ func (h *BaseHandler) Connect(route *mux.Route) {
 func (h *BaseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.PrintRequest(w, r)
 	ok := true
-	var hndlr http.HandlerFunc
+	var hndlr hf.HandlerFunc
 
 	hndlr, ok = h.handlerMethods[r.Method]
 	if ok {

@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	proto "patreon/internal/microservices/auth/delivery/grpc/protobuf"
+	proto "glide/internal/microservices/auth/delivery/grpc/protobuf"
 )
 
 type AuthCheckerServer interface {

@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"patreon/internal/microservices/push"
-	"patreon/internal/microservices/push/push"
+	"glide/internal/microservices/push"
+	"glide/internal/microservices/push/push"
 )
 
 type Usecase interface {

@@ -1,4 +1,4 @@
-package utils
+package utilits
 
 import (
 	"bytes"
@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"github.com/conku/webp"
 	"github.com/pkg/errors"
+	"glide/internal/app"
+	repoFiles "glide/internal/microservices/files/files/repository/files"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
-	"glide/internal/app"
-	repoFiles "glide/internal/microservices/files/files/repository/files"
 	"strings"
 )
 

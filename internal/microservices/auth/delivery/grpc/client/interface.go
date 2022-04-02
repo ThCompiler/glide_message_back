@@ -2,7 +2,7 @@ package client
 
 import (
 	"context"
-	"patreon/internal/microservices/auth/sessions/models"
+	"glide/internal/microservices/auth/sessions/models"
 )
 
 //go:generate mockgen -destination=mocks/auth_checker_mock.go -package=mock_auth_checker . AuthCheckerClient

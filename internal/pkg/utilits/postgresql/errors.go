@@ -2,7 +2,7 @@ package postgresql_utilits
 
 import (
 	"errors"
-	"tech-db-forum/internal/app"
+	"glide/internal/app"
 )
 
 const (

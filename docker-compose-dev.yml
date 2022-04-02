@@ -106,16 +106,6 @@ services:
     volumes:
       - session-redis:/data
     restart: always
-  access-redis:
-    image: "redis:alpine"
-    command: --port 6380
-    expose:
-      - "6380"
-    ports:
-      - "6380:6380"
-    volumes:
-      - access-redis:/data
-    restart: always
   patreon-bd:
     image: pg-14
     expose:

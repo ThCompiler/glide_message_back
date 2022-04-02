@@ -3,7 +3,7 @@ package push_client
 import (
 	"github.com/mailru/easyjson"
 	"github.com/streadway/amqp"
-	models "patreon/internal/microservices/push"
+	models "glide/internal/microservices/push"
 	"glide/internal/pkg/rabbit"
 	"time"
 )

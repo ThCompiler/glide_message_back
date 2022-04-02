@@ -5,8 +5,8 @@ import (
 	"github.com/mailru/easyjson"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
-	"patreon/internal/microservices/push"
-	"patreon/internal/microservices/push/push/usecase"
+	"glide/internal/microservices/push"
+	"glide/internal/microservices/push/push/usecase"
 	"glide/internal/pkg/rabbit"
 )
 

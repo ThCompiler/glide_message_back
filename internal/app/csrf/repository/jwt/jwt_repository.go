@@ -1,8 +1,8 @@
 package repository_jwt
 
 import (
-	"patreon/internal/app"
-	"patreon/internal/app/csrf/csrf_models"
+	"glide/internal/app"
+	"glide/internal/app/csrf/csrf_models"
 	"time"
 
 	uuid "github.com/satori/go.uuid"

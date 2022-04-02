@@ -1,9 +1,6 @@
 package sessions
 
-import "patreon/internal/microservices/auth/sessions/models"
-
-//go:generate mockgen -destination=mocks/manager_mock.go -package=mock_sessions . SessionsManager
-//go:generate mockgen -destination=mocks/repository_mock.go -package=mock_sessions . SessionRepository
+import "glide/internal/microservices/auth/sessions/models"
 
 type SessionRepository interface {
 	Set(session *models.Session) error

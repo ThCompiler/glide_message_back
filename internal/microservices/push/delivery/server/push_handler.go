@@ -3,25 +3,25 @@ package push_server
 import (
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
+	session_client "glide/internal/microservices/auth/delivery/grpc/client"
+	"glide/internal/microservices/auth/sessions/middleware"
+	"glide/internal/microservices/push/utils"
+	hf "glide/internal/pkg/handler"
 	"log"
 	"net/http"
-	bh "patreon/internal/app/delivery/http/handlers/base_handler"
-	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
-	"patreon/internal/microservices/auth/sessions/middleware"
-	"patreon/internal/microservices/push/utils"
 )
 
 type PushHandler struct {
 	sessionClient session_client.AuthCheckerClient
 	hub           *utils.SendHub
 	upgrader      *websocket.Upgrader
-	bh.BaseHandler
+	hf.BaseHandler
 }
 
 func NewPushHandler(log *logrus.Logger, sManager session_client.AuthCheckerClient, hub *utils.SendHub,
 	upgrader *websocket.Upgrader) *PushHandler {
 	h := &PushHandler{
-		BaseHandler:   *bh.NewBaseHandler(log),
+		BaseHandler:   *hf.NewBaseHandler(log),
 		sessionClient: sManager,
 		hub:           hub,
 		upgrader:      upgrader,

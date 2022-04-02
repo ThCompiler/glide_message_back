@@ -2,11 +2,11 @@ package middleware
 
 import (
 	"context"
+	"glide/internal/app/utilits"
+	"glide/internal/microservices/auth/delivery/grpc/client"
+	"glide/internal/microservices/auth/sessions/sessions_manager"
+	hf "glide/internal/pkg/handler/handler_interfaces"
 	"net/http"
-	hf "patreon/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
-	"patreon/internal/app/utilits"
-	"patreon/internal/microservices/auth/delivery/grpc/client"
-	"patreon/internal/microservices/auth/sessions/sessions_manager"
 	"time"
 
 	"github.com/sirupsen/logrus"

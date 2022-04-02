@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
-	"patreon/internal/app"
-	"patreon/internal/app/repository"
+	"glide/internal/app"
+	repository "glide/internal/pkg/utilits/postgresql"
 )
 
 const (

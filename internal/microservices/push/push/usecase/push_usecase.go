@@ -1,9 +1,9 @@
 package usecase
 
 import (
-	"patreon/internal/microservices/push"
-	"patreon/internal/microservices/push/push"
-	"patreon/internal/microservices/push/push/repository"
+	"glide/internal/microservices/push"
+	"glide/internal/microservices/push/push"
+	"glide/internal/microservices/push/push/repository"
 )
 
 type PushUsecase struct {

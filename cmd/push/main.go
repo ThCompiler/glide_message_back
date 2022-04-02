@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
+	"glide/internal/app"
+	"glide/internal/microservices/push"
+	push_server "glide/internal/microservices/push/delivery/server"
+	"glide/internal/pkg/utilits"
 	"os"
-	"patreon/internal/app"
-	"patreon/internal/microservices/push"
-	push_server "patreon/internal/microservices/push/delivery/server"
-	"glide/internal/pkg/utils"
 
 	"github.com/BurntSushi/toml"
 	"github.com/sirupsen/logrus"
@@ -27,7 +27,7 @@ func main() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	logger, CloseLogger := utils.NewLogger(&config.Config, true, "push_microservice")
+	logger, CloseLogger := utilits.NewLogger(&config.Config, true, "push_microservice")
 	defer CloseLogger()
 	level, err := logrus.ParseLevel(config.LogLevel)
 	if err != nil {
@@ -35,7 +35,7 @@ func main() {
 	}
 	logger.SetLevel(level)
 
-	db, closeResource := utils.NewPostgresConnection(config.SqlUrl)
+	db, closeResource := utilits.NewPostgresConnection(config.SqlUrl)
 
 	defer func(closer func() error, log *logrus.Logger) {
 		err := closer()
@@ -44,7 +44,7 @@ func main() {
 		}
 	}(closeResource, logger)
 
-	rabbit, closeResource := utils.NewRabbitSession(logger, config.RabbitUrl)
+	rabbit, closeResource := utilits.NewRabbitSession(logger, config.RabbitUrl)
 
 	defer func(closer func() error, log *logrus.Logger) {
 		err := closer()
@@ -53,7 +53,7 @@ func main() {
 		}
 	}(closeResource, logger)
 
-	sessionConn, err := utils.NewGrpcConnection(config.SessionUrl)
+	sessionConn, err := utilits.NewGrpcConnection(config.SessionUrl)
 	if err != nil {
 		logger.Fatal(err)
 	}

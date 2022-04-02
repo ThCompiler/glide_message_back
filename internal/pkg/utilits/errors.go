@@ -1,4 +1,4 @@
-package utils
+package utilits
 
 import "github.com/pkg/errors"
 

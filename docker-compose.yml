@@ -172,28 +172,6 @@ services:
       - GF_SERVER_ROOT_URL=${GRAFANA_URL}
     expose:
       - "3000"
-  postgres_exporter:
-    container_name: exporter_container
-    image: prometheuscommunity/postgres-exporter
-    environment:
-      DATA_SOURCE_USER: "${PG_BD_USERNAME}"
-      DATA_SOURCE_PASS: "${PG_BD_PASSWORD}"
-      DATA_SOURCE_URI: "patreon-bd:5432/${PG_BD_NAME}?sslmode=disable"
-      PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
-    volumes:
-      - ./scripts/queries.yaml:/etc/postgres_exporter/queries.yaml:ro
-    ports:
-      - "9187:9187"
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.2'
-          memory: 500M
-    networks:
-      - default
-    depends_on:
-      - patreon-bd
   rabbit:
     image: rabbitmq:3-management-alpine
     ports:

@@ -2,15 +2,12 @@ package main
 
 import (
 	"flag"
+	"glide/internal/app"
+	sessionServer "glide/internal/microservices/auth/delivery/grpc/server"
+	"glide/internal/microservices/auth/sessions/repository"
+	"glide/internal/microservices/auth/sessions/sessions_manager"
+	"glide/internal/pkg/utilits"
 	"os"
-	"patreon/internal/app"
-	sessionServer "patreon/internal/microservices/auth/delivery/grpc/server"
-	"patreon/internal/microservices/auth/sessions/repository"
-	sessions_manager2 "patreon/internal/microservices/auth/sessions/sessions_manager"
-	prometheus_monitoring "glide/internal/pkg/monitoring/prometheus-monitoring"
-	"glide/internal/pkg/utils"
-
-	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	grpc2 "google.golang.org/grpc"
 
@@ -33,7 +30,7 @@ func main() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	logger, CloseLogger := utils.NewLogger(&config.Config, true, "session_microservice")
+	logger, CloseLogger := utilits.NewLogger(&config.Config, true, "session_microservice")
 	defer CloseLogger()
 	level, err := logrus.ParseLevel(config.LogLevel)
 	if err != nil {
@@ -41,7 +38,7 @@ func main() {
 	}
 	logger.SetLevel(level)
 
-	sessionRedisPool := utils.NewRedisPool(config.ServerRepository.SessionRedisUrl)
+	sessionRedisPool := utilits.NewRedisPool(config.ServerRepository.SessionRedisUrl)
 	logger.Info("Session-service new redis pool create")
 
 	conn, err := sessionRedisPool.Dial()
@@ -52,25 +49,15 @@ func main() {
 		logger.Fatal(err)
 	}
 	logger.Info("Session-service new redis pool success check")
-	metrics := prometheus_monitoring.NewPrometheusMetrics("auth")
-	if err = metrics.SetupMonitoring(); err != nil {
-		logger.Fatal(err)
-	}
 
-	grpcDurationMetrics := utils.AuthInterceptor(metrics)
 
-	grpc := grpc2.NewServer(
-		grpc2.UnaryInterceptor(grpcDurationMetrics),
-		grpc2.StreamInterceptor(grpc_prometheus.StreamServerInterceptor),
-	)
-	//grpc2.UnaryInterceptor(grpcDurationMetrics))
+	grpc := grpc2.NewServer()
 
-	grpc_prometheus.Register(grpc)
 
 	sessionRepository := repository.NewRedisRepository(sessionRedisPool, logger)
 	logger.Info("Session-service create repository")
 
-	server := sessionServer.NewAuthGRPCServer(logger, grpc, sessions_manager2.NewSessionManager(sessionRepository))
+	server := sessionServer.NewAuthGRPCServer(logger, grpc, sessions_manager.NewSessionManager(sessionRepository))
 	if err = server.StartGRPCServer(config.Microservices.SessionServerUrl); err != nil {
 		logger.Fatalln(err)
 	}

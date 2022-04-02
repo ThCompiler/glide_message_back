@@ -1,6 +1,6 @@
 package push
 
-import "patreon/internal"
+import "glide/internal"
 
 type Config struct {
 	internal.Config

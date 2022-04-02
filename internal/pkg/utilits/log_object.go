@@ -17,7 +17,7 @@ func (l *LogObject) BaseLog() *logrus.Logger {
 	return l.log
 }
 
-func (l *LogObject) Log(w http.ResponseWriter, r *http.Request) *logrus.Entry {
+func (l *LogObject) Log(r *http.Request) *logrus.Entry {
 	if r == nil {
 		return l.log.WithField("type", "base_log")
 	}

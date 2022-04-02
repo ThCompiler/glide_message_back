@@ -2,8 +2,12 @@ package utilits
 
 import (
 	"fmt"
-	"os"
+	"github.com/gomodule/redigo/redis"
 	"glide/internal"
+	"glide/internal/pkg/rabbit"
+	"google.golang.org/grpc"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -11,6 +15,8 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
+
+const MAX_GRPC_SIZE = 1024 * 1024 * 100
 
 func NewLogger(config *internal.Config, isService bool, serviceName string) (log *logrus.Logger, closeResource func() error) {
 	level, err := logrus.ParseLevel(config.LogLevel)
@@ -49,3 +55,28 @@ func NewPostgresConnection(databaseUrl string) (db *sqlx.DB, closeResource func(
 	return db, db.Close
 }
 
+func NewRedisPool(redisUrl string) *redis.Pool {
+	return &redis.Pool{
+		Dial: func() (redis.Conn, error) {
+			return redis.DialURL(redisUrl)
+		},
+	}
+}
+
+func NewRabbitSession(logger *logrus.Logger, url string) (session *rabbit.Session, closeResource func() error) {
+	session = rabbit.New(logger.WithField("service", "rabbit"), "rabbit", url)
+	return session, session.Close
+}
+
+func NewGrpcConnection(grpcUrl string) (*grpc.ClientConn, error) {
+	return grpc.Dial(grpcUrl, grpc.WithInsecure(), grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(MAX_GRPC_SIZE),
+		grpc.MaxCallSendMsgSize(MAX_GRPC_SIZE)), grpc.WithBlock())
+}
+
+func StringsToLowerCase(array []string) []string {
+	res := make([]string, len(array))
+	for i, str := range array {
+		res[i] = strings.ToLower(str)
+	}
+	return res
+}

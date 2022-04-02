@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"os"
-	_ "patreon/docs"
-	"patreon/internal/app"
-	main_server "patreon/internal/app/server"
-	"glide/internal/pkg/utils"
+	_ "glide/docs"
+	"glide/internal/app"
+	main_server "glide/internal/app/server"
+	"glide/internal/pkg/utilits"
 
 	"github.com/BurntSushi/toml"
 	"github.com/sirupsen/logrus"
@@ -70,7 +70,7 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	logger, closeResource := utils.NewLogger(&config.Config, false, "")
+	logger, closeResource := utilits.NewLogger(&config.Config, false, "")
 
 	defer func(closer func() error, log *logrus.Logger) {
 		err := closer()
@@ -84,7 +84,7 @@ func main() {
 		repositoryConfig = &config.ServerRepository
 	}
 
-	db, closeResource := utils.NewPostgresConnection(repositoryConfig.DataBaseUrl)
+	db, closeResource := utilits.NewPostgresConnection(repositoryConfig.DataBaseUrl)
 
 	defer func(closer func() error, log *logrus.Logger) {
 		err := closer()
@@ -93,7 +93,7 @@ func main() {
 		}
 	}(closeResource, logger)
 
-	rabbit, closeResource := utils.NewRabbitSession(logger, repositoryConfig.RabbitUrl)
+	rabbit, closeResource := utilits.NewRabbitSession(logger, repositoryConfig.RabbitUrl)
 
 	defer func(closer func() error, log *logrus.Logger) {
 		err := closer()
@@ -102,11 +102,11 @@ func main() {
 		}
 	}(closeResource, logger)
 
-	sessionConn, err := utils.NewGrpcConnection(config.Microservices.SessionServerUrl)
+	sessionConn, err := utilits.NewGrpcConnection(config.Microservices.SessionServerUrl)
 	if err != nil {
 		logger.Fatal(err)
 	}
-	filesConn, err := utils.NewGrpcConnection(config.Microservices.FilesUrl)
+	filesConn, err := utilits.NewGrpcConnection(config.Microservices.FilesUrl)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -114,7 +114,7 @@ func main() {
 		app.ExpectedConnections{
 			SessionGrpcConnection: sessionConn,
 			FilesGrpcConnection:   filesConn,
-			AccessRedisPool:       utils.NewRedisPool(repositoryConfig.AccessRedisUrl),
+			AccessRedisPool:       utilits.NewRedisPool(repositoryConfig.AccessRedisUrl),
 			SqlConnection:         db,
 			PathFiles:             config.MediaDir,
 			RabbitSession:         rabbit,

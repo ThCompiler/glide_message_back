@@ -26,5 +26,4 @@ service AuthChecker {
   rpc Check(SessionID) returns (Result);
   rpc Create(UserID) returns (Result);
   rpc Delete(SessionID) returns (Nothing);
-
 }

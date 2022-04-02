@@ -1,8 +1,8 @@
 package client
 
 import (
-	proto "patreon/internal/microservices/auth/delivery/grpc/protobuf"
-	"patreon/internal/microservices/auth/sessions/models"
+	proto "glide/internal/microservices/auth/delivery/grpc/protobuf"
+	"glide/internal/microservices/auth/sessions/models"
 )
 
 func ConvertAuthServerRespond(result *proto.Result) models.Result {

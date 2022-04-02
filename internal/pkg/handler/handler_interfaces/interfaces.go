@@ -14,4 +14,4 @@ type Handler interface {
 	ServeHTTP(w http.ResponseWriter, r *http.Request)
 }
 type HMiddlewareFunc func(http.Handler) http.Handler
-type HFMiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
+type HFMiddlewareFunc func(HandlerFunc) HandlerFunc
