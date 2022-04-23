@@ -2,12 +2,12 @@ package upd_text_attach_handler
 
 import (
 	"net/http"
-	"patreon/internal/app"
-	"patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	repository_postgresql "patreon/internal/app/repository/attaches/postgresql"
+	"glide/internal/app"
+	"glide/internal/app/delivery/http/handlers/base_handler"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
+	repository_postgresql "glide/internal/app/repository/attaches/postgresql"
 
 	"github.com/sirupsen/logrus"
 )

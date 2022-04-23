@@ -3,32 +3,50 @@ package repository_postgresql
 import (
 	"database/sql"
 	"github.com/jmoiron/sqlx"
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
+	"github.com/lib/pq"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
 
 	"github.com/pkg/errors"
-
-	"github.com/lib/pq"
 )
 
 const (
 	updateNicknameQuery = `UPDATE users SET nickname = $1 WHERE nickname = $2`
 
-	isAllowedAwardQuery = `WITH used_award AS (
-			 		SELECT count(*) as cnt FROM users 
-						JOIN subscribers AS sb ON sb.users_id = $2
-						JOIN parents_awards AS pa ON pa.parent_id = sb.awards_id AND pa.awards_id = $1
-				UNION
-					SELECT count(*) as cnt FROM subscribers WHERE users_id = $2 AND awards_id = $1
-		 	)
-			SELECT sum(cnt) FROM used_award`
+	updateAvatarQuery = `UPDATE users SET avatar = $1 WHERE nickname = $2`
 
-	findByNicknameQuery = `SELECT users_id, login, nickname, users.avatar, encrypted_password, cp.creator_id IS NOT NULL
-	from users LEFT JOIN creator_profile AS cp ON (users.users_id = cp.creator_id) where nickname=$1`
+	findByNicknameQuery             = `SELECT nickname, fullname, about, age, country FROM users WHERE nickname=$1`
+	findByNicknameGetLanguagesQuery = `SELECT language FROM user_language WHERE nickname=$1`
 
-	createQuery         = `INSERT INTO users (login, nickname, encrypted_password, avatar) VALUES ($1, $2, $3, $4) RETURNING users_id`
-	createSettingsQuery = `INSERT INTO user_settings (user_id, get_sub, get_post, get_comment) VALUES ($1, true, true, true)`
+	createQuery = `    
+						WITH sel AS (
+						    SELECT nickname, fullname, about, password, age, country
+							FROM users
+							WHERE nickname = $1 LIMIT 1
+						), ins as (
+							INSERT INTO users (nickname, fullname, about, password, age, country)
+								SELECT $1, $2, $3, $4, $5, $6
+								WHERE not exists (select 1 from sel)
+							RETURNING nickname, fullname, about, age, country
+						)
+						SELECT nickname, fullname, about, age, country, 0
+						FROM ins
+						UNION ALL
+						SELECT nickname, fullname, about, age, country, 1
+						FROM sel
+					`
+	addLanguagesToUsersQuery = `INSERT INTO user_language (language, nickname) VALUES ($1, $2)`
+
+	deleteLanguagesForUsersQuery = `DELETE FROM user_language WHERE nickname = $1`
+
+	updateUserQuery = `
+					UPDATE users SET 
+					    fullname = COALESCE(NULLIF(TRIM($1), ''), fullname),
+					    about = COALESCE(NULLIF(TRIM($2), ''), about),
+					    age = COALESCE(NULLIF($3, 0), age),
+						country = COALESCE(NULLIF(TRIM($4), ''), country),
+					WHERE nickname = $5
+					RETURNING nickname, fullname, about, age, country`
 )
 
 type UserRepository struct {
@@ -42,74 +60,56 @@ func NewUserRepository(st *sqlx.DB) *UserRepository {
 }
 
 // Create Errors:
-// 		LoginAlreadyExist
 // 		NicknameAlreadyExist
+//		IncorrectCounty
+//		IncorrectLanguage
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (repo *UserRepository) Create(u *models.User) error {
-
+func (repo *UserRepository) Create(u *models.User) (*models.User, error) {
 	tx, err := repo.store.Beginx()
 	if err != nil {
-		return repository.NewDBError(err)
+		return nil, repository.NewDBError(err)
 	}
 
-	if err = tx.QueryRow(createQuery, u.Login, u.Nickname, u.EncryptedPassword, app.DefaultImage).Scan(&u.ID); err != nil {
+	var have_conflict = 0
+
+	if err = tx.QueryRow(
+		createQuery,
+		u.Nickname,
+		u.Fullname,
+		u.About,
+		u.EncryptedPassword,
+		u.Age,
+		u.Country).
+		Scan(&u.Nickname,
+			&u.Fullname,
+			&u.About,
+			&u.Age,
+			&u.Country,
+			&have_conflict); err != nil {
 		_ = tx.Rollback()
-		if _, ok := err.(*pq.Error); ok {
-			return parsePQError(err.(*pq.Error))
-		}
-		return repository.NewDBError(err)
+		return nil, parsePQError(err.(*pq.Error))
 	}
-	if _, err = tx.Exec(createSettingsQuery, u.ID); err != nil {
-		_ = tx.Rollback()
-		return repository.NewDBError(err)
+
+	if have_conflict == 1 {
+		return u, NicknameAlreadyExist
+	}
+
+	for lang := range u.Languages {
+		if _, err = tx.Exec(
+			addLanguagesToUsersQuery,
+			lang,
+			u.Nickname); err != nil {
+			_ = tx.Rollback()
+			return nil, parsePQError(err.(*pq.Error))
+		}
 	}
 
 	if err = tx.Commit(); err != nil {
-		return repository.NewDBError(err)
-	}
-
-	return nil
-}
-
-// FindByLogin Errors:
-// 		repository.NotFound
-// 		app.GeneralError with Errors:
-// 			repository.DefaultErrDB
-func (repo *UserRepository) FindByLogin(login string) (*models.User, error) {
-	query := `SELECT users_id, login, nickname, avatar, encrypted_password from users where login=$1`
-	user := models.User{}
-
-	if err := repo.store.QueryRow(query, login).
-		Scan(&user.ID, &user.Login, &user.Nickname, &user.Avatar, &user.EncryptedPassword); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, repository.NotFound
-		}
-		return nil, repository.NewDBError(err)
-
-	}
-
-	return &user, nil
-}
-
-// FindByID Errors:
-// 		repository.NotFound
-// 		app.GeneralError with Errors
-// 			repository.DefaultErrDB
-func (repo *UserRepository) FindByID(id int64) (*models.User, error) {
-	user := models.User{}
-	query := `SELECT users_id, login, nickname, users.avatar, encrypted_password, cp.creator_id IS NOT NULL
-	from users LEFT JOIN creator_profile AS cp ON (users.users_id = cp.creator_id) where users_id=$1`
-
-	if err := repo.store.QueryRow(query, id).
-		Scan(&user.ID, &user.Login, &user.Nickname, &user.Avatar, &user.EncryptedPassword, &user.HaveCreator); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, repository.NotFound
-		}
 		return nil, repository.NewDBError(err)
 	}
 
-	return &user, nil
+	return u, nil
 }
 
 // FindByNickname Errors:
@@ -120,7 +120,18 @@ func (repo *UserRepository) FindByNickname(nickname string) (*models.User, error
 	user := models.User{}
 
 	if err := repo.store.QueryRow(findByNicknameQuery, nickname).
-		Scan(&user.ID, &user.Login, &user.Nickname, &user.Avatar, &user.EncryptedPassword, &user.HaveCreator); err != nil {
+		Scan(&user.Nickname,
+			&user.Fullname,
+			&user.About,
+			&user.Age,
+			&user.Country); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, repository.NotFound
+		}
+		return nil, repository.NewDBError(err)
+	}
+
+	if err := repo.store.Select(&user.Languages, findByNicknameGetLanguagesQuery, nickname); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, repository.NotFound
 		}
@@ -149,35 +160,76 @@ func (repo *UserRepository) UpdatePassword(id int64, newEncryptedPassword string
 }
 
 // UpdateAvatar Errors:
+//		repository.NotFound
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (repo *UserRepository) UpdateAvatar(id int64, newAvatar string) error {
-	query := `UPDATE users SET avatar = $1 WHERE users_id = $2`
-
-	row, err := repo.store.Query(query, newAvatar, id)
+func (repo *UserRepository) UpdateAvatar(nickname string, newAvatar string) error {
+	res, err := repo.store.Exec(updateAvatarQuery, newAvatar, nickname)
 	if err != nil {
 		return repository.NewDBError(err)
 	}
 
-	if err = row.Close(); err != nil {
+	rw, err := res.RowsAffected()
+	if err != nil {
 		return repository.NewDBError(err)
 	}
+
+	if rw == 0 {
+		return repository.NotFound
+	}
+
 	return nil
 }
 
-// IsAllowedAward Errors:
+// Update Errors:
+//		IncorrectCounty
+//		IncorrectLanguage
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (repo *UserRepository) IsAllowedAward(userId int64, awardId int64) (bool, error) {
-	count := int64(0)
-	if err := repo.store.QueryRow(isAllowedAwardQuery, awardId, userId).Scan(&count); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return false, nil
-		}
-		return false, repository.NewDBError(err)
+func (repo *UserRepository) Update(u *models.User) (*models.User, error) {
+	tx, err := repo.store.Beginx()
+	if err != nil {
+		return nil, repository.NewDBError(err)
 	}
 
-	return count != 0, nil
+	if err = tx.QueryRow(
+		updateUserQuery,
+		u.Fullname,
+		u.About,
+		u.Age,
+		u.Country,
+		u.Nickname).
+		Scan(&u.Nickname,
+			&u.Fullname,
+			&u.About,
+			&u.Age,
+			&u.Country); err != nil {
+		_ = tx.Rollback()
+		return nil, parsePQError(err.(*pq.Error))
+	}
+
+	if len(u.Languages) != 0 {
+		if _, err = tx.Exec(deleteLanguagesForUsersQuery, u.Nickname); err != nil {
+			_ = tx.Rollback()
+			return nil, repository.NewDBError(err)
+		}
+
+		for lang := range u.Languages {
+			if _, err = tx.Exec(
+				addLanguagesToUsersQuery,
+				lang,
+				u.Nickname); err != nil {
+				_ = tx.Rollback()
+				return nil, parsePQError(err.(*pq.Error))
+			}
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		return nil, repository.NewDBError(err)
+	}
+
+	return u, nil
 }
 
 // UpdateNickname Errors:

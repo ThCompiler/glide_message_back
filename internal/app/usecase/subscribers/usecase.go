@@ -1,6 +1,6 @@
 package usecase_subscribers
 
-import "patreon/internal/app/models"
+import "glide/internal/app/models"
 
 //go:generate mockgen -destination=mocks/mock_subscribers_usecase.go -package=mock_usecase -mock_names=Usecase=SubscribersUsecase . Usecase
 

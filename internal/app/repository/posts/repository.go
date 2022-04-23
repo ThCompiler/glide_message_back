@@ -1,7 +1,7 @@
 package repository_posts
 
 import (
-	"patreon/internal/app/models"
+	"glide/internal/app/models"
 )
 
 //go:generate mockgen -destination=mocks/mock_posts_repository.go -package=mock_repository -mock_names=Repository=PostsRepository . Repository

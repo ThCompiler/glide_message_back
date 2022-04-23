@@ -1,6 +1,6 @@
 ./media
 ./logs*
-./patreon-secrt
+./glide-secrt
 ./docs
 ./docker
 ./scripts

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/pkg/errors"
-	"patreon/internal/app/utilits/models"
+	"glide/internal/pkg/utilits/models"
 	"strconv"
 	"time"
 )

@@ -2,8 +2,8 @@ package usecase_pay_token
 
 import (
 	uuid "github.com/satori/go.uuid"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository/pay_token"
+	"glide/internal/app/models"
+	"glide/internal/app/repository/pay_token"
 	"strconv"
 	"time"
 )

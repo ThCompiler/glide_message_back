@@ -1,7 +1,7 @@
 package server
 
 import (
-	"patreon/internal/app"
+	"glide/internal/app"
 )
 
 type HandlerFactory interface {

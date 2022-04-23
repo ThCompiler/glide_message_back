@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
-	"patreon/internal/app/repository"
-	mock_usecase "patreon/internal/app/usecase/awards/mocks"
+	"glide/internal/app/repository"
+	mock_usecase "glide/internal/app/usecase/awards/mocks"
 	"strconv"
 	"testing"
 )

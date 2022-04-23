@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gomodule/redigo/redis"
 	"github.com/pkg/errors"
-	"patreon/internal/app"
+	"glide/internal/app"
 )
 
 type PayTokenRepository struct {

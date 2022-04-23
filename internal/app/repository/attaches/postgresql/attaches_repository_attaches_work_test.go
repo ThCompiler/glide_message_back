@@ -5,8 +5,8 @@ import (
 	"database/sql/driver"
 	"github.com/stretchr/testify/require"
 	sqlmock "github.com/zhashkevych/go-sqlxmock"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
 	"time"
 )
 

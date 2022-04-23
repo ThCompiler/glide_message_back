@@ -6,6 +6,7 @@ import (
 	"github.com/mailru/easyjson"
 	"github.com/pkg/errors"
 	"glide/internal/app"
+	repFiles "glide/internal/app/repository/files"
 	"glide/internal/pkg/handler/handler_errors"
 	"glide/internal/pkg/utilits/delivery"
 	"io"
@@ -139,7 +140,7 @@ func (h *HelpHandlers) GetArrayStringFromQueries(w http.ResponseWriter, r *http.
 	return strings.Split(values, ","), app.InvalidInt
 }
 
-func (h *HelpHandlers) GetRequestBody(w http.ResponseWriter, r *http.Request, reqStruct easyjson.Unmarshaler) error {
+func (h *HelpHandlers) GetRequestBody(r *http.Request, reqStruct easyjson.Unmarshaler) error {
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
 	}(r.Body)

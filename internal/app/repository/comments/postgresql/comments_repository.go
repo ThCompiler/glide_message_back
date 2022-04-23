@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/jmoiron/sqlx"
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	"patreon/internal/app/repository/comments"
-	postgresql_utilits "patreon/internal/app/utilits/postgresql"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
+	"glide/internal/app/repository/comments"
+	postgresql_utilits "glide/internal/app/utilits/postgresql"
 
 	"github.com/pkg/errors"
 )

@@ -4,7 +4,7 @@ import (
 	gh "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"net/http"
-	"patreon/internal"
+	"glide/internal"
 )
 
 type CorsMiddleware struct {

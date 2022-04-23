@@ -21,7 +21,7 @@ generate-api:
 	swag init --parseDependency --parseInternal --parseDepth 1 -g ./cmd/server/main.go -o docs
 
 build: generate-api
-	mkdir -p ./patreon-secrt
+	mkdir -p ./glide-secrt
 	go build -o server.out -v ./cmd/server
 build-sessions:
 	go build -o sessions.out -v ./cmd/sessions
@@ -31,9 +31,9 @@ build-push:
 	go build -o push.out -v ./cmd/push
 
 build-docker-server: # запуск обычного http servera
-	docker build --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon
+	docker build --no-cache --network host -f ./docker/builder.Dockerfile . --tag glide
 build-docker-server-https: # запуск https serverа
-	docker build --build-arg RUN_HTTPS=-run-https --no-cache --network host -f ./docker/builder.Dockerfile . --tag patreon
+	docker build --build-arg RUN_HTTPS=-run-https --no-cache --network host -f ./docker/builder.Dockerfile . --tag glide
 
 build-docker-pg: # сборка образа базы
 	docker build --no-cache --network host -f ./docker/postgresql.Dockerfile . --tag pg-14
@@ -105,8 +105,6 @@ gen-mock:
 
 gen-proto-sessions:
 	protoc --proto_path=${MICROSERVICE_DIR}/auth/delivery/grpc/protobuf session.proto --go_out=plugins=grpc:${MICROSERVICE_DIR}/auth/delivery/grpc/protobuf
-gen-proto-files:
-	protoc --proto_path=${MICROSERVICE_DIR}/files/delivery/grpc/protobuf files.proto --go_out=plugins=grpc:${MICROSERVICE_DIR}/files/delivery/grpc/protobuf
 
 test:
 	go test -v -race ./internal/...

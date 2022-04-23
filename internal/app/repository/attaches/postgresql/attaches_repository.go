@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	repository_attaches "patreon/internal/app/repository/attaches"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
+	repository_attaches "glide/internal/app/repository/attaches"
 	"time"
 )
 

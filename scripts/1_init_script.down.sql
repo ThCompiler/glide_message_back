@@ -10,3 +10,4 @@ DROP TABLE users;
 DROP TABLE countries;
 DROP TABLE languages;
 DROP EXTENSION citext;
+DROP EXTENSION hstore;

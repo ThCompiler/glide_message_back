@@ -12,4 +12,5 @@ var (
 	IncorrectEmailOrPassword = errors.New("incorrect email or password")
 	OldPasswordEqualNew      = errors.New("the new password must be different from the old one")
 	IncorrectNewPassword     = errors.New("new password not valid")
+	FileSystemError          = errors.New("some error with filesystem")
 )

@@ -2,7 +2,7 @@ package repository_postgresql
 
 import (
 	"github.com/stretchr/testify/suite"
-	"patreon/internal/app/models"
+	"glide/internal/app/models"
 	"testing"
 
 	"github.com/stretchr/testify/require"

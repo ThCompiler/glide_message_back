@@ -6,9 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/zhashkevych/go-sqlxmock"
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
 	"regexp"
 	"testing"
 

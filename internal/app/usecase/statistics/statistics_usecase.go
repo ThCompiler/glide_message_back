@@ -1,8 +1,8 @@
 package statistics
 
 import (
-	"patreon/internal/app"
-	repository_statistics "patreon/internal/app/repository/statistics"
+	"glide/internal/app"
+	repository_statistics "glide/internal/app/repository/statistics"
 )
 
 type StatisticsUsecase struct {

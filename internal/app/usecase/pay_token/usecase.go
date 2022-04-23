@@ -1,6 +1,6 @@
 package usecase_pay_token
 
-import "patreon/internal/app/models"
+import "glide/internal/app/models"
 
 //go:generate mockgen -destination=mocks/mock_pay_token_usecase.go -package=mock_usecase -mock_names=Usecase=PayTokenUsecase . Usecase
 

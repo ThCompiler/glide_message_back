@@ -1,9 +1,9 @@
 package payments
 
 import (
-	"patreon/internal/app/models"
-	db_models "patreon/internal/app/models"
-	repository_payments "patreon/internal/app/repository/payments"
+	"glide/internal/app/models"
+	db_models "glide/internal/app/models"
+	repository_payments "glide/internal/app/repository/payments"
 )
 
 type PaymentsUsecase struct {

@@ -2,12 +2,12 @@ package creator_id_handler
 
 import (
 	"net/http"
-	"patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/delivery/http/models"
-	usecase_creator "patreon/internal/app/usecase/creator"
-	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
-	"patreon/internal/microservices/auth/sessions/middleware"
+	"glide/internal/app/delivery/http/handlers/base_handler"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/delivery/http/models"
+	usecase_creator "glide/internal/app/usecase/creator"
+	session_client "glide/internal/microservices/auth/delivery/grpc/client"
+	"glide/internal/microservices/auth/sessions/middleware"
 
 	"github.com/sirupsen/logrus"
 

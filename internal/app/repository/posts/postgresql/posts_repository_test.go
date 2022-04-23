@@ -3,10 +3,10 @@ package repository_postgresql
 import (
 	"database/sql"
 	"fmt"
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	putilits "patreon/internal/app/utilits/postgresql"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
+	putilits "glide/internal/app/utilits/postgresql"
 	"regexp"
 	"testing"
 

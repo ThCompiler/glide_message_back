@@ -1,9 +1,9 @@
 package attaches
 
 import (
+	"glide/internal/app/models"
+	repoFiles "glide/internal/app/repository/files"
 	"io"
-	"patreon/internal/app/models"
-	repoFiles "patreon/internal/microservices/files/files/repository/files"
 )
 
 const (

@@ -1,7 +1,7 @@
 package posts_id_handler
 
 import (
-	"patreon/internal/app/delivery/http/handlers"
+	"glide/internal/app/delivery/http/handlers"
 )
 
 type PostsIdTestSuite struct {

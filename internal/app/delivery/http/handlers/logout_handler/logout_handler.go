@@ -2,11 +2,11 @@ package logout_handler
 
 import (
 	"context"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	session_client "glide/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "glide/internal/microservices/auth/sessions/middleware"
+	bh "glide/internal/pkg/handler"
 	"net/http"
-	bh "patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
-	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -30,16 +30,6 @@ func NewLogoutHandler(log *logrus.Logger,
 	return h
 }
 
-// POST Logout
-// @Summary logout user
-// @Description logout user
-// @tags user
-// @Accept  json
-// @Produce json
-// @Success 201 "Successfully logout"
-// @Failure 500 {object} http_models.ErrResponse "server error"
-// @Failure 401 "User not are authorized"
-// @Router /logout [POST]
 func (h *LogoutHandler) POST(w http.ResponseWriter, r *http.Request) {
 	uniqID := r.Context().Value("session_id")
 	if uniqID == nil {

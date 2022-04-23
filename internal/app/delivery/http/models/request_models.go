@@ -2,11 +2,11 @@ package http_models
 
 import (
 	"github.com/pkg/errors"
+	"glide/internal/app/delivery/http/handlers"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/models"
+	models_utilits "glide/internal/pkg/utilits/models"
 	"image/color"
-	"patreon/internal/app/delivery/http/handlers"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/models"
-	models_utilits "patreon/internal/app/utilits/models"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 )
@@ -45,9 +45,44 @@ type RequestChangeNickname struct {
 
 //easyjson:json
 type RequestRegistration struct {
-	Login    string `json:"login"`
-	Nickname string `json:"nickname"`
-	Password string `json:"password"`
+	Nickname  string   `json:"nickname"`
+	Fullname  string   `json:"fullname"`
+	About     string   `json:"about,omitempty"`
+	Age       int64    `json:"age"`
+	Country   string   `json:"country"`
+	Languages []string `json:"languages"`
+	Password  string   `json:"password"`
+}
+
+func (rr *RequestRegistration) ToUser() *models.User {
+	return &models.User{
+		Nickname:  rr.Nickname,
+		Fullname:  rr.Fullname,
+		Languages: rr.Languages,
+		Country:   rr.Country,
+		About:     rr.About,
+		Age:       rr.Age,
+		Password:  rr.Password,
+	}
+}
+
+//easyjson:json
+type RequestUserUpdate struct {
+	Fullname  string   `json:"fullname"`
+	About     string   `json:"about,omitempty"`
+	Age       int64    `json:"age"`
+	Country   string   `json:"country"`
+	Languages []string `json:"languages"`
+}
+
+func (rr *RequestUserUpdate) ToUser() *models.User {
+	return &models.User{
+		Fullname:  rr.Fullname,
+		Languages: rr.Languages,
+		Country:   rr.Country,
+		About:     rr.About,
+		Age:       rr.Age,
+	}
 }
 
 //easyjson:json

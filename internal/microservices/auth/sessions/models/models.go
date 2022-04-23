@@ -11,6 +11,6 @@ func (session *Session) String() string {
 }
 
 type Result struct {
-	UserID int64
+	UserID string
 	UniqID string
 }

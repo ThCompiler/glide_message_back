@@ -1,9 +1,9 @@
 package usecase_subscribers
 
 import (
-	"patreon/internal/app/models"
-	repository_awards "patreon/internal/app/repository/awards"
-	repository_subscribers "patreon/internal/app/repository/subscribers"
+	"glide/internal/app/models"
+	repository_awards "glide/internal/app/repository/awards"
+	repository_subscribers "glide/internal/app/repository/subscribers"
 
 	"github.com/pkg/errors"
 )

@@ -2,12 +2,12 @@ package subscribe_handler
 
 import (
 	"net/http"
-	bh "patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/delivery/http/models"
-	usecase_subscribers "patreon/internal/app/usecase/subscribers"
-	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
-	"patreon/internal/microservices/auth/sessions/middleware"
+	bh "glide/internal/app/delivery/http/handlers/base_handler"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/delivery/http/models"
+	usecase_subscribers "glide/internal/app/usecase/subscribers"
+	session_client "glide/internal/microservices/auth/delivery/grpc/client"
+	"glide/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"

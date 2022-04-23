@@ -3,35 +3,32 @@ package usercase_user
 import (
 	"context"
 	"fmt"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	repoFiles "glide/internal/app/repository/files"
+	repoUser "glide/internal/app/repository/user"
+	"glide/internal/pkg/utilits"
 	"io"
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	repoUser "patreon/internal/app/repository/user"
-	usePosts "patreon/internal/app/usecase/posts"
-	"patreon/internal/microservices/files/delivery/grpc/client"
-	repoFiles "patreon/internal/microservices/files/files/repository/files"
-	"glide/internal/pkg/utils"
 
 	"github.com/pkg/errors"
 )
 
 type UserUsecase struct {
 	repository     repoUser.Repository
-	repositoryFile client.FileServiceClient
-	imageConvector utils.ImageConverter
+	repositoryFile repoFiles.Repository
+	imageConvector utilits.ImageConverter
 }
 
-func NewUserUsecase(repository repoUser.Repository, fileClient client.FileServiceClient,
-	convector ...utils.ImageConverter) *UserUsecase {
-	conv := utils.ImageConverter(&utils.ConverterToWebp{})
+func NewUserUsecase(repository repoUser.Repository, fileRepository repoFiles.Repository,
+	convector ...utilits.ImageConverter) *UserUsecase {
+	conv := utilits.ImageConverter(&utilits.ConverterToWebp{})
 	if len(convector) != 0 {
 		conv = convector[0]
 	}
 	return &UserUsecase{
 		repository:     repository,
 		imageConvector: conv,
-		repositoryFile: fileClient,
+		repositoryFile: fileRepository,
 	}
 }
 
@@ -39,78 +36,100 @@ func NewUserUsecase(repository repoUser.Repository, fileClient client.FileServic
 // 		repository.NotFound
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (usecase *UserUsecase) GetProfile(userID int64) (*models.User, error) {
-	u, err := usecase.repository.FindByID(userID)
+func (usecase *UserUsecase) GetProfile(nickname string) (*models.User, error) {
+	u, err := usecase.repository.FindByNickname(nickname)
 	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("profile with id %v not found", userID))
+		return nil, errors.Wrap(err, fmt.Sprintf("profile with nickname %v not found", nickname))
 	}
 	return u, nil
 }
 
 // Create Errors:
 //		models.EmptyPassword
-//		models.IncorrectNickname
-// 		models.IncorrectEmailOrPassword
-//		repository_postgresql.LoginAlreadyExist
+//		models.IncorrectAge
+// 		models.IncorrectNicknameOrPassword
+//		repository_postgresql.IncorrectCounty
+//		repository_postgresql.IncorrectLanguage
 //		repository_postgresql.NicknameAlreadyExist
-//		UserExist
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (usecase *UserUsecase) Create(user *models.User) (int64, error) {
-	checkUser, err := usecase.repository.FindByLogin(user.Login)
-	if err != nil && err != repository.NotFound {
-		return -1, errors.Wrap(err, fmt.Sprintf("error on create user with login %v", user.Login))
-	}
-
-	if checkUser != nil {
-		return -1, UserExist
-	}
-
-	if err = user.Validate(); err != nil {
-		if errors.Is(err, models.IncorrectEmailOrPassword) || errors.Is(err, models.IncorrectNickname) {
-			return -1, err
+//			app.UnknownError
+//			BadEncrypt
+func (usecase *UserUsecase) Create(user *models.User) (*models.User, error) {
+	if err := user.Validate(); err != nil {
+		if errors.Is(err, models.IncorrectNicknameOrPassword) || errors.Is(err, models.IncorrectAge) {
+			return nil, err
 		}
-		return -1, &app.GeneralError{
+		return nil, &app.GeneralError{
 			Err:         app.UnknownError,
 			ExternalErr: errors.Wrap(err, "failed process of validation user"),
 		}
 	}
 
-	if err = user.Encrypt(); err != nil {
+	if err := user.Encrypt(); err != nil {
 		if errors.Is(err, models.EmptyPassword) {
-			return -1, err
+			return nil, err
 		}
 
-		return -1, app.GeneralError{
+		return nil, app.GeneralError{
 			Err:         BadEncrypt,
 			ExternalErr: err,
 		}
 	}
 
-	if err = usecase.repository.Create(user); err != nil {
-		return -1, err
+	usr, err := usecase.repository.Create(user)
+	if err != nil {
+		return nil, err
 	}
 
-	return user.ID, nil
+	return usr, nil
 }
 
 // Check Errors:
-//		models.IncorrectEmailOrPassword
+//		models.IncorrectNicknameOrPassword
 // 		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *UserUsecase) Check(login string, password string) (int64, error) {
-	u, err := usecase.repository.FindByLogin(login)
+func (usecase *UserUsecase) Check(nickname string, password string) (string, error) {
+	u, err := usecase.repository.FindByNickname(nickname)
 	if err != nil {
-		return -1, err
+		return "", err
 	}
 
 	if !u.ComparePassword(password) {
-		return -1, models.IncorrectEmailOrPassword
+		return "", models.IncorrectNicknameOrPassword
 	}
-	return u.ID, nil
+	return u.Nickname, nil
 }
 
+// Update Errors:
+//		models.IncorrectAge
+//		repository_postgresql.IncorrectCounty
+//		repository_postgresql.IncorrectLanguage
+//		repository_postgresql.NicknameAlreadyExist
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
+//			app.UnknownError
+func (usecase *UserUsecase) Update(user *models.User) (*models.User, error) {
+	if err := user.ValidateUpdate(); err != nil {
+		if errors.Is(err, models.IncorrectAge) {
+			return nil, err
+		}
+		return nil, &app.GeneralError{
+			Err:         app.UnknownError,
+			ExternalErr: errors.Wrap(err, "failed process of validation user"),
+		}
+	}
+
+	usr, err := usecase.repository.Update(user)
+	if err != nil {
+		return nil, err
+	}
+
+	return usr, nil
+}
+
+/*
 // UpdatePassword Errors:
 // 		repository.NotFound
 //		OldPasswordEqualNew
@@ -156,36 +175,37 @@ func (usecase *UserUsecase) UpdatePassword(userId int64, oldPassword, newPasswor
 	err = usecase.repository.UpdatePassword(userId, u.EncryptedPassword)
 	return err
 }
+*/
 
 // UpdateAvatar Errors:
+//		repository.NotFound
 // 		app.GeneralError with Errors
-//			app.UnknownError
+//			FileSystemError
 //			repository.DefaultErrDB
-//			repository_os.ErrorCreate
-//   		repository_os.ErrorCopyFile
-//			utils.ConvertErr
-//  		utils.UnknownExtOfFileName
-func (usecase *UserUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName, userId int64) error {
+//			utilits.ConvertErr
+//  		utilits.UnknownExtOfFileName
+func (usecase *UserUsecase) UpdateAvatar(data io.Reader, name repoFiles.FileName, nickname string) error {
 	var err error
 	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
 	if err != nil {
-		return errors.Wrap(err, "failed convert to webp of update user avatar")
+		return errors.Wrap(err, "failed convert to webp of update user avatar for user: "+nickname)
 	}
 
-	path, err := usecase.repositoryFile.SaveFile(context.Background(), data, name, repoFiles.Image)
+	path, err := usecase.repositoryFile.SaveFile(data, name, repoFiles.Image)
 	if err != nil {
-		return err
+		return app.GeneralError{
+			Err:         FileSystemError,
+			ExternalErr: errors.Wrap(err, "error with file: "+string(name)+" for user: "+nickname),
+		}
 	}
 
-	if err := usecase.repository.UpdateAvatar(userId, app.LoadFileUrl+path); err != nil {
-		return app.GeneralError{
-			Err:         app.UnknownError,
-			ExternalErr: errors.Wrap(err, "failed process of update avatar"),
-		}
+	if err = usecase.repository.UpdateAvatar(nickname, app.LoadFileUrl+path); err != nil {
+		return err
 	}
 	return nil
 }
 
+/*
 // UpdateNickname Errors:
 //		InvalidOldNickname
 //		repository.NotFound
@@ -214,18 +234,4 @@ func (usecase *UserUsecase) UpdateNickname(userID int64, oldNickname string, new
 	}
 	return nil
 }
-
-// CheckAccessForAward Errors:
-// 		app.GeneralError with Errors
-//			repository.DefaultErrDBr
-func (usecase *UserUsecase) CheckAccessForAward(userID int64, awardsId int64, creatorId int64) (bool, error) {
-	if awardsId == repository.NoAwards || userID == creatorId {
-		return true, nil
-	}
-
-	if userID == usePosts.EmptyUser {
-		return false, nil
-	}
-
-	return usecase.repository.IsAllowedAward(userID, awardsId)
-}
+*/

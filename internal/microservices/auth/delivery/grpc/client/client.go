@@ -30,7 +30,7 @@ func (c *SessionClient) Check(ctx context.Context, sessionID string) (models.Res
 	}
 	return ConvertAuthServerRespond(res), err
 }
-func (c *SessionClient) Create(ctx context.Context, userID int64) (models.Result, error) {
+func (c *SessionClient) Create(ctx context.Context, userID string) (models.Result, error) {
 	protoUserID := &proto.UserID{
 		ID: userID,
 	}

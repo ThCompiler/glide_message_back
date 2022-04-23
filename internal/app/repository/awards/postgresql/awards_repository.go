@@ -3,10 +3,10 @@ package repository_postgresql
 import (
 	"database/sql"
 	"github.com/jmoiron/sqlx"
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	repository_awards "patreon/internal/app/repository/awards"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
+	repository_awards "glide/internal/app/repository/awards"
 
 	"github.com/pkg/errors"
 )

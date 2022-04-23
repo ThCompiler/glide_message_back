@@ -4,12 +4,12 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	bh "patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/models"
-	usecase_creator "patreon/internal/app/usecase/creator"
-	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	bh "glide/internal/app/delivery/http/handlers/base_handler"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/delivery/http/models"
+	"glide/internal/app/models"
+	usecase_creator "glide/internal/app/usecase/creator"
+	session_client "glide/internal/microservices/auth/delivery/grpc/client"
 )
 
 type SearchCreatorsHandler struct {

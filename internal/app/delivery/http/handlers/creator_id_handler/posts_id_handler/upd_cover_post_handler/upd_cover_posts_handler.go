@@ -2,16 +2,16 @@ package upl_cover_posts_handler
 
 import (
 	"net/http"
-	csrf_middleware "patreon/internal/app/csrf/middleware"
-	repository_jwt "patreon/internal/app/csrf/repository/jwt"
-	usecase_csrf "patreon/internal/app/csrf/usecase"
-	"patreon/internal/app/delivery/http/handlers"
-	bh "patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/middleware"
-	usePosts "patreon/internal/app/usecase/posts"
-	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
-	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
+	csrf_middleware "glide/internal/app/csrf/middleware"
+	repository_jwt "glide/internal/app/csrf/repository/jwt"
+	usecase_csrf "glide/internal/app/csrf/usecase"
+	"glide/internal/app/delivery/http/handlers"
+	bh "glide/internal/app/delivery/http/handlers/base_handler"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/middleware"
+	usePosts "glide/internal/app/usecase/posts"
+	session_client "glide/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "glide/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 

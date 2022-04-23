@@ -2,10 +2,10 @@ package middleware
 
 import (
 	"context"
-	"glide/internal/app/utilits"
 	"glide/internal/microservices/auth/delivery/grpc/client"
 	"glide/internal/microservices/auth/sessions/sessions_manager"
 	hf "glide/internal/pkg/handler/handler_interfaces"
+	"glide/internal/pkg/utilits"
 	"net/http"
 	"time"
 
@@ -71,10 +71,10 @@ func (m *SessionMiddleware) Check(next http.Handler) http.Handler {
 	return http.HandlerFunc(m.CheckFunc(next.ServeHTTP))
 }
 
-// CheckNotAuthorized Errors:
+// CheckNotAuthorizedFunc Errors:
 //		Status 418 "user already authorized"
-func (m *SessionMiddleware) CheckNotAuthorized(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func (m *SessionMiddleware) CheckNotAuthorizedFunc(next hf.HandlerFunc) hf.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		sessionID, err := r.Cookie("session_id")
 		if err != nil {
 			m.Log(r).Debug("User not Authorized")
@@ -93,7 +93,13 @@ func (m *SessionMiddleware) CheckNotAuthorized(next http.Handler) http.Handler {
 			m.updateCookie(w, sessionID)
 		}
 		w.WriteHeader(http.StatusTeapot)
-	})
+	}
+}
+
+// CheckNotAuthorized Errors:
+//		Status 418 "user already authorized"
+func (m *SessionMiddleware) CheckNotAuthorized(next http.Handler) http.Handler {
+	return http.HandlerFunc(m.CheckNotAuthorizedFunc(next.ServeHTTP))
 }
 
 // AddUserIdFunc Errors:

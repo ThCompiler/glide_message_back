@@ -2,12 +2,12 @@ package main
 
 import (
 	"flag"
-	"os"
-	"patreon/internal/app"
-	server2 "patreon/internal/microservices/files/delivery/grpc/server"
-	repository_os "patreon/internal/microservices/files/files/repository/files/os"
+	"glide/internal/app"
+	"glide/internal/app/repository/files/os"
+	server2 "glide/internal/microservices/files/delivery/grpc/server"
 	prometheus_monitoring "glide/internal/pkg/monitoring/prometheus-monitoring"
 	"glide/internal/pkg/utils"
+	"os"
 
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 

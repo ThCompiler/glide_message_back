@@ -25,7 +25,7 @@ services:
       - default
     volumes:
       - ./logs-ngnix:/var/log/nginx/
-      - ./patreon-secrt/ngnix/letsencrypt:/etc/letsencrypt
+      - ./glide-secrt/ngnix/letsencrypt:/etc/letsencrypt
       - ./static:/static
       - ${NGNIX_CONFIG}:/etc/nginx/conf.d/default.conf
     environment:
@@ -85,18 +85,18 @@ services:
     volumes:
       - ./logs:/app/logs
       - ./media:/app/media
-      - ./patreon-secrt:/app/patreon-secrt
+      - ./glide-secrt:/app/glide-secrt
       - ${CONFIG_DIR}:/app/configs
     depends_on:
       - session-redis
       - access-redis
-      - patreon-bd
+      - glide-bd
       - sessions-service
       - push-service
       - files-service
       - rabbit
     environment:
-      WAIT_HOSTS: patreon-bd:5432, rabbit:5672
+      WAIT_HOSTS: glide-bd:5432, rabbit:5672
   session-redis:
     image: "redis:alpine"
     expose:
@@ -116,7 +116,7 @@ services:
     volumes:
       - access-redis:/data
     restart: always
-  patreon-bd:
+  glide-bd:
     image: flashiee/pg-14:latest
     expose:
       - "5432"

@@ -3,13 +3,13 @@ package usecase_awards
 import (
 	"context"
 	"fmt"
-	"io"
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	repoAwrds "patreon/internal/app/repository/awards"
-	"patreon/internal/microservices/files/delivery/grpc/client"
-	repoFiles "patreon/internal/microservices/files/files/repository/files"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	repoAwrds "glide/internal/app/repository/awards"
+	repoFiles "glide/internal/app/repository/files"
+	"glide/internal/microservices/files/delivery/grpc/client"
 	"glide/internal/pkg/utils"
+	"io"
 
 	"github.com/pkg/errors"
 )

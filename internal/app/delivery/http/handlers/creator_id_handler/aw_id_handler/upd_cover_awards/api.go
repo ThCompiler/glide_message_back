@@ -1,12 +1,12 @@
 package upd_cover_awards_handler
 
 import (
-	"net/http"
-	"patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/repository"
-	repository_os "patreon/internal/microservices/files/files/repository/files/os"
+	"glide/internal/app/delivery/http/handlers/base_handler"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/repository"
+	"glide/internal/app/repository/files/os"
 	"glide/internal/pkg/utils"
+	"net/http"
 
 	log "github.com/sirupsen/logrus"
 )

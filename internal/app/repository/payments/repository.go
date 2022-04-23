@@ -1,8 +1,8 @@
 package repository_payments
 
 import (
-	"patreon/internal/app/models"
-	db_models "patreon/internal/app/models"
+	"glide/internal/app/models"
+	db_models "glide/internal/app/models"
 )
 
 //go:generate mockgen -destination=mocks/mock_payments_repository.go -package=mock_repository -mock_names=Repository=PaymentsRepository . Repository

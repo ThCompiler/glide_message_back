@@ -2,12 +2,12 @@ package aw_subscribe_handler
 
 import (
 	"net/http"
-	"patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/repository"
-	repository_redis "patreon/internal/app/repository/pay_token/redis"
-	usecase_pay_token "patreon/internal/app/usecase/pay_token"
-	usecase_subscribers "patreon/internal/app/usecase/subscribers"
+	"glide/internal/app/delivery/http/handlers/base_handler"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/repository"
+	repository_redis "glide/internal/app/repository/pay_token/redis"
+	usecase_pay_token "glide/internal/app/usecase/pay_token"
+	usecase_subscribers "glide/internal/app/usecase/subscribers"
 
 	"github.com/sirupsen/logrus"
 )

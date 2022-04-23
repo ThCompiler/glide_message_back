@@ -3,7 +3,7 @@ package http_models
 import (
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/stretchr/testify/require"
-	"patreon/internal/app/models"
+	"glide/internal/app/models"
 	"testing"
 )
 

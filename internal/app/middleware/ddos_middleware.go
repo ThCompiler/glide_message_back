@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"net/http"
-	usecase_access "patreon/internal/app/usecase/access"
-	"patreon/internal/app/utilits"
+	usecase_access "glide/internal/app/usecase/access"
+	"glide/internal/app/utilits"
 
 	"github.com/sirupsen/logrus"
 )

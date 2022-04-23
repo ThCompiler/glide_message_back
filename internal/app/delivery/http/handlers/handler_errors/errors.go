@@ -3,8 +3,8 @@ package handler_errors
 import (
 	"errors"
 	"fmt"
-	http_models "patreon/internal/app/delivery/http/handlers"
-	"patreon/internal/app/models"
+	http_models "glide/internal/app/delivery/http/handlers"
+	"glide/internal/app/models"
 )
 
 /// NOT FOUND
@@ -78,6 +78,9 @@ var (
 var (
 	NotEqualPaymentAmount = errors.New("payment amount from request not equal amount from database")
 	InvalidBody           = errors.New("invalid body in request")
+	InvalidUserAge        = errors.New("invalid user age in request")
+	InvalidUserCounty     = errors.New("invalid user county in request")
+	InvalidUserLanguage   = errors.New("invalid user language in request")
 	InvalidParameters     = errors.New("invalid parameters")
 	UserNotHaveAward      = errors.New("this user not have award for this post")
 	InvalidQueries        = errors.New("invalid parameters in query")

@@ -2,8 +2,8 @@ package repository_postgresql
 
 import (
 	"github.com/jmoiron/sqlx"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
 )
 
 const (

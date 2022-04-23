@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"net/http"
-	"patreon/internal/app/utilits"
+	"glide/internal/app/utilits"
 	"glide/internal/pkg/monitoring"
 	"runtime/debug"
 	"strconv"

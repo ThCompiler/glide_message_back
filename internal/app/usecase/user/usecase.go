@@ -1,9 +1,9 @@
 package usercase_user
 
 import (
+	"glide/internal/app/models"
+	repoFiles "glide/internal/app/repository/files"
 	"io"
-	"patreon/internal/app/models"
-	repoFiles "patreon/internal/microservices/files/files/repository/files"
 )
 
 //go:generate mockgen -destination=mocks/mock_user_usecase.go -package=mock_usecase -mock_names=Usecase=UserUsecase . Usecase
@@ -13,27 +13,29 @@ type Usecase interface {
 	// 		repository.NotFound
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
-	GetProfile(userID int64) (*models.User, error)
+	GetProfile(nickname string) (*models.User, error)
 
 	// Create Errors:
 	//		models.EmptyPassword
-	//		models.IncorrectNickname
-	// 		models.IncorrectEmailOrPassword
-	//		repository_postgresql.LoginAlreadyExist
+	//		models.IncorrectAge
+	// 		models.IncorrectNicknameOrPassword
+	//		repository_postgresql.IncorrectCounty
+	//		repository_postgresql.IncorrectLanguage
 	//		repository_postgresql.NicknameAlreadyExist
-	//		UserExist
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
-	Create(user *models.User) (int64, error)
+	//			app.UnknownError
+	//			BadEncrypt
+	Create(user *models.User) (*models.User, error)
 
 	// Check Errors:
-	//		models.IncorrectEmailOrPassword
+	//		models.IncorrectNicknameOrPassword
 	// 		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	Check(login string, password string) (int64, error)
+	Check(login string, password string) (string, error)
 
-	// UpdatePassword Errors:
+	/*// UpdatePassword Errors:
 	// 		repository.NotFound
 	//		OldPasswordEqualNew
 	//		IncorrectEmailOrPassword
@@ -43,25 +45,32 @@ type Usecase interface {
 	// 			repository.DefaultErrDB
 	//			BadEncrypt
 	//			app.UnknownError
-	UpdatePassword(userId int64, oldPassword, newPassword string) error
+	UpdatePassword(userId int64, oldPassword, newPassword string) error*/
+
+	// Update Errors:
+	//		models.IncorrectAge
+	//		repository_postgresql.IncorrectCounty
+	//		repository_postgresql.IncorrectLanguage
+	//		repository_postgresql.NicknameAlreadyExist
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	//			app.UnknownError
+	Update(user *models.User) (*models.User, error)
 
 	// UpdateAvatar Errors:
+	//		repository.NotFound
 	// 		app.GeneralError with Errors
-	//			app.UnknownError
-	//			repository_os.ErrorCreate
-	//   		repository_os.ErrorCopyFile
-	UpdateAvatar(data io.Reader, name repoFiles.FileName, userId int64) error
+	//			FileSystemError
+	//			repository.DefaultErrDB
+	//			utilits.ConvertErr
+	//  		utilits.UnknownExtOfFileName
+	UpdateAvatar(data io.Reader, name repoFiles.FileName, nickname string) error
 
-	// UpdateNickname Errors:
+	/*// UpdateNickname Errors:
 	//		InvalidOldNickname
 	//		repository.NotFound
 	//		NicknameExists
 	// 		app.GeneralError with Errors
 	//			app.UnknownError
-	UpdateNickname(userID int64, oldNickname string, newNickname string) error
-
-	// CheckAccessForAward Errors:
-	// 		app.GeneralError with Errors
-	//			repository.DefaultErrDBr
-	CheckAccessForAward(userID int64, awardsId int64, creatorId int64) (bool, error)
+	UpdateNickname(userID string, oldNickname string, newNickname string) error*/
 }

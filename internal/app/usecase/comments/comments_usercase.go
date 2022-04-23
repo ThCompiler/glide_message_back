@@ -3,10 +3,10 @@ package usecase_comments
 import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	repoComments "patreon/internal/app/repository/comments"
-	push_client "patreon/internal/microservices/push/delivery/client"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	repoComments "glide/internal/app/repository/comments"
+	push_client "glide/internal/microservices/push/delivery/client"
 )
 
 type CommentsUsecase struct {

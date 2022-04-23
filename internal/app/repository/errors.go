@@ -2,7 +2,7 @@ package repository
 
 import (
 	"errors"
-	"patreon/internal/app"
+	"glide/internal/app"
 )
 
 const (

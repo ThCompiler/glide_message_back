@@ -4,7 +4,7 @@ import (
 	"fmt"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/pkg/errors"
-	models_utilits "patreon/internal/app/utilits/models"
+	models_utilits "glide/internal/pkg/utilits/models"
 )
 
 var (

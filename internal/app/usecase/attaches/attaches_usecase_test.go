@@ -3,11 +3,11 @@ package attaches
 import (
 	"bytes"
 	"github.com/golang/mock/gomock"
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	"patreon/internal/app/usecase"
-	repoFiles "patreon/internal/microservices/files/files/repository/files"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
+	repoFiles "glide/internal/app/repository/files"
+	"glide/internal/app/usecase"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

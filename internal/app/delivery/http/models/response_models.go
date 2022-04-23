@@ -2,9 +2,9 @@ package http_models
 
 import (
 	"fmt"
+	"glide/internal/app/csrf/csrf_models"
+	"glide/internal/app/models"
 	"math"
-	"patreon/internal/app/csrf/csrf_models"
-	"patreon/internal/app/models"
 	"strconv"
 	"time"
 )
@@ -14,16 +14,6 @@ import (
 //easyjson:json
 type TokenResponse struct {
 	Token csrf_models.Token `json:"token"`
-}
-
-//easyjson:json
-type PayTokenResponse struct {
-	Token string `json:"token"`
-}
-
-//easyjson:json
-type PayAccountResponse struct {
-	Account string `json:"account_number"`
 }
 
 //easyjson:json
@@ -43,11 +33,13 @@ type IdResponse struct {
 
 //easyjson:json
 type ProfileResponse struct {
-	ID          int64  `json:"id"`
-	Login       string `json:"login"`
-	Nickname    string `json:"nickname"`
-	Avatar      string `json:"avatar"`
-	HaveCreator bool   `json:"have_creator"`
+	Nickname  string   `json:"nickname"`
+	Fullname  string   `json:"fullname"`
+	Avatar    string   `json:"avatar"`
+	About     string   `json:"about,omitempty"`
+	Age       int64    `json:"age"`
+	Country   string   `json:"country"`
+	Languages []string `json:"languages"`
 }
 
 //easyjson:json
@@ -167,13 +159,15 @@ type ResponseBalance struct {
 	Balance models.Money `json:"balance"`
 }
 
-func ToRProfileResponse(us models.User) ProfileResponse {
+func ToProfileResponse(us models.User) ProfileResponse {
 	return ProfileResponse{
-		ID:          us.ID,
-		Login:       us.Login,
-		Nickname:    us.Nickname,
-		Avatar:      us.Avatar,
-		HaveCreator: us.HaveCreator,
+		Nickname:  us.Nickname,
+		Avatar:    us.Avatar,
+		Fullname:  us.Fullname,
+		Languages: us.Languages,
+		Country:   us.Country,
+		About:     us.About,
+		Age:       us.Age,
 	}
 }
 
@@ -329,21 +323,6 @@ type ResponseUser struct {
 //easyjson:json
 type SubscribersCreatorResponse struct {
 	Users []ResponseUser `json:"users"`
-}
-
-func ToSubscribersCreatorResponse(users []models.User) SubscribersCreatorResponse {
-	res := make([]ResponseUser, len(users))
-	for i, user := range users {
-		res[i] = ResponseUser{
-			ID:       user.ID,
-			Login:    user.Login,
-			Nickname: user.Nickname,
-			Avatar:   user.Avatar,
-		}
-	}
-	return SubscribersCreatorResponse{
-		Users: res,
-	}
 }
 
 //easyjson:json

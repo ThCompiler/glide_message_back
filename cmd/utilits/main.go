@@ -9,8 +9,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"log"
 	"os"
-	"patreon/cmd/utilits/models"
-	"patreon/internal/app"
+	"glide/cmd/utilits/models"
+	"glide/internal/app"
 	"strings"
 	"time"
 )

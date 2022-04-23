@@ -1,8 +1,8 @@
 package usecase_info
 
 import (
-	"patreon/internal/app/models"
-	repoInfo "patreon/internal/app/repository/info"
+	"glide/internal/app/models"
+	repoInfo "glide/internal/app/repository/info"
 )
 
 type InfoUsecase struct {

@@ -2,15 +2,13 @@ package models
 
 import (
 	"errors"
-	"fmt"
-	models_utilits "patreon/internal/app/utilits/models"
+	models_utilits "glide/internal/pkg/utilits/models"
 )
 
 var (
-	EmptyPassword            = errors.New("empty password")
-	IncorrectEmailOrPassword = errors.New("invalid email or password")
-	IncorrectNickname        = errors.New(fmt.Sprintf("invalid nickname in body len must be from %v to %v",
-		MIN_NICKNAME_LENGTH, MAX_NICKNAME_LENGTH))
+	EmptyPassword               = errors.New("empty password")
+	IncorrectNicknameOrPassword = errors.New("invalid nickname or password")
+	IncorrectAge                = errors.New("age is negative")
 	IncorrectCreatorNickname    = errors.New("incorrect creator nickname")
 	EmptyName                   = errors.New("empty name")
 	IncorrectAwardsPrice        = errors.New("incorrect awards price")
@@ -30,9 +28,9 @@ var (
 //		IncorrectNickname
 func userValidError() models_utilits.ExtractorErrorByName {
 	validMap := models_utilits.MapOfValidateError{
-		"login":    IncorrectEmailOrPassword,
-		"password": IncorrectEmailOrPassword,
-		"nickname": IncorrectNickname,
+		"password": IncorrectNicknameOrPassword,
+		"nickname": IncorrectNicknameOrPassword,
+		"age":      IncorrectAge,
 	}
 	return func(key string) error {
 		if val, ok := validMap[key]; ok {

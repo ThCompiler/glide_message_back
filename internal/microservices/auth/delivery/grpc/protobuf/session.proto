@@ -6,7 +6,7 @@ option go_package = ".;auth";
 // go:generate protoc --go_out=plugins=grpc:. *.proto
 
 message UserID {
-  int64 ID = 1;
+  string ID = 1;
 }
 
 message SessionID {
@@ -14,7 +14,7 @@ message SessionID {
 }
 
 message Result {
-  int64 UserID = 1;
+  string UserID = 1;
   string SessionID = 2;
 }
 

@@ -1,4 +1,4 @@
-name: patreon-ci-deploy
+name: glide-ci-deploy
 
 on:
   push:

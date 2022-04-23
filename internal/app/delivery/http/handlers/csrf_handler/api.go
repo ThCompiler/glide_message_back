@@ -2,9 +2,9 @@ package csrf_handler
 
 import (
 	"net/http"
-	repository_jwt "patreon/internal/app/csrf/repository/jwt"
-	"patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
+	repository_jwt "glide/internal/app/csrf/repository/jwt"
+	"glide/internal/app/delivery/http/handlers/base_handler"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
 
 	"github.com/sirupsen/logrus"
 )

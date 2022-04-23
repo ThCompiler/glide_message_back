@@ -7,106 +7,106 @@ volumes:
   session-redis:
   access-redis:
 services:
-  ngnix-proxy:
-    image: nginx-ssl
-    expose:
-      - "80"
-      - "443"
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - main
-      - push-service
-      - grafana
-      - prometheus
-      - rabbit
-    networks:
-      - default
-    volumes:
-      - ./logs-ngnix:/var/log/nginx
-      - ./patreon-secrt/ngnix/letsencrypt:/etc/letsencrypt
-      - ./static:/static
-      - ${NGNIX_CONFIG}:/etc/nginx/conf.d/default.conf
-    environment:
-      WAIT_HOSTS: main:8080, push-service:5003
-    restart: always
-  sessions-service:
-    image: session-service
-    expose:
-      - "5001"
-      - "9091"
-    ports:
-      - "5001:5001"
-    networks:
-      - default
-    depends_on:
-      - session-redis
-    volumes:
-      - ./logs-sessions:/app/logs
-      - ${CONFIG_DIR}:/app/configs
-  push-service:
-    image: push-service
-    expose:
-      - "5003"
-      - "9091"
-    ports:
-      - "5003:5003"
-    networks:
-      - default
-    depends_on:
-      - session-redis
-      - sessions-service
-      - rabbit
-    volumes:
-      - ./logs-push:/app/logs
-      - ${CONFIG_DIR}:/app/configs
-    environment:
-      WAIT_HOSTS: rabbit:5672
-  files-service:
-    image: files-service
-    expose:
-      - "5002"
-      - "9091"
-    ports:
-      - "5002:5002"
-    networks:
-      - default
-    volumes:
-      - ./logs-files:/app/logs
-      - ./media:/app/media
-      - ${CONFIG_DIR}:/app/configs
-  main:
-    image: patreon
-    expose:
-      - "8080"
-    networks:
-      - default
-    volumes:
-      - ./logs:/app/logs
-      - ./media:/app/media
-      - ./patreon-secrt:/app/patreon-secrt
-      - ${CONFIG_DIR}:/app/configs
-    depends_on:
-      - session-redis
-      - access-redis
-      - patreon-bd
-      - sessions-service
-      - push-service
-      - files-service
-      - rabbit
-    environment:
-      WAIT_HOSTS: patreon-bd:5432, rabbit:5672
-  session-redis:
-    image: "redis:alpine"
-    expose:
-      - "6379"
-    ports:
-      - "6379:6379"
-    volumes:
-      - session-redis:/data
-    restart: always
-  patreon-bd:
+#  ngnix-proxy:
+#    image: nginx-ssl
+#    expose:
+#      - "80"
+#      - "443"
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    depends_on:
+#      - main
+#      - push-service
+#      - grafana
+#      - prometheus
+#      - rabbit
+#    networks:
+#      - default
+#    volumes:
+#      - ./logs-ngnix:/var/log/nginx
+#      - ./glide-secrt/ngnix/letsencrypt:/etc/letsencrypt
+#      - ./static:/static
+#      - ${NGNIX_CONFIG}:/etc/nginx/conf.d/default.conf
+#    environment:
+#      WAIT_HOSTS: main:8080, push-service:5003
+#    restart: always
+#  sessions-service:
+#    image: session-service
+#    expose:
+#      - "5001"
+#      - "9091"
+#    ports:
+#      - "5001:5001"
+#    networks:
+#      - default
+#    depends_on:
+#      - session-redis
+#    volumes:
+#      - ./logs-sessions:/app/logs
+#      - ${CONFIG_DIR}:/app/configs
+#  push-service:
+#    image: push-service
+#    expose:
+#      - "5003"
+#      - "9091"
+#    ports:
+#      - "5003:5003"
+#    networks:
+#      - default
+#    depends_on:
+#      - session-redis
+#      - sessions-service
+#      - rabbit
+#    volumes:
+#      - ./logs-push:/app/logs
+#      - ${CONFIG_DIR}:/app/configs
+#    environment:
+#      WAIT_HOSTS: rabbit:5672
+#  files-service:
+#    image: files-service
+#    expose:
+#      - "5002"
+#      - "9091"
+#    ports:
+#      - "5002:5002"
+#    networks:
+#      - default
+#    volumes:
+#      - ./logs-files:/app/logs
+#      - ./media:/app/media
+#      - ${CONFIG_DIR}:/app/configs
+#  main:
+#    image: glide
+#    expose:
+#      - "8080"
+#    networks:
+#      - default
+#    volumes:
+#      - ./logs:/app/logs
+#      - ./media:/app/media
+#      - ./glide-secrt:/app/glide-secrt
+#      - ${CONFIG_DIR}:/app/configs
+#    depends_on:
+#      - session-redis
+#      - access-redis
+#      - glide-bd
+#      - sessions-service
+#      - push-service
+#      - files-service
+#      - rabbit
+#    environment:
+#      WAIT_HOSTS: glide-bd:5432, rabbit:5672
+#  session-redis:
+#    image: "redis:alpine"
+#    expose:
+#      - "6379"
+#    ports:
+#      - "6379:6379"
+#    volumes:
+#      - session-redis:/data
+#    restart: always
+  glide-bd:
     image: pg-14
     expose:
       - "5432"
@@ -127,19 +127,19 @@ services:
         limits:
           cpus: '2'
           memory: 4G
-  rabbit:
-    image: rabbitmq:3-management-alpine
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: "${PG_BD_USERNAME}"
-      RABBITMQ_DEFAULT_PASS: "${PG_BD_PASSWORD}"
-    volumes:
-      - rabbit-data:/var/lib/rabbitmq/
-      - ./logs-rabbit:/var/log/rabbitmq
-    networks:
-      - default
+#  rabbit:
+#    image: rabbitmq:3-management-alpine
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672"
+#    environment:
+#      RABBITMQ_DEFAULT_USER: "${PG_BD_USERNAME}"
+#      RABBITMQ_DEFAULT_PASS: "${PG_BD_PASSWORD}"
+#    volumes:
+#      - rabbit-data:/var/lib/rabbitmq/
+#      - ./logs-rabbit:/var/log/rabbitmq
+#    networks:
+#      - default
 #  pgadmin:
 #    container_name: pgadmin_container
 #    image: dpage/pgadmin4:5.7

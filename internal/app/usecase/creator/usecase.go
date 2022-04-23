@@ -1,9 +1,9 @@
 package usecase_creator
 
 import (
+	"glide/internal/app/models"
+	repoFiles "glide/internal/app/repository/files"
 	"io"
-	"patreon/internal/app/models"
-	repoFiles "patreon/internal/microservices/files/files/repository/files"
 )
 
 //go:generate mockgen -destination=mocks/mock_creator_usecase.go -package=mock_usecase -mock_names=Usecase=CreatorUsecase . Usecase

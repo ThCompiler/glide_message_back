@@ -2,12 +2,12 @@ package register_handler
 
 import (
 	"net/http"
-	bh "patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/models"
-	usecase_user "patreon/internal/app/usecase/user"
-	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
+	bh "glide/internal/app/delivery/http/handlers/base_handler"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/delivery/http/models"
+	"glide/internal/app/models"
+	usecase_user "glide/internal/app/usecase/user"
+	session_client "glide/internal/microservices/auth/delivery/grpc/client"
 
 	"github.com/microcosm-cc/bluemonday"
 

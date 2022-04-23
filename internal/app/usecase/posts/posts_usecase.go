@@ -3,15 +3,15 @@ package posts
 import (
 	"context"
 	"github.com/sirupsen/logrus"
-	"io"
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	repoAttaches "patreon/internal/app/repository/attaches"
-	repoPosts "patreon/internal/app/repository/posts"
-	"patreon/internal/microservices/files/delivery/grpc/client"
-	repoFiles "patreon/internal/microservices/files/files/repository/files"
-	push_client "patreon/internal/microservices/push/delivery/client"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	repoAttaches "glide/internal/app/repository/attaches"
+	repoFiles "glide/internal/app/repository/files"
+	repoPosts "glide/internal/app/repository/posts"
+	"glide/internal/microservices/files/delivery/grpc/client"
+	push_client "glide/internal/microservices/push/delivery/client"
 	"glide/internal/pkg/utils"
+	"io"
 
 	"github.com/pkg/errors"
 )

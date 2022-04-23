@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"github.com/zhashkevych/go-sqlxmock"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
 	"regexp"
 	"testing"
 )

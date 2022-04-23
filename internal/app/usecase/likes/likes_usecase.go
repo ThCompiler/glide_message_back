@@ -1,10 +1,10 @@
 package usecase_likes
 
 import (
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	repoLikes "patreon/internal/app/repository/likes"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
+	repoLikes "glide/internal/app/repository/likes"
 
 	"github.com/pkg/errors"
 )

@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"net/http"
-	hf "patreon/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
-	"patreon/internal/app/utilits"
+	hf "glide/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
+	"glide/internal/app/utilits"
 	"strconv"
 
 	"github.com/gorilla/mux"

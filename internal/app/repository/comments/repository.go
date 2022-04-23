@@ -1,6 +1,6 @@
 package repository_comments
 
-import "patreon/internal/app/models"
+import "glide/internal/app/models"
 
 //go:generate mockgen -destination=mocks/mock_comments_repository.go -package=mock_repository -mock_names=Repository=CommentsRepository . Repository
 

@@ -2,11 +2,11 @@ package repository_postgresql
 
 import (
 	"fmt"
-	"patreon/internal/app/models"
-	db_models "patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	repository_payments "patreon/internal/app/repository/payments"
-	putilits "patreon/internal/app/utilits/postgresql"
+	"glide/internal/app/models"
+	db_models "glide/internal/app/models"
+	"glide/internal/app/repository"
+	repository_payments "glide/internal/app/repository/payments"
+	putilits "glide/internal/app/utilits/postgresql"
 
 	"github.com/jmoiron/sqlx"
 

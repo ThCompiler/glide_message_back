@@ -3,9 +3,9 @@ package usecase_likes
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	"patreon/internal/app/usecase"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
+	"glide/internal/app/usecase"
 	"testing"
 )
 

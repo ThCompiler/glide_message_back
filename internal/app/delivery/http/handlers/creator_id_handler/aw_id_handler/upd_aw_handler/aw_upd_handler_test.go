@@ -1,8 +1,8 @@
 package aw_upd_handler
 
 import (
-	"patreon/internal/app/delivery/http/handlers"
-	"patreon/internal/app/delivery/http/handlers/creator_id_handler/aw_handler"
+	"glide/internal/app/delivery/http/handlers"
+	"glide/internal/app/delivery/http/handlers/creator_id_handler/aw_handler"
 )
 
 type AwardsUpOtherTestSuite struct {

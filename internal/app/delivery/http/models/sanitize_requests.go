@@ -2,7 +2,7 @@ package http_models
 
 import (
 	"github.com/microcosm-cc/bluemonday"
-	"patreon/internal/app/models"
+	"glide/internal/app/models"
 )
 
 func (req *RequestCreator) Sanitize(sanitizer bluemonday.Policy) {
@@ -21,9 +21,23 @@ func (req *RequestChangePassword) Sanitize(sanitizer bluemonday.Policy) {
 }
 
 func (req *RequestRegistration) Sanitize(sanitizer bluemonday.Policy) {
-	req.Login = sanitizer.Sanitize(req.Login)
 	req.Nickname = sanitizer.Sanitize(req.Nickname)
 	req.Password = sanitizer.Sanitize(req.Password)
+	req.Fullname = sanitizer.Sanitize(req.Fullname)
+	req.About = sanitizer.Sanitize(req.About)
+	req.Country = sanitizer.Sanitize(req.Country)
+	for id, lang := range req.Languages {
+		req.Languages[id] = sanitizer.Sanitize(lang)
+	}
+}
+
+func (req *RequestUserUpdate) Sanitize(sanitizer bluemonday.Policy) {
+	req.Fullname = sanitizer.Sanitize(req.Fullname)
+	req.About = sanitizer.Sanitize(req.About)
+	req.Country = sanitizer.Sanitize(req.Country)
+	for id, lang := range req.Languages {
+		req.Languages[id] = sanitizer.Sanitize(lang)
+	}
 }
 
 func (req *RequestComment) Sanitize(sanitizer bluemonday.Policy) {

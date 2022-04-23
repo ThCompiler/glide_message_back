@@ -2,7 +2,7 @@ package http_models
 
 import (
 	"fmt"
-	"patreon/internal/app/models"
+	"glide/internal/app/models"
 
 	"github.com/pkg/errors"
 )

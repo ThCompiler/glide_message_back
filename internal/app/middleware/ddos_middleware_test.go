@@ -9,10 +9,10 @@ import (
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"
-	"patreon/internal/app"
-	"patreon/internal/app/repository"
-	usecase_access "patreon/internal/app/usecase/access"
-	mock_usecase "patreon/internal/app/usecase/access/mocks"
+	"glide/internal/app"
+	"glide/internal/app/repository"
+	usecase_access "glide/internal/app/usecase/access"
+	mock_usecase "glide/internal/app/usecase/access/mocks"
 	"testing"
 )
 

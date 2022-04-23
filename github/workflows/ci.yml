@@ -1,4 +1,4 @@
-name: patreon-ci
+name: glide-ci
 
 on:
   push:

@@ -3,9 +3,9 @@ package info_handler
 import (
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/models"
-	usecase_info "patreon/internal/app/usecase/info"
+	"glide/internal/app/delivery/http/handlers/base_handler"
+	"glide/internal/app/delivery/http/models"
+	usecase_info "glide/internal/app/usecase/info"
 )
 
 type InfoHandler struct {

@@ -2,8 +2,8 @@ package repository_postgresql
 
 import (
 	"fmt"
-	"patreon/internal/app/models"
-	putilits "patreon/internal/app/utilits/postgresql"
+	"glide/internal/app/models"
+	putilits "glide/internal/app/utilits/postgresql"
 	"regexp"
 	"testing"
 

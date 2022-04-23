@@ -3,22 +3,22 @@ package aw_handler
 import (
 	"image/color"
 	"net/http"
-	csrf_middleware "patreon/internal/app/csrf/middleware"
-	repository_jwt "patreon/internal/app/csrf/repository/jwt"
-	usecase_csrf "patreon/internal/app/csrf/usecase"
-	bh "patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/delivery/http/models"
-	"patreon/internal/app/middleware"
-	db_models "patreon/internal/app/models"
-	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
-	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
+	csrf_middleware "glide/internal/app/csrf/middleware"
+	repository_jwt "glide/internal/app/csrf/repository/jwt"
+	usecase_csrf "glide/internal/app/csrf/usecase"
+	bh "glide/internal/app/delivery/http/handlers/base_handler"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/delivery/http/models"
+	"glide/internal/app/middleware"
+	db_models "glide/internal/app/models"
+	session_client "glide/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "glide/internal/microservices/auth/sessions/middleware"
 
 	"github.com/gorilla/mux"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/sirupsen/logrus"
 
-	useAwards "patreon/internal/app/usecase/awards"
+	useAwards "glide/internal/app/usecase/awards"
 )
 
 type AwardsHandler struct {

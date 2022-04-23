@@ -3,10 +3,10 @@ package likes_handler
 import (
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/repository"
-	usecase_likes "patreon/internal/app/usecase/likes"
+	"glide/internal/app/delivery/http/handlers/base_handler"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/repository"
+	usecase_likes "glide/internal/app/usecase/likes"
 )
 
 var codesByErrorsDELETE = base_handler.CodeMap{

@@ -5,11 +5,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	hf "patreon/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/repository"
-	usecase_comments "patreon/internal/app/usecase/comments"
-	"patreon/internal/app/utilits"
+	hf "glide/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/repository"
+	usecase_comments "glide/internal/app/usecase/comments"
+	"glide/internal/app/utilits"
 	"strconv"
 )
 

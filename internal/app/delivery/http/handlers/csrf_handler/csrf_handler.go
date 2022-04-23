@@ -2,12 +2,12 @@ package csrf_handler
 
 import (
 	"net/http"
-	usecase_csrf "patreon/internal/app/csrf/usecase"
-	bh "patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/delivery/http/models"
-	session_client "patreon/internal/microservices/auth/delivery/grpc/client"
-	session_middleware "patreon/internal/microservices/auth/sessions/middleware"
+	usecase_csrf "glide/internal/app/csrf/usecase"
+	bh "glide/internal/app/delivery/http/handlers/base_handler"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/delivery/http/models"
+	session_client "glide/internal/microservices/auth/delivery/grpc/client"
+	session_middleware "glide/internal/microservices/auth/sessions/middleware"
 
 	"github.com/sirupsen/logrus"
 )

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"glide/internal/microservices/auth/sessions"
 	"glide/internal/microservices/auth/sessions/models"
-	"strconv"
 	"time"
 
 	"golang.org/x/crypto/sha3"
@@ -15,7 +14,7 @@ import (
 
 const (
 	ExpiredCookiesTime = 48 * time.Hour
-	UnknownUser        = -1
+	UnknownUser        = ""
 )
 
 type SessionManager struct {
@@ -28,8 +27,8 @@ func NewSessionManager(sessionRep sessions.SessionRepository) *SessionManager {
 	}
 }
 
-func (manager *SessionManager) Create(userID int64) (models.Result, error) {
-	strUserID := fmt.Sprintf("%d", userID)
+func (manager *SessionManager) Create(nickname string) (models.Result, error) {
+	strUserID := fmt.Sprintf("%d", nickname)
 
 	session := &models.Session{
 		UserID:     strUserID,
@@ -39,7 +38,7 @@ func (manager *SessionManager) Create(userID int64) (models.Result, error) {
 	if err := manager.sessionRepository.Set(session); err != nil {
 		return models.Result{UserID: UnknownUser}, err
 	}
-	return models.Result{UserID: userID, UniqID: session.UniqID}, nil
+	return models.Result{UserID: nickname, UniqID: session.UniqID}, nil
 }
 
 func (manager *SessionManager) Delete(uniqID string) error {
@@ -55,11 +54,10 @@ func (manager *SessionManager) Check(uniqID string) (models.Result, error) {
 		return models.Result{UserID: UnknownUser, UniqID: uniqID}, err
 	}
 
-	intUserID, err := strconv.ParseInt(userID, 10, 64)
 	if err != nil {
 		return models.Result{UserID: UnknownUser, UniqID: uniqID}, err
 	}
-	return models.Result{UserID: intUserID, UniqID: uniqID}, nil
+	return models.Result{UserID: userID, UniqID: uniqID}, nil
 }
 
 func generateUniqID(userID string) string {

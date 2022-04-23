@@ -2,7 +2,7 @@ package usecase_comments
 
 import (
 	"github.com/sirupsen/logrus"
-	"patreon/internal/app/models"
+	"glide/internal/app/models"
 )
 
 //go:generate mockgen -destination=mocks/mock_comments_usecase.go -package=mock_usecase -mock_names=Usecase=CommentsUsecase . Usecase

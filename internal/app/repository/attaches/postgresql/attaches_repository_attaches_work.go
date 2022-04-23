@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
 	"strings"
 	"time"
 )

@@ -10,6 +10,6 @@ type SessionRepository interface {
 
 type SessionsManager interface {
 	Check(uniqID string) (models.Result, error)
-	Create(userID int64) (models.Result, error)
+	Create(userID string) (models.Result, error)
 	Delete(uniqID string) error
 }

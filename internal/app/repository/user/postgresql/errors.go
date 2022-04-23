@@ -2,29 +2,29 @@ package repository_postgresql
 
 import (
 	"errors"
-	"patreon/internal/app/repository"
-
 	"github.com/lib/pq"
-)
-
-const (
-	codeDuplicateVal   = "23505"
-	loginConstraint    = "users_login_key"
-	nicknameConstraint = "users_nickname_key"
+	postgresql_utilits "glide/internal/pkg/utilits/postgresql"
 )
 
 var (
-	LoginAlreadyExist    = errors.New("login already exist")
 	NicknameAlreadyExist = errors.New("nickname already exist")
+	IncorrectCounty      = errors.New("unknown county")
+	IncorrectLanguage    = errors.New("unknown language")
+)
+
+const (
+	codeForeignKeyVal  = "23503"
+	countryConstraint  = "users_county_fkey"
+	languageConstraint = "user_language_language_fkey"
 )
 
 func parsePQError(err *pq.Error) error {
 	switch {
-	case err.Code == codeDuplicateVal && err.Constraint == loginConstraint:
-		return LoginAlreadyExist
-	case err.Code == codeDuplicateVal && err.Constraint == nicknameConstraint:
-		return NicknameAlreadyExist
+	case err.Code == codeForeignKeyVal && err.Constraint == countryConstraint:
+		return IncorrectCounty
+	case err.Code == codeForeignKeyVal && err.Constraint == languageConstraint:
+		return IncorrectLanguage
 	default:
-		return repository.NewDBError(err)
+		return postgresql_utilits.NewDBError(err)
 	}
 }

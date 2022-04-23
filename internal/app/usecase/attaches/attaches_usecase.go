@@ -3,15 +3,14 @@ package attaches
 import (
 	"context"
 	"fmt"
-	"io"
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	repoAttaches "patreon/internal/app/repository/attaches"
-	"patreon/internal/microservices/files/delivery/grpc/client"
-	repoFiles "patreon/internal/microservices/files/files/repository/files"
-
 	"github.com/pkg/errors"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	repoAttaches "glide/internal/app/repository/attaches"
+	repoFiles "glide/internal/app/repository/files"
+	"glide/internal/microservices/files/delivery/grpc/client"
 	"glide/internal/pkg/utils"
+	"io"
 )
 
 type AttachesUsecase struct {

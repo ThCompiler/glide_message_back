@@ -1,20 +1,20 @@
 package login_handler
 
 import (
+	"glide/internal/pkg/handler/handler_errors"
 	"net/http"
-	"patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
 
 	"github.com/sirupsen/logrus"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
+	"glide/internal/pkg/utilits/delivery"
 )
 
-var codesByErrors = base_handler.CodeMap{
+var codesByErrors = delivery.CodeMap{
 	repository.NotFound: {
-		http.StatusNotFound, handler_errors.UserNotFound, logrus.WarnLevel},
+		http.StatusUnauthorized, handler_errors.IncorrectLoginOrPassword, logrus.WarnLevel},
 	repository.DefaultErrDB: {
 		http.StatusInternalServerError, handler_errors.BDError, logrus.ErrorLevel},
-	models.IncorrectEmailOrPassword: {
+	models.IncorrectNicknameOrPassword: {
 		http.StatusUnauthorized, handler_errors.IncorrectLoginOrPassword, logrus.InfoLevel},
 }

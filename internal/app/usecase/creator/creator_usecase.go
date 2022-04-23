@@ -3,14 +3,14 @@ package usecase_creator
 import (
 	"context"
 	"fmt"
-	"io"
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	repoCreator "patreon/internal/app/repository/creator"
-	"patreon/internal/microservices/files/delivery/grpc/client"
-	repoFiles "patreon/internal/microservices/files/files/repository/files"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
+	repoCreator "glide/internal/app/repository/creator"
+	repoFiles "glide/internal/app/repository/files"
+	"glide/internal/microservices/files/delivery/grpc/client"
 	"glide/internal/pkg/utils"
+	"io"
 
 	"github.com/pkg/errors"
 )

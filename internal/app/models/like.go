@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	models_utilits "patreon/internal/app/utilits/models"
+	models_utilits "glide/internal/pkg/utilits/models"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/pkg/errors"

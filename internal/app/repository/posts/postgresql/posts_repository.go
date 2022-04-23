@@ -3,12 +3,12 @@ package repository_postgresql
 import (
 	"database/sql"
 	"fmt"
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	rp "patreon/internal/app/repository"
-	repository_posts "patreon/internal/app/repository/posts"
-	putilits "patreon/internal/app/utilits/postgresql"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
+	rp "glide/internal/app/repository"
+	repository_posts "glide/internal/app/repository/posts"
+	putilits "glide/internal/app/utilits/postgresql"
 
 	"github.com/jmoiron/sqlx"
 

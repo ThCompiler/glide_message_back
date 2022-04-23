@@ -1,10 +1,10 @@
 package usecase_subscribers
 
 import (
-	"patreon/internal/app"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	"patreon/internal/app/usecase"
+	"glide/internal/app"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
+	"glide/internal/app/usecase"
 	"testing"
 
 	"github.com/pkg/errors"

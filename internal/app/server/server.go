@@ -12,15 +12,15 @@ import (
 
 	//_ "net/http/pprof"
 	"net/url"
-	"patreon/internal/app/delivery/http/handler_factory"
-	"patreon/internal/app/middleware"
-	"patreon/internal/app/repository/repository_factory"
-	"patreon/internal/app/usecase/usecase_factory"
+	"glide/internal/app/delivery/http/handler_factory"
+	"glide/internal/app/middleware"
+	"glide/internal/app/repository/repository_factory"
+	"glide/internal/app/usecase/usecase_factory"
 
 	"golang.org/x/crypto/acme/autocert"
 
-	_ "patreon/docs"
-	"patreon/internal/app"
+	_ "glide/docs"
+	"glide/internal/app"
 
 	httpSwagger "github.com/swaggo/http-swagger"
 
@@ -88,7 +88,7 @@ func makingHTTPSServerWithRedirect(config *app.Config, router http.Handler) (*ht
 		return fmt.Errorf("acme/autocert: only %s host is allowed", allowedHost)
 	}
 
-	dataDir := "./patreon-secrt"
+	dataDir := "./glide-secrt"
 	m := &autocert.Manager{
 		Cache:      autocert.DirCache(dataDir),
 		Prompt:     autocert.AcceptTOS,

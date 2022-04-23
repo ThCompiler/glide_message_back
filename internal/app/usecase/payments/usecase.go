@@ -1,8 +1,8 @@
 package payments
 
 import (
-	"patreon/internal/app/models"
-	db_models "patreon/internal/app/models"
+	"glide/internal/app/models"
+	db_models "glide/internal/app/models"
 )
 
 const (

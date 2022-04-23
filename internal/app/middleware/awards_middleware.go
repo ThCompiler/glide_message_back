@@ -3,11 +3,11 @@ package middleware
 import (
 	"errors"
 	"net/http"
-	hf "patreon/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/repository"
-	usecase_awards "patreon/internal/app/usecase/awards"
-	"patreon/internal/app/utilits"
+	hf "glide/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/repository"
+	usecase_awards "glide/internal/app/usecase/awards"
+	"glide/internal/app/utilits"
 	"strconv"
 
 	"github.com/gorilla/mux"

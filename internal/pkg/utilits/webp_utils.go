@@ -7,7 +7,7 @@ import (
 	"github.com/conku/webp"
 	"github.com/pkg/errors"
 	"glide/internal/app"
-	repoFiles "glide/internal/microservices/files/files/repository/files"
+	repoFiles "glide/internal/app/repository/files"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
@@ -20,8 +20,8 @@ import (
 type ImageConverter interface {
 	// Convert Errors:
 	// 	app.GeneralError:
-	//		utils.ConvertErr
-	// 		utils.UnknownExtOfFileName
+	//		utilits.ConvertErr
+	// 		utilits.UnknownExtOfFileName
 	Convert(context.Context, io.Reader, repoFiles.FileName) (io.Reader, repoFiles.FileName, error)
 }
 
@@ -30,8 +30,8 @@ type ConverterToWebp struct {
 
 // Convert Errors:
 // 	app.GeneralError:
-//		utils.ConvertErr
-// 		utils.UnknownExtOfFileName
+//		utilits.ConvertErr
+// 		utilits.UnknownExtOfFileName
 func (cv *ConverterToWebp) Convert(_ context.Context,
 	file io.Reader, name repoFiles.FileName) (io.Reader, repoFiles.FileName, error) {
 	img, _, err := image.Decode(file)

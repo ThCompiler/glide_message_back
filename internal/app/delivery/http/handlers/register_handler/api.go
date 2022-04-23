@@ -1,18 +1,18 @@
 package register_handler
 
 import (
+	"glide/internal/app/delivery/http/handlers/handler_errors"
+	"glide/internal/app/models"
+	"glide/internal/app/repository"
+	repository_user "glide/internal/app/repository/user/postgresql"
+	useUser "glide/internal/app/usecase/user"
+	"glide/internal/pkg/utilits/delivery"
 	"net/http"
-	"patreon/internal/app/delivery/http/handlers/base_handler"
-	"patreon/internal/app/delivery/http/handlers/handler_errors"
-	"patreon/internal/app/models"
-	"patreon/internal/app/repository"
-	repository_user "patreon/internal/app/repository/user/postgresql"
-	useUser "patreon/internal/app/usecase/user"
 
 	"github.com/sirupsen/logrus"
 )
 
-var codeByError = base_handler.CodeMap{
+var codeByError = delivery.CodeMap{
 	models.IncorrectNickname: {
 		http.StatusUnprocessableEntity, handler_errors.InvalidUserNickname, logrus.InfoLevel},
 	models.EmptyPassword: {
