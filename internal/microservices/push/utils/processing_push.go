@@ -11,7 +11,7 @@ import (
 )
 
 type SendMessager interface {
-	SendMessage(users []int64, hsg easyjson.Marshaler)
+	SendMessage(users []string, hsg easyjson.Marshaler)
 }
 
 type ProcessingPush struct {
@@ -72,34 +72,25 @@ func (pp *ProcessingPush) initMsg(routerKey string) (<-chan amqp.Delivery, error
 	return msgs, err
 }
 
-func (pp *ProcessingPush) RunProcessPost() {
-	msg, err := pp.initMsg(push.PostPush)
+func (pp *ProcessingPush) RunProcessMessage() {
+	msg, err := pp.initMsg(push.MessagePush)
 	if err != nil {
-		pp.logger.Errorf("error init post query from msg with err: %s", err)
+		pp.logger.Errorf("error init message query from msg with err: %s", err)
 		return
 	}
-	pp.processPostMsg(msg)
+	pp.processMessageMsg(msg)
 }
 
-func (pp *ProcessingPush) RunProcessComment() {
-	msg, err := pp.initMsg(push.CommentPush)
+func (pp *ProcessingPush) RunProcessGlide() {
+	msg, err := pp.initMsg(push.GlidePush)
 	if err != nil {
-		pp.logger.Errorf("error init comment query from msg with err: %s", err)
+		pp.logger.Errorf("error init glide query from msg with err: %s", err)
 		return
 	}
-	pp.processCommentMsg(msg)
+	pp.processGlideMsg(msg)
 }
 
-func (pp *ProcessingPush) RunProcessSub() {
-	msg, err := pp.initMsg(push.NewSubPush)
-	if err != nil {
-		pp.logger.Errorf("error init sub query from msg with err: %s", err)
-		return
-	}
-	pp.processSubMsg(msg)
-}
-
-func (pp *ProcessingPush) processPostMsg(msg <-chan amqp.Delivery) {
+func (pp *ProcessingPush) processMessageMsg(msg <-chan amqp.Delivery) {
 	for {
 		var pushMsg amqp.Delivery
 		select {
@@ -109,24 +100,24 @@ func (pp *ProcessingPush) processPostMsg(msg <-chan amqp.Delivery) {
 			break
 		}
 
-		post := &push.PostInfo{}
+		msgInfo := &push.MessageInfo{}
 		reader := bytes.NewBuffer(pushMsg.Body)
-		if err := easyjson.UnmarshalFromReader(reader, post); err != nil {
-			pp.logger.Errorf("error decode info post from msg with err: %s", err)
+		if err := easyjson.UnmarshalFromReader(reader, msgInfo); err != nil {
+			pp.logger.Errorf("error decode info message from msg with err: %s", err)
 			continue
 		}
 
-		users, sendPush, err := pp.usecase.PreparePostPush(post)
+		users, sendPush, err := pp.usecase.PrepareMessagePush(msgInfo)
 		if err != nil {
-			pp.logger.Errorf("error prepare info post with err: %s", err)
+			pp.logger.Errorf("error prepare info message with err: %s", err)
 			continue
 		}
-		pp.logger.Infof("Was send message about new post %v", pushMsg.Body)
-		pp.sendMsg.SendMessage(users, PushResponse{Type: push.PostPush, Push: sendPush})
+		pp.logger.Infof("Was send message about new message %v", pushMsg.Body)
+		pp.sendMsg.SendMessage(users, PushResponse{Type: push.MessagePush, Push: sendPush})
 	}
 }
 
-func (pp *ProcessingPush) processCommentMsg(msg <-chan amqp.Delivery) {
+func (pp *ProcessingPush) processGlideMsg(msg <-chan amqp.Delivery) {
 	for {
 		var pushMsg amqp.Delivery
 		select {
@@ -135,46 +126,19 @@ func (pp *ProcessingPush) processCommentMsg(msg <-chan amqp.Delivery) {
 		case pushMsg = <-msg:
 			break
 		}
-		comment := &push.CommentInfo{}
+		glide := &push.GlideInfo{}
 		reader := bytes.NewBuffer(pushMsg.Body)
-		if err := easyjson.UnmarshalFromReader(reader, comment); err != nil {
-			pp.logger.Errorf("error decode info post from msg with err: %s", err)
+		if err := easyjson.UnmarshalFromReader(reader, glide); err != nil {
+			pp.logger.Errorf("error decode info glide from msg with err: %s", err)
 			continue
 		}
 
-		users, sendPush, err := pp.usecase.PrepareCommentPush(comment)
+		users, sendPush, err := pp.usecase.PrepareGlidePush(glide)
 		if err != nil {
-			pp.logger.Errorf("error prepare info comment with err: %s", err)
+			pp.logger.Errorf("error prepare info glide with err: %s", err)
 			continue
 		}
-		pp.logger.Infof("Was send message about new comment %v", pushMsg.Body)
-		pp.sendMsg.SendMessage(users, PushResponse{Type: push.CommentPush, Push: sendPush})
-	}
-}
-
-func (pp *ProcessingPush) processSubMsg(msg <-chan amqp.Delivery) {
-	for {
-		var pushMsg amqp.Delivery
-		select {
-		case <-pp.stop:
-			return
-		case pushMsg = <-msg:
-			break
-		}
-
-		subscriber := &push.SubInfo{}
-		reader := bytes.NewBuffer(pushMsg.Body)
-		if err := easyjson.UnmarshalFromReader(reader, subscriber); err != nil {
-			pp.logger.Errorf("error decode info post from msg with err: %s", err)
-			continue
-		}
-
-		users, sendPush, err := pp.usecase.PrepareSubPush(subscriber)
-		if err != nil {
-			pp.logger.Errorf("error prepare info sub with err: %s", err)
-			continue
-		}
-		pp.logger.Infof("Was send message about new subscriber %v", pushMsg.Body)
-		pp.sendMsg.SendMessage(users, PushResponse{Type: push.NewSubPush, Push: sendPush})
+		pp.logger.Infof("Was send message about new glide %v", pushMsg.Body)
+		pp.sendMsg.SendMessage(users, PushResponse{Type: push.GlidePush, Push: sendPush})
 	}
 }

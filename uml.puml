@@ -1,0 +1,1495 @@
+@startuml
+namespace app {
+    class Config << (S,Aquamarine) >> {
+        + MediaDir string
+        + Microservices Microservice
+        + ServerRepository RepositoryConnections
+        + LocalRepository RepositoryConnections
+        + Cors internal.CorsConfig
+        + PaymentsInfo Payments
+
+    }
+    class ExpectedConnections << (S,Aquamarine) >> {
+        + SessionGrpcConnection *grpc.ClientConn
+        + FilesGrpcConnection *grpc.ClientConn
+        + AccessRedisPool *redis.Pool
+        + SqlConnection *sqlx.DB
+        + PathFiles string
+        + RabbitSession *rabbit.Session
+
+    }
+    class GeneralError << (S,Aquamarine) >> {
+        + Err error
+        + ExternalErr error
+
+        + Error() string
+
+    }
+    interface Handler  {
+        + ServeHTTP(w http.ResponseWriter, r *http.Request) 
+        + Connect(router *mux.Route) 
+
+    }
+    class Microservice << (S,Aquamarine) >> {
+        + SessionServerUrl string
+        + FilesUrl string
+
+    }
+    class Payments << (S,Aquamarine) >> {
+        + AccountNumber string
+
+    }
+    class RepositoryConnections << (S,Aquamarine) >> {
+        + DataBaseUrl string
+        + SessionRedisUrl string
+        + AccessRedisUrl string
+        + RabbitUrl string
+
+    }
+}
+"internal.Config" *-- "app.Config"
+
+
+namespace auth {
+    interface AuthCheckerClient  {
+        + Check(ctx context.Context, in *SessionID, opts ...grpc.CallOption) (*Result, error)
+        + Create(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*Result, error)
+        + Delete(ctx context.Context, in *SessionID, opts ...grpc.CallOption) (*Nothing, error)
+
+    }
+    interface AuthCheckerServer  {
+        + Check( context.Context,  *SessionID) (*Result, error)
+        + Create( context.Context,  *UserID) (*Result, error)
+        + Delete( context.Context,  *SessionID) (*Nothing, error)
+
+    }
+    class Nothing << (S,Aquamarine) >> {
+        - state protoimpl.MessageState
+        - sizeCache protoimpl.SizeCache
+        - unknownFields protoimpl.UnknownFields
+
+        + Dummy bool
+
+        + Reset() 
+        + String() string
+        + ProtoMessage() 
+        + ProtoReflect() protoreflect.Message
+        + Descriptor() ([]byte, []int)
+        + GetDummy() bool
+
+    }
+    class Result << (S,Aquamarine) >> {
+        - state protoimpl.MessageState
+        - sizeCache protoimpl.SizeCache
+        - unknownFields protoimpl.UnknownFields
+
+        + UserID string
+        + SessionID string
+
+        + Reset() 
+        + String() string
+        + ProtoMessage() 
+        + ProtoReflect() protoreflect.Message
+        + Descriptor() ([]byte, []int)
+        + GetUserID() string
+        + GetSessionID() string
+
+    }
+    class SessionID << (S,Aquamarine) >> {
+        - state protoimpl.MessageState
+        - sizeCache protoimpl.SizeCache
+        - unknownFields protoimpl.UnknownFields
+
+        + ID string
+
+        + Reset() 
+        + String() string
+        + ProtoMessage() 
+        + ProtoReflect() protoreflect.Message
+        + Descriptor() ([]byte, []int)
+        + GetID() string
+
+    }
+    class UnimplementedAuthCheckerServer << (S,Aquamarine) >> {
+        + Check( context.Context,  *SessionID) (*Result, error)
+        + Create( context.Context,  *UserID) (*Result, error)
+        + Delete( context.Context,  *SessionID) (*Nothing, error)
+
+    }
+    class UserID << (S,Aquamarine) >> {
+        - state protoimpl.MessageState
+        - sizeCache protoimpl.SizeCache
+        - unknownFields protoimpl.UnknownFields
+
+        + ID string
+
+        + Reset() 
+        + String() string
+        + ProtoMessage() 
+        + ProtoReflect() protoreflect.Message
+        + Descriptor() ([]byte, []int)
+        + GetID() string
+
+    }
+    class authCheckerClient << (S,Aquamarine) >> {
+        - cc grpc.ClientConnInterface
+
+        + Check(ctx context.Context, in *SessionID, opts ...grpc.CallOption) (*Result, error)
+        + Create(ctx context.Context, in *UserID, opts ...grpc.CallOption) (*Result, error)
+        + Delete(ctx context.Context, in *SessionID, opts ...grpc.CallOption) (*Nothing, error)
+
+    }
+}
+
+"auth.AuthCheckerServer" <|-- "auth.UnimplementedAuthCheckerServer"
+"auth.AuthCheckerClient" <|-- "auth.authCheckerClient"
+
+namespace chat_handler {
+    class ChatHandler << (S,Aquamarine) >> {
+        - sessionClient client.AuthCheckerClient
+        - chatsUsecase chats.Usecase
+
+        + GET(w http.ResponseWriter, r *http.Request) 
+        + POST(w http.ResponseWriter, r *http.Request) 
+
+    }
+}
+"handler.BaseHandler" *-- "chat_handler.ChatHandler"
+
+
+namespace chat_id_message_handler {
+    class ChatIdMessageHandler << (S,Aquamarine) >> {
+        - sessionClient client.AuthCheckerClient
+        - chatsUsecase chats.Usecase
+
+        + GET(w http.ResponseWriter, r *http.Request) 
+        + POST(w http.ResponseWriter, r *http.Request) 
+
+    }
+}
+"handler.BaseHandler" *-- "chat_id_message_handler.ChatIdMessageHandler"
+
+
+namespace chat_message_handler {
+    class ChatMessageHandler << (S,Aquamarine) >> {
+        - sessionClient client.AuthCheckerClient
+        - chatsUsecase chats.Usecase
+
+        + PUT(w http.ResponseWriter, r *http.Request) 
+
+    }
+}
+"handler.BaseHandler" *-- "chat_message_handler.ChatMessageHandler"
+
+
+namespace chats {
+    class ChatsUsecase << (S,Aquamarine) >> {
+        - repository chat.Repository
+        - filesRepository files.Repository
+        - imageConvector utilits.ImageConverter
+        - pusher client.Pusher
+
+        + Create(user string, with string) (*models.Chat, error)
+        + CheckAllow(user string, chatId int64) error
+        + GetChats(userId string) ([]models.Chat, error)
+        + GetMessages(chatId int64, pag *models.Pagination) ([]models.Message, error)
+        + MarkMessages(chatId int64, messageIds []int64) error
+        + CreateMessage(text string, chatId int64, data io.Reader, name files.FileName, user string) (*models.Message, error)
+
+    }
+    interface Usecase  {
+        + Create(user string, with string) (*models.Chat, error)
+        + CheckAllow(user string, chatId int64) error
+        + GetChats(userId string) ([]models.Chat, error)
+        + GetMessages(chatId int64, pag *models.Pagination) ([]models.Message, error)
+        + MarkMessages(chatId int64, messageIds []int64) error
+        + CreateMessage(text string, chatId int64, data io.Reader, name files.FileName, user string) (*models.Message, error)
+
+    }
+}
+
+"chats.Usecase" <|-- "chats.ChatsUsecase"
+
+namespace client {
+    interface AuthCheckerClient  {
+        + Check(ctx context.Context, sessionID string) (models.Result, error)
+        + Create(ctx context.Context, userID string) (models.Result, error)
+        + Delete(ctx context.Context, sessionID string) error
+
+    }
+    class SessionClient << (S,Aquamarine) >> {
+        - sessionClient protobuf.AuthCheckerClient
+
+        + Check(ctx context.Context, sessionID string) (models.Result, error)
+        + Create(ctx context.Context, userID string) (models.Result, error)
+        + Delete(ctx context.Context, sessionID string) error
+
+    }
+}
+
+"client.AuthCheckerClient" <|-- "client.SessionClient"
+
+namespace csrf_models {
+    class TokenSources << (S,Aquamarine) >> {
+        + UserId int64
+        + SessionId string
+        + ExpiredTime time.Time
+
+    }
+    class csrf_models.Token << (T, #FF7700) >>  {
+    }
+}
+
+
+namespace delivery {
+    class ErrResponse << (S,Aquamarine) >> {
+        + Err string
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class ErrorConvertor << (S,Aquamarine) >> {
+        + UsecaseError(w http.ResponseWriter, r *http.Request, usecaseErr error, codeByErr CodeMap) 
+        + HandlerError(w http.ResponseWriter, r *http.Request, code int, err error) 
+
+    }
+    class RespondError << (S,Aquamarine) >> {
+        + Code int
+        + Error error
+        + Level logrus.Level
+
+    }
+    class Responder << (S,Aquamarine) >> {
+        + Error(w http.ResponseWriter, r *http.Request, code int, err error) 
+        + Respond(w http.ResponseWriter, r *http.Request, code int, data easyjson.Marshaler) 
+
+    }
+    class delivery.CodeMap << (T, #FF7700) >>  {
+    }
+}
+"delivery.Responder" *-- "delivery.ErrorConvertor"
+"utilits.LogObject" *-- "delivery.Responder"
+
+
+namespace handler {
+    class BaseHandler << (S,Aquamarine) >> {
+        - handlerMethods <font color=blue>map</font>[string]handler_interfaces.HandlerFunc
+        - middlewares []handler_interfaces.HMiddlewareFunc
+
+        - applyHFMiddleware(handlerMethod handler_interfaces.HandlerFunc, middlewares ...handler_interfaces.HFMiddlewareFunc) handler_interfaces.HandlerFunc
+        - applyMiddleware(handler handler_interfaces.Handler) handler_interfaces.Handler
+        - getListMethods() []string
+        - add(handler http.Handler, route *mux.Route) 
+
+        + AddMiddleware(middleware ...handler_interfaces.HMiddlewareFunc) 
+        + AddMethod(method string, handlerMethod handler_interfaces.HandlerFunc, middlewares ...handler_interfaces.HFMiddlewareFunc) 
+        + Connect(route *mux.Route) 
+        + ServeHTTP(w http.ResponseWriter, r *http.Request) 
+
+    }
+    class HelpHandlers << (S,Aquamarine) >> {
+        + PrintRequest(w http.ResponseWriter, r *http.Request) 
+        + GetInt64FromParam(w http.ResponseWriter, r *http.Request, name string) (int64, int, error)
+        + GetPaginationFromQuery(w http.ResponseWriter, r *http.Request) (*Pagination, int, error)
+        + GetInt64FromQueries(w http.ResponseWriter, r *http.Request, name string) (int64, int, error)
+        + GetBoolFromQueries(w http.ResponseWriter, r *http.Request, name string) bool
+        + GetStringFromQueries(w http.ResponseWriter, r *http.Request, name string) (string, int)
+        + GetStringFromParam(w http.ResponseWriter, r *http.Request, name string) (string, int)
+        + GetArrayStringFromQueries(w http.ResponseWriter, r *http.Request, name string) ([]string, int)
+        + GetRequestBody(r *http.Request, reqStruct Sanitizable, sanitizer bluemonday.Policy) error
+        + GetFilesFromRequest(w http.ResponseWriter, r *http.Request, maxSize int64, name string, validTypes []string) (io.Reader, files.FileName, int, error)
+
+    }
+    class Pagination << (S,Aquamarine) >> {
+        + Limit int64
+        + Desc bool
+        + Since string
+
+    }
+    interface Sanitizable  {
+        + Sanitize(sanitizer bluemonday.Policy) 
+
+    }
+}
+"handler.HelpHandlers" *-- "handler.BaseHandler"
+"delivery.ErrorConvertor" *-- "handler.HelpHandlers"
+
+"app.Handler" <|-- "handler.BaseHandler"
+"handler_interfaces.Handler" <|-- "handler.BaseHandler"
+
+namespace handler_factory {
+    class HandlerFactory << (S,Aquamarine) >> {
+        - usecaseFactory UsecaseFactory
+        - sessionClientConn *grpc.ClientConn
+        - logger *logrus.Logger
+        - urlHandler *<font color=blue>map</font>[string]app.Handler
+
+        - initAllHandlers() <font color=blue>map</font>[int]app.Handler
+
+        + GetHandleUrls() *<font color=blue>map</font>[string]app.Handler
+
+    }
+    interface UsecaseFactory  {
+        + GetUserUsecase() user.Usecase
+
+    }
+}
+
+"server.HandlerFactory" <|-- "handler_factory.HandlerFactory"
+
+namespace handler_interfaces {
+    interface Handler  {
+        + ServeHTTP(w http.ResponseWriter, r *http.Request) 
+
+    }
+    class HandlerFunc << (S,Aquamarine) >> {
+        + ServeHTTP(w http.ResponseWriter, r *http.Request) 
+
+    }
+    class handler_interfaces.HFMiddlewareFunc << (T, #FF7700) >>  {
+    }
+    class handler_interfaces.HMiddlewareFunc << (T, #FF7700) >>  {
+    }
+    class handler_interfaces.HandlerFunc << (T, #FF7700) >>  {
+    }
+    class "<font color=blue>func</font>(http.Handler) http.Handler" as fontcolorbluefuncfonthttpHandlerhttpHandler {
+        'This class was created so that we can correctly have an alias pointing to this name. Since it contains dots that can break namespaces
+    }
+    class "<font color=blue>func</font>(http.ResponseWriter, *http.Request) " as fontcolorbluefuncfonthttpResponseWriterhttpRequest {
+        'This class was created so that we can correctly have an alias pointing to this name. Since it contains dots that can break namespaces
+    }
+}
+
+"handler_interfaces.Handler" <|-- "handler_interfaces.HandlerFunc"
+
+namespace http_models {
+    class Color << (S,Aquamarine) >> {
+        + R uint8
+        + G uint8
+        + B uint8
+        + A uint8
+
+    }
+    class ErrResponse << (S,Aquamarine) >> {
+        + Err string
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class IdResponse << (S,Aquamarine) >> {
+        + ID int64
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class OkResponse << (S,Aquamarine) >> {
+        + Ok string
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class ProfileResponse << (S,Aquamarine) >> {
+        + Nickname string
+        + Fullname string
+        + Avatar string
+        + About string
+        + Age int64
+        + Country string
+        + Languages []string
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class RequestAwards << (S,Aquamarine) >> {
+        + Name string
+        + Description string
+        + Price int64
+        + Color Color
+
+        + Sanitize(sanitizer bluemonday.Policy) 
+
+    }
+    class RequestChangeNickname << (S,Aquamarine) >> {
+        + OldNickname string
+        + NewNickname string
+
+        + Validate() error
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+        + Sanitize(sanitizer bluemonday.Policy) 
+
+    }
+    class RequestChangePassword << (S,Aquamarine) >> {
+        + OldPassword string
+        + NewPassword string
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+        + Sanitize(sanitizer bluemonday.Policy) 
+
+    }
+    class RequestComment << (S,Aquamarine) >> {
+        + Body string
+        + AsCreator bool
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+        + Sanitize(sanitizer bluemonday.Policy) 
+
+    }
+    class RequestCreator << (S,Aquamarine) >> {
+        + Category string
+        + Description string
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+        + Sanitize(sanitizer bluemonday.Policy) 
+
+    }
+    class RequestLogin << (S,Aquamarine) >> {
+        + Login string
+        + Password string
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+        + Sanitize(sanitizer bluemonday.Policy) 
+
+    }
+    class RequestPosts << (S,Aquamarine) >> {
+        + Title string
+        + AwardsId int64
+        + Description string
+        + IsDraft bool
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+        + Sanitize(sanitizer bluemonday.Policy) 
+
+    }
+    class RequestRegistration << (S,Aquamarine) >> {
+        + Nickname string
+        + Fullname string
+        + About string
+        + Age int64
+        + Country string
+        + Languages []string
+        + Password string
+
+        + ToUser() *models.User
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+        + Sanitize(sanitizer bluemonday.Policy) 
+
+    }
+    class RequestText << (S,Aquamarine) >> {
+        + Text string
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+        + Sanitize(sanitizer bluemonday.Policy) 
+
+    }
+    class RequestUserUpdate << (S,Aquamarine) >> {
+        + Fullname string
+        + About string
+        + Age int64
+        + Country string
+        + Languages []string
+
+        + ToUser() *models.User
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+        + Sanitize(sanitizer bluemonday.Policy) 
+
+    }
+    class ResponseChat << (S,Aquamarine) >> {
+        + ID int64
+        + Companion string
+        + CompanionAvatar string
+        + LastMessage ResponseMessage
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class ResponseChats << (S,Aquamarine) >> {
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class ResponseInfo << (S,Aquamarine) >> {
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class ResponseMessage << (S,Aquamarine) >> {
+        + ID int64
+        + Text string
+        + Picture string
+        + Created time.Time
+        + Author string
+        + IsViewed bool
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class ResponseMessages << (S,Aquamarine) >> {
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class SubscribeRequest << (S,Aquamarine) >> {
+        + Token string
+
+        + Validate() error
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+        + Sanitize(sanitizer bluemonday.Policy) 
+
+    }
+    class TokenResponse << (S,Aquamarine) >> {
+        + Token csrf_models.Token
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class http_models.ResponseChats << (T, #FF7700) >>  {
+    }
+    class http_models.ResponseMessages << (T, #FF7700) >>  {
+    }
+}
+"models.Info" *-- "http_models.ResponseInfo"
+
+"handler.Sanitizable" <|-- "http_models.RequestAwards"
+"handler.Sanitizable" <|-- "http_models.RequestChangeNickname"
+"handler.Sanitizable" <|-- "http_models.RequestChangePassword"
+"handler.Sanitizable" <|-- "http_models.RequestComment"
+"handler.Sanitizable" <|-- "http_models.RequestCreator"
+"handler.Sanitizable" <|-- "http_models.RequestLogin"
+"handler.Sanitizable" <|-- "http_models.RequestPosts"
+"handler.Sanitizable" <|-- "http_models.RequestRegistration"
+"handler.Sanitizable" <|-- "http_models.RequestText"
+"handler.Sanitizable" <|-- "http_models.RequestUserUpdate"
+"handler.Sanitizable" <|-- "http_models.SubscribeRequest"
+
+namespace info_handler {
+    class InfoHandler << (S,Aquamarine) >> {
+        - infoUsecase info.Usecase
+
+        + GET(w http.ResponseWriter, r *http.Request) 
+
+    }
+}
+"base_handler.BaseHandler" *-- "info_handler.InfoHandler"
+
+
+namespace internal {
+    class Config << (S,Aquamarine) >> {
+        + LogLevel string
+        + LogAddr string
+        + Domen string
+        + IsHTTPSServer bool
+        + BindHttpsAddr string
+        + BindHttpAddr string
+
+    }
+    class CorsConfig << (S,Aquamarine) >> {
+        + Urls []string
+        + Headers []string
+        + Methods []string
+
+    }
+}
+
+
+namespace login_handler {
+    class LoginHandler << (S,Aquamarine) >> {
+        - sessionClient client.AuthCheckerClient
+        - userUsecase user.Usecase
+
+        + POST(w http.ResponseWriter, r *http.Request) 
+
+    }
+}
+"handler.BaseHandler" *-- "login_handler.LoginHandler"
+
+
+namespace logout_handler {
+    class LogoutHandler << (S,Aquamarine) >> {
+        - sessionClient client.AuthCheckerClient
+
+        + POST(w http.ResponseWriter, r *http.Request) 
+
+    }
+}
+"handler.BaseHandler" *-- "logout_handler.LogoutHandler"
+
+
+namespace middleware {
+    class ChatsMiddleware << (S,Aquamarine) >> {
+        - log utilits.LogObject
+        - usecaseChats chats.Usecase
+
+        + CheckCorrectChatIdFunc(next handler_interfaces.HandlerFunc) handler_interfaces.HandlerFunc
+        + CheckCorrectChatId(handler http.Handler) http.Handler
+
+    }
+    class CorsMiddleware << (S,Aquamarine) >> {
+        - router *mux.Router
+        - config *internal.CorsConfig
+
+        + SetCors(handler http.Handler) http.Handler
+
+    }
+    class CsrfMiddleware << (S,Aquamarine) >> {
+        - log utilits.LogObject
+        - usecase usecase.Usecase
+
+        + CheckCsrfTokenFunc(next handler_interfaces.HandlerFunc) handler_interfaces.HandlerFunc
+        + CheckCsrfToken(next http.Handler) http.Handler
+
+    }
+    class SessionMiddleware << (S,Aquamarine) >> {
+        + SessionClient client.AuthCheckerClient
+
+        - updateCookie(w http.ResponseWriter, cook *http.Cookie) 
+        - clearCookie(w http.ResponseWriter, cook *http.Cookie) 
+
+        + CheckFunc(next handler_interfaces.HandlerFunc) handler_interfaces.HandlerFunc
+        + Check(next http.Handler) http.Handler
+        + CheckNotAuthorizedFunc(next handler_interfaces.HandlerFunc) handler_interfaces.HandlerFunc
+        + CheckNotAuthorized(next http.Handler) http.Handler
+        + AddUserIdFunc(next handler_interfaces.HandlerFunc) handler_interfaces.HandlerFunc
+        + AddUserId(next http.Handler) http.Handler
+
+    }
+    class UtilitiesMiddleware << (S,Aquamarine) >> {
+        - log utilits.LogObject
+
+        + CheckPanic(handler http.Handler) http.Handler
+        + UpgradeLogger(handler http.Handler) http.Handler
+
+    }
+}
+"utilits.LogObject" *-- "middleware.SessionMiddleware"
+
+
+namespace mock_usecase {
+    class StatisticsUsecase << (S,Aquamarine) >> {
+        - ctrl *gomock.Controller
+        - recorder *StatisticsUsecaseMockRecorder
+
+        + EXPECT() *StatisticsUsecaseMockRecorder
+        + GetCountCreatorPosts(arg0 int64) (int64, error)
+        + GetCountCreatorSubscribers(arg0 int64) (int64, error)
+        + GetCountCreatorViews(arg0 int64, arg1 int64) (int64, error)
+        + GetTotalIncome(arg0 int64, arg1 int64) (float64, error)
+
+    }
+    class StatisticsUsecaseMockRecorder << (S,Aquamarine) >> {
+        - mock *StatisticsUsecase
+
+        + GetCountCreatorPosts(arg0 <font color=blue>interface</font>{}) *gomock.Call
+        + GetCountCreatorSubscribers(arg0 <font color=blue>interface</font>{}) *gomock.Call
+        + GetCountCreatorViews(arg0 <font color=blue>interface</font>{}, arg1 <font color=blue>interface</font>{}) *gomock.Call
+        + GetTotalIncome(arg0 <font color=blue>interface</font>{}, arg1 <font color=blue>interface</font>{}) *gomock.Call
+
+    }
+}
+
+"statistics.Usecase" <|-- "mock_usecase.StatisticsUsecase"
+
+namespace models {
+    class Chat << (S,Aquamarine) >> {
+        + ID int64
+        + Companion string
+        + CompanionAvatar string
+        + LastMessage Message
+
+        + String() string
+
+    }
+    class Info << (S,Aquamarine) >> {
+        + Category []string
+        + TypePostData []string
+
+    }
+    class Log << (S,Aquamarine) >> {
+        + Level string
+        + Method string
+        + Msg string
+        + Adr string
+        + Url url.URL
+        + Time time.Time
+        + WorkTime int64
+        + ReqID string
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class Message << (S,Aquamarine) >> {
+        + ID int64
+        + Text string
+        + Picture string
+        + Created time.Time
+        + Author string
+        + IsViewed bool
+
+        + String() string
+        + Validate() error
+
+    }
+    class Pagination << (S,Aquamarine) >> {
+        + Limit int64
+        + Offset int64
+
+    }
+    class Result << (S,Aquamarine) >> {
+        + UserID string
+        + UniqID string
+
+    }
+    class Session << (S,Aquamarine) >> {
+        + UserID string
+        + UniqID string
+        + Expiration int
+
+        + String() string
+
+    }
+    class User << (S,Aquamarine) >> {
+        + Nickname string
+        + Password string
+        + Fullname string
+        + About string
+        + EncryptedPassword string
+        + Avatar string
+        + Age int64
+        + Country string
+        + Languages []string
+
+        - encryptString(s string) (string, error)
+
+        + String() string
+        + ValidateUpdate() error
+        + Validate() error
+        + MakeEmptyPassword() 
+        + Encrypt() error
+        + ComparePassword(password string) bool
+
+    }
+}
+
+
+namespace models_utilits {
+    class MapOfUnmarshalError << (S,Aquamarine) >> {
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class models_utilits.ExtractorErrorByName << (T, #FF7700) >>  {
+    }
+    class models_utilits.MapOfUnmarshalError << (T, #FF7700) >>  {
+    }
+    class models_utilits.MapOfValidateError << (T, #FF7700) >>  {
+    }
+}
+
+
+namespace push {
+    class Config << (S,Aquamarine) >> {
+        + RabbitUrl string
+        + FilesUrl string
+        + Cors internal.CorsConfig
+        + SessionUrl string
+        + SqlUrl string
+
+    }
+    class GlideInfo << (S,Aquamarine) >> {
+        + Companion string
+        + GlideId int64
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class MessageInfo << (S,Aquamarine) >> {
+        + Companion string
+        + MessageId int64
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+}
+"internal.Config" *-- "push.Config"
+
+
+namespace push_client {
+    class PushSender << (S,Aquamarine) >> {
+        - session *rabbit.Session
+
+        + NewMessage(messageId int64, companion string) error
+        + NewGlideMessage(companion int64, glideId int64) error
+        + NewPost(creatorId int64, postId int64, postTitle string) error
+        + NewComment(commentId int64, authorId int64, postId int64) error
+        + NewSubscriber(subscriberId int64, awardsId int64, creatorId int64) error
+
+    }
+    interface Pusher  {
+        + NewMessage(messageId int64, companion string) error
+        + NewGlideMessage(companion int64, glideId int64) error
+
+    }
+}
+
+"push_client.Pusher" <|-- "push_client.PushSender"
+
+namespace push_models {
+    class GlidePush << (S,Aquamarine) >> {
+        + Id int64
+        + Title string
+        + Message string
+        + Country string
+        + Author string
+        + AuthorAvatar string
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class MessagePush << (S,Aquamarine) >> {
+        + ChatId int64
+        + Companion string
+        + CompanionAvatar string
+        + MessageId int64
+        + Text string
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+}
+
+
+namespace push_server {
+    class PushHandler << (S,Aquamarine) >> {
+        - sessionClient client.AuthCheckerClient
+        - hub *utils.SendHub
+        - upgrader *websocket.Upgrader
+
+        + GET(w http.ResponseWriter, r *http.Request) 
+
+    }
+    class Server << (S,Aquamarine) >> {
+        - config *push.Config
+        - logger *logrus.Logger
+        - connections app.ExpectedConnections
+
+        - checkConnection() error
+
+        + Start() error
+
+    }
+}
+"handler.BaseHandler" *-- "push_server.PushHandler"
+
+
+namespace rabbit {
+    class Session << (S,Aquamarine) >> {
+        - name string
+        - typeEchange string
+        - logger *logrus.Entry
+        - connection *amqp.Connection
+        - channel *amqp.Channel
+        - done <font color=blue>chan</font> bool
+        - notifyConnClose <font color=blue>chan</font> *amqp.Error
+        - notifyChanClose <font color=blue>chan</font> *amqp.Error
+        - isReady bool
+
+        - handleReconnect(addr string) 
+        - connect(addr string) (*amqp.Connection, error)
+        - init(conn *amqp.Connection) error
+        - changeConnection(connection *amqp.Connection) 
+        - changeChannel(channel *amqp.Channel) 
+
+        + CheckConnection() bool
+        + GetName() string
+        + GetChannel() *amqp.Channel
+        + Close() error
+
+    }
+}
+
+
+namespace repository {
+    class PushRepository << (S,Aquamarine) >> {
+        - store *sqlx.DB
+
+        + GetUserAvatar(username string) (string, error)
+        + GetMessageInfo(messageId int64) (string, string, int64, error)
+        + GetGlideInfo(glideId int64) (string, string, string, string, error)
+
+    }
+    class RedisRepository << (S,Aquamarine) >> {
+        - redisPool *redis.Pool
+        - log *logrus.Logger
+
+        + Set(session *models.Session) error
+        + GetUserId(uniqID string, updExpiration int) (string, error)
+        + Del(session *models.Session) error
+
+    }
+    interface Repository  {
+        + GetUserAvatar(username string) (string, error)
+        + GetMessageInfo(messageId int64) (string, string, int64, error)
+        + GetGlideInfo(glideId int64) (string, string, string, string, error)
+
+    }
+}
+
+"repository.Repository" <|-- "repository.PushRepository"
+"sessions.SessionRepository" <|-- "repository.RedisRepository"
+
+namespace repository_chat {
+    interface Repository  {
+        + Create(user string, with string) (*models.Chat, error)
+        + CheckChat(chatId int64) error
+        + CheckAllow(user string, chatId int64) error
+        + GetChats(userId string) ([]models.Chat, error)
+        + GetMessages(chatId int64, pag *models.Pagination) ([]models.Message, error)
+        + MarkMessages(chatId int64, messageIds []int64) error
+        + CreateMessage(text string, chatId int64, image string, user string) (*models.Message, error)
+
+    }
+}
+
+
+namespace repository_factory {
+    class RepositoryFactory << (S,Aquamarine) >> {
+        - expectedConnections app.ExpectedConnections
+        - logger *logrus.Logger
+        - userRepository user.Repository
+        - fileRepository files.Repository
+
+        + GetUserRepository() user.Repository
+        + GetFileRepository() files.Repository
+
+    }
+}
+
+"usecase_factory.RepositoryFactory" <|-- "repository_factory.RepositoryFactory"
+
+namespace repository_files {
+    interface Repository  {
+        + SaveFile(file io.Reader, name FileName, typeF TypeFiles) (string, error)
+        + LoadFile(path string) (io.Reader, error)
+
+    }
+    class repository_files.FileName << (T, #FF7700) >>  {
+    }
+    class repository_files.TypeFiles << (T, #FF7700) >>  {
+    }
+}
+
+
+namespace repository_info {
+    interface Repository  {
+        + Get() (*models.Info, error)
+
+    }
+}
+
+
+namespace repository_jwt {
+    class JwtRepository << (S,Aquamarine) >> {
+        + Secret []byte
+
+        - parseClaims(token *jwt.Token) (<font color=blue>interface</font>{}, error)
+
+        + Check(sources csrf_models.TokenSources, tokenString csrf_models.Token) error
+        + Create(sources csrf_models.TokenSources) (csrf_models.Token, error)
+
+    }
+    interface Repository  {
+        + Check(sources csrf_models.TokenSources, tokenString csrf_models.Token) error
+        + Create(sources csrf_models.TokenSources) (csrf_models.Token, error)
+
+    }
+    class jwtCsrfClaims << (S,Aquamarine) >> {
+        + UserId int64
+        + SessionId string
+
+    }
+}
+"jwt.StandardClaims" *-- "repository_jwt.jwtCsrfClaims"
+
+"repository_jwt.Repository" <|-- "repository_jwt.JwtRepository"
+"repository_token.Repository" <|-- "repository_jwt.JwtRepository"
+
+namespace repository_os {
+    class FileRepository << (S,Aquamarine) >> {
+        - staticDir string
+
+        + SaveFile(file io.Reader, name files.FileName, typeF files.TypeFiles) (string, error)
+        + LoadFile(path string) (io.Reader, error)
+
+    }
+}
+
+
+namespace repository_postgresql {
+    class ChatRepository << (S,Aquamarine) >> {
+        - store *sqlx.DB
+
+        + Create(user string, with string) (*models.Chat, error)
+        + CheckAllow(user string, chatId int64) error
+        + CheckChat(chatId int64) error
+        + GetChats(userId string) ([]models.Chat, error)
+        + GetMessages(chatId int64, pag *models.Pagination) ([]models.Message, error)
+        + MarkMessages(chatId int64, messageIds []int64) error
+        + CreateMessage(text string, chatId int64, image string, user string) (*models.Message, error)
+
+    }
+    class InfoRepository << (S,Aquamarine) >> {
+        - store *sqlx.DB
+
+        + Get() (*models.Info, error)
+
+    }
+    class UserRepository << (S,Aquamarine) >> {
+        - store *sqlx.DB
+
+        + Create(u *models.User) (*models.User, error)
+        + FindByNickname(nickname string) (*models.User, error)
+        + UpdatePassword(id int64, newEncryptedPassword string) error
+        + UpdateAvatar(nickname string, newAvatar string) error
+        + Update(u *models.User) (*models.User, error)
+        + UpdateNickname(oldNickname string, newNickname string) error
+
+    }
+}
+
+"repository_chat.Repository" <|-- "repository_postgresql.ChatRepository"
+"repository_info.Repository" <|-- "repository_postgresql.InfoRepository"
+"repository_user.Repository" <|-- "repository_postgresql.UserRepository"
+
+namespace repository_token {
+    interface Repository  {
+        + Check(sources csrf_models.TokenSources, tokenString csrf_models.Token) error
+        + Create(sources csrf_models.TokenSources) (csrf_models.Token, error)
+
+    }
+}
+
+
+namespace repository_user {
+    interface Repository  {
+        + Create( *models.User) (*models.User, error)
+        + FindByNickname(nickname string) (*models.User, error)
+        + Update( *models.User) (*models.User, error)
+        + UpdateAvatar(id string, newAvatar string) error
+
+    }
+}
+
+
+namespace server {
+    interface AuthCheckerServer  {
+        + Check( context.Context,  *protobuf.SessionID) (*protobuf.Result, error)
+        + Create( context.Context,  *protobuf.UserID) (*protobuf.Result, error)
+        + Delete( context.Context,  *protobuf.SessionID) (*protobuf.Nothing, error)
+
+    }
+    class AuthServer << (S,Aquamarine) >> {
+        - grpcServer *grpc.Server
+        - sessionManager sessions.SessionsManager
+        - logger *logrus.Logger
+
+        + StartGRPCServer(listenUrl string) error
+        + Check(ctx context.Context, sessionID *protobuf.SessionID) (*protobuf.Result, error)
+        + Create(ctx context.Context, userID *protobuf.UserID) (*protobuf.Result, error)
+        + Delete(ctx context.Context, sessionID *protobuf.SessionID) (*protobuf.Nothing, error)
+
+    }
+    interface HandlerFactory  {
+        + GetHandleUrls() *<font color=blue>map</font>[string]app.Handler
+
+    }
+    class Server << (S,Aquamarine) >> {
+        - config *app.Config
+        - logger *logrus.Logger
+        - connections app.ExpectedConnections
+
+        - checkConnection() error
+
+        + Start(config *app.Config) error
+
+    }
+}
+
+"server.AuthCheckerServer" <|-- "server.AuthServer"
+
+namespace sessions {
+    interface SessionRepository  {
+        + Set(session *models.Session) error
+        + GetUserId(key string, updExpiration int) (string, error)
+        + Del(session *models.Session) error
+
+    }
+    interface SessionsManager  {
+        + Check(uniqID string) (models.Result, error)
+        + Create(userID string) (models.Result, error)
+        + Delete(uniqID string) error
+
+    }
+}
+
+
+namespace sessions_manager {
+    class SessionManager << (S,Aquamarine) >> {
+        - sessionRepository sessions.SessionRepository
+
+        + Create(nickname string) (models.Result, error)
+        + Delete(uniqID string) error
+        + Check(uniqID string) (models.Result, error)
+
+    }
+}
+
+"sessions.SessionsManager" <|-- "sessions_manager.SessionManager"
+
+namespace statistics {
+    class StatisticsUsecase << (S,Aquamarine) >> {
+        - repository statistics.Repository
+
+        + GetCountCreatorPosts(creatorID int64) (int64, error)
+        + GetCountCreatorSubscribers(creatorID int64) (int64, error)
+        + GetCountCreatorViews(creatorID int64, days int64) (int64, error)
+        + GetTotalIncome(creatorID int64, days int64) (float64, error)
+
+    }
+    interface Usecase  {
+        + GetCountCreatorPosts(creatorID int64) (int64, error)
+        + GetCountCreatorSubscribers(creatorID int64) (int64, error)
+        + GetCountCreatorViews(creatorID int64, days int64) (int64, error)
+        + GetTotalIncome(creatorID int64, days int64) (float64, error)
+
+    }
+}
+
+"statistics.Usecase" <|-- "statistics.StatisticsUsecase"
+
+namespace upd_user_avatar_handler {
+    class UpdateUserAvatarHandler << (S,Aquamarine) >> {
+        - sessionClient client.AuthCheckerClient
+        - userUsecase user.Usecase
+
+        + PUT(w http.ResponseWriter, r *http.Request) 
+
+    }
+}
+"handler.BaseHandler" *-- "upd_user_avatar_handler.UpdateUserAvatarHandler"
+
+
+namespace usecase {
+    class PushUsecase << (S,Aquamarine) >> {
+        - repository postgresql.Repository
+
+        + PrepareMessagePush(info *push.MessageInfo) ([]string, *push.MessagePush, error)
+        + PrepareGlidePush(info *push.GlideInfo) ([]string, *push.GlidePush, error)
+
+    }
+    class SuiteUsecase << (S,Aquamarine) >> {
+        + Mock *gomock.Controller
+        + MockCreatorRepository *mocks.CreatorRepository
+        + MockUserRepository *mocks.UserRepository
+        + MockSubscribersRepository *mocks.SubscribersRepository
+        + MockAwardsRepository *mocks.AwardsRepository
+        + MockPostsRepository *mocks.PostsRepository
+        + MockLikesRepository *mocks.LikesRepository
+        + MockAccessRepository *mocks.AccessRepository
+        + MockInfoRepository *mocks.InfoRepository
+        + MockAttachesRepository *mocks.AttachesRepository
+        + MockFileClient *mocks.MockFileServiceClient
+        + MockConvector *mocks.MockImageConverter
+        + MockSubscriberRepository *mocks.SubscribersRepository
+        + Logger *logrus.Logger
+        + Tb TestTable
+
+        + SetupSuite() 
+        + TearDownSuite() 
+
+    }
+    class TestTable << (S,Aquamarine) >> {
+        + Name string
+        + Data <font color=blue>interface</font>{}
+        + ExpectedMockTimes int
+        + ExpectedError error
+
+    }
+    interface Usecase  {
+        + PrepareMessagePush(info *push.MessageInfo) ([]string, *push.MessagePush, error)
+        + PrepareGlidePush(info *push.GlideInfo) ([]string, *push.GlidePush, error)
+
+    }
+}
+"suite.Suite" *-- "usecase.SuiteUsecase"
+
+"usecase.Usecase" <|-- "usecase.PushUsecase"
+
+namespace usecase_csrf {
+    class CsrfUsecase << (S,Aquamarine) >> {
+        - repository jwt.Repository
+
+        + Check(sessionId string, userId int64, token string) error
+        + Create(sessionId string, userId int64) (csrf_models.Token, error)
+
+    }
+    interface Usecase  {
+        + Check(sessionId string, userId int64, token string) error
+        + Create(sessionId string, userId int64) (csrf_models.Token, error)
+
+    }
+}
+
+"usecase_csrf.Usecase" <|-- "usecase_csrf.CsrfUsecase"
+
+namespace usecase_factory {
+    interface RepositoryFactory  {
+        + GetUserRepository() user.Repository
+        + GetFileRepository() files.Repository
+
+    }
+    class UsecaseFactory << (S,Aquamarine) >> {
+        - paymentsConfig app.Payments
+        - repositoryFactory RepositoryFactory
+        - userUsecase user.Usecase
+
+        + GetUserUsecase() user.Usecase
+
+    }
+}
+
+"handler_factory.UsecaseFactory" <|-- "usecase_factory.UsecaseFactory"
+
+namespace user_handler {
+    class ProfileHandler << (S,Aquamarine) >> {
+        - sessionClient client.AuthCheckerClient
+        - userUsecase user.Usecase
+
+        + GET(w http.ResponseWriter, r *http.Request) 
+        + POST(w http.ResponseWriter, r *http.Request) 
+        + PUT(w http.ResponseWriter, r *http.Request) 
+
+    }
+}
+"handler.BaseHandler" *-- "user_handler.ProfileHandler"
+
+
+namespace user_nickname_profile_handler {
+    class GetProfileHandler << (S,Aquamarine) >> {
+        - sessionClient client.AuthCheckerClient
+        - userUsecase user.Usecase
+
+        + GET(w http.ResponseWriter, r *http.Request) 
+
+    }
+}
+"handler.BaseHandler" *-- "user_nickname_profile_handler.GetProfileHandler"
+
+
+namespace usercase_user {
+    interface Usecase  {
+        + GetProfile(nickname string) (*models.User, error)
+        + Create(user *models.User) (*models.User, error)
+        + Check(login string, password string) (string, error)
+        + Update(user *models.User) (*models.User, error)
+        + UpdateAvatar(data io.Reader, name files.FileName, nickname string) error
+
+    }
+    class UserUsecase << (S,Aquamarine) >> {
+        - repository user.Repository
+        - repositoryFile files.Repository
+        - imageConvector utilits.ImageConverter
+
+        + GetProfile(nickname string) (*models.User, error)
+        + Create(user *models.User) (*models.User, error)
+        + Check(nickname string, password string) (string, error)
+        + Update(user *models.User) (*models.User, error)
+        + UpdateAvatar(data io.Reader, name files.FileName, nickname string) error
+
+    }
+}
+
+"usercase_user.Usecase" <|-- "usercase_user.UserUsecase"
+
+namespace utilits {
+    class ConverterToWebp << (S,Aquamarine) >> {
+        + Convert(_ context.Context, file io.Reader, name files.FileName) (io.Reader, files.FileName, error)
+
+    }
+    interface ImageConverter  {
+        + Convert( context.Context,  io.Reader,  files.FileName) (io.Reader, files.FileName, error)
+
+    }
+    class LogObject << (S,Aquamarine) >> {
+        - log *logrus.Logger
+
+        + BaseLog() *logrus.Logger
+        + Log(r *http.Request) *logrus.Entry
+
+    }
+    interface MarshUnmarsh  {
+    }
+}
+
+"utilits.ImageConverter" <|-- "utilits.ConverterToWebp"
+
+namespace utils {
+    class Client << (S,Aquamarine) >> {
+        - logger *logrus.Entry
+        - hub *SendHub
+        - clientId int64
+        - conn *websocket.Conn
+        - send <font color=blue>chan</font> easyjson.Marshaler
+        - close <font color=blue>chan</font> bool
+
+        - writeJSON(cn *websocket.Conn, v easyjson.Marshaler) error
+
+        + CloseClient() 
+        + SenderProcesses() 
+
+    }
+    class ProcessingPush << (S,Aquamarine) >> {
+        - session *rabbit.Session
+        - logger *logrus.Entry
+        - sendMsg SendMessager
+        - usecase usecase.Usecase
+        - stop <font color=blue>chan</font> bool
+
+        - initMsg(routerKey string) (<font color=blue>chan</font> amqp.Delivery, error)
+        - processMessageMsg(msg <font color=blue>chan</font> amqp.Delivery) 
+        - processGlideMsg(msg <font color=blue>chan</font> amqp.Delivery) 
+
+        + Stop() 
+        + RunProcessMessage() 
+        + RunProcessGlide() 
+
+    }
+    class PushResponse << (S,Aquamarine) >> {
+        + Type string
+        + Push <font color=blue>interface</font>{}
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+    class SendHub << (S,Aquamarine) >> {
+        - broadcast <font color=blue>chan</font> *message
+        - register <font color=blue>chan</font> *Client
+        - unregister <font color=blue>chan</font> *Client
+        - stopHub <font color=blue>chan</font> bool
+
+        + Clients <font color=blue>map</font>[int64][]*Client
+
+        - unregisterAll() 
+        - sendMessage(msg *message) 
+        - unregisterClient(client *Client) 
+
+        + RegisterClient(client *Client) 
+        + UnregisterClient(client *Client) 
+        + SendMessage(users []int64, hsg easyjson.Marshaler) 
+        + StopHub() 
+        + Run() 
+
+    }
+    interface SendMessager  {
+        + SendMessage(users []string, hsg easyjson.Marshaler) 
+
+    }
+    class message << (S,Aquamarine) >> {
+        - users []int64
+        - message easyjson.Marshaler
+
+    }
+}
+
+
+"__builtin__.<font color=blue>map</font>[string]error" #.. "models_utilits.MapOfValidateError"
+"__builtin__.<font color=blue>map</font>[string]string" #.. "models_utilits.MapOfUnmarshalError"
+"__builtin__.string" #.. "csrf_models.Token"
+"__builtin__.string" #.. "repository_files.FileName"
+"__builtin__.string" #.. "repository_files.TypeFiles"
+"delivery.<font color=blue>map</font>[error]RespondError" #.. "delivery.CodeMap"
+"handler_interfaces.<font color=blue>func</font>(HandlerFunc) HandlerFunc" #.. "handler_interfaces.HFMiddlewareFunc"
+"handler_interfaces.fontcolorbluefuncfonthttpHandlerhttpHandler" #.. "handler_interfaces.HMiddlewareFunc"
+"handler_interfaces.fontcolorbluefuncfonthttpResponseWriterhttpRequest" #.. "handler_interfaces.HandlerFunc"
+"http_models.[]ResponseChat" #.. "http_models.ResponseChats"
+"http_models.[]ResponseMessage" #.. "http_models.ResponseMessages"
+"models_utilits.<font color=blue>func</font>(string) error" #.. "models_utilits.ExtractorErrorByName"
+@enduml

@@ -1,1 +1,0 @@
-package statistics_count_subscribers_handler

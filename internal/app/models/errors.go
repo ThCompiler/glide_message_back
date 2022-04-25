@@ -15,7 +15,7 @@ var (
 	IncorrectCreatorCategory    = errors.New("incorrect creator category")
 	IncorrectCreatorDescription = errors.New("incorrect creator category description")
 	InvalidLikeValue            = errors.New("like contain not valid value")
-	EmptyTitle                  = errors.New("empty title")
+	EmptyText                   = errors.New("empty text")
 	InvalidCreatorId            = errors.New("not positive creator id")
 	InvalidAwardsId             = errors.New("not positive awards id")
 	InvalidPostId               = errors.New("not positive posts id")
@@ -109,11 +109,9 @@ func likeValidError() models_utilits.ExtractorErrorByName {
 //		EmptyTitle
 //		InvalidCreatorId
 //		InvalidAwardsId
-func postValidError() models_utilits.ExtractorErrorByName {
+func messageValidError() models_utilits.ExtractorErrorByName {
 	validMap := models_utilits.MapOfValidateError{
-		"title":   EmptyTitle,
-		"creator": InvalidCreatorId,
-		"awards":  InvalidAwardsId,
+		"text": EmptyText,
 	}
 	return func(key string) error {
 		if val, ok := validMap[key]; ok {

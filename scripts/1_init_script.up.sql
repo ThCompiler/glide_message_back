@@ -43,12 +43,13 @@ CREATE UNIQUE INDEX unique_companions_of_chat ON chat USING BTREE (hstore(ARRAY 
 
 CREATE TABLE IF NOT EXISTS messages
 (
-    id      bigserial                              not null primary key,
-    message text                                   not null,
-    chat    bigint                                 not null references chat (id) on delete cascade,
-    picture text        default ''                 not null,
-    created timestamptz default now()::timestamptz not null,
-    author  citext                                 not null not null references users (nickname) on delete cascade
+    id        bigserial                              not null primary key,
+    message   text                                   not null,
+    chat      bigint                                 not null references chat (id) on delete cascade,
+    picture   text        default ''                 not null,
+    created   timestamptz default now()::timestamptz not null,
+    is_viewed bool        default false              not null,
+    author    citext                                 not null not null references users (nickname) on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS glide_message

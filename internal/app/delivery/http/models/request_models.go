@@ -1,8 +1,6 @@
 package http_models
 
 import (
-	"github.com/pkg/errors"
-	"glide/internal/app/delivery/http/handlers"
 	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/models"
 	models_utilits "glide/internal/pkg/utilits/models"
@@ -119,19 +117,6 @@ type RequestPosts struct {
 }
 
 //easyjson:json
-type RequestAttach struct {
-	Type   models.DataType `json:"type"`
-	Value  string          `json:"value,omitempty"`
-	Id     int64           `json:"id,omitempty"`
-	Status string          `json:"status,omitempty"`
-}
-
-//easyjson:json
-type RequestAttaches struct {
-	Attaches []RequestAttach `json:"attaches"`
-}
-
-//easyjson:json
 type RequestText struct {
 	Text string `json:"text"`
 }
@@ -179,59 +164,4 @@ func requestAttachValidError() models_utilits.ExtractorErrorByName {
 		}
 		return nil
 	}
-}
-
-// Validate Errors:
-//		handler_errors.IncorrectType
-//		handler_errors.IncorrectIdAttach
-//      handler_errors.IncorrectStatus
-// can return not specify error
-func (req *RequestAttach) Validate() error {
-	err := validation.Errors{
-		"type": validation.Validate(req.Type, validation.In(models.Music, models.Video,
-			models.Files, models.Text, models.Image)),
-		"id":     validation.Validate(req.Id, validation.Min(1)),
-		"status": validation.Validate(req.Status, validation.In(handlers.AddStatus, handlers.UpdateStatus)),
-	}.Filter()
-
-	mapOfErr, knowError := models_utilits.ParseErrorToMap(err)
-	if knowError != nil {
-		return errors.Wrap(knowError, "failed error getting in validate request attach")
-	}
-	_, haveTypeError := mapOfErr["type"]
-	_, haveIdError := mapOfErr["id"]
-	_, haveStatusError := mapOfErr["status"]
-	if !haveTypeError && haveIdError {
-		if haveStatusError && req.Type != models.Text {
-			return handler_errors.IncorrectStatus
-		}
-		return nil
-	}
-
-	if haveStatusError && req.Type != models.Text {
-		if haveIdError {
-			return handler_errors.IncorrectIdAttach
-		}
-		return nil
-	}
-
-	if knowError = models_utilits.ExtractValidateError(requestAttachValidError(), mapOfErr); knowError != nil {
-		return knowError
-	}
-
-	return nil
-}
-
-// Validate Errors:
-//		handler_errors.IncorrectType
-//		handler_errors.IncorrectIdAttach
-//      handler_errors.IncorrectStatus
-// can return not specify error
-func (req *RequestAttaches) Validate() error {
-	for _, attach := range req.Attaches {
-		if err := attach.Validate(); err != nil {
-			return err
-		}
-	}
-	return nil
 }

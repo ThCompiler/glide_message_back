@@ -16,99 +16,45 @@ func NewPushUsecase(repository repository.Repository) *PushUsecase {
 	}
 }
 
-// PreparePostPush with Errors:
+// PrepareMessagePush with Errors:
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *PushUsecase) PreparePostPush(info *push.PostInfo) ([]int64, *push_models.PostPush, error) {
-	result := &push_models.PostPush{
-		PostId:    info.PostId,
-		PostTitle: info.PostTitle,
-		CreatorId: info.CreatorId,
+func (usecase *PushUsecase) PrepareMessagePush(info *push.MessageInfo) ([]string, *push_models.MessagePush, error) {
+	result := &push_models.MessagePush{
+		MessageId: info.MessageId,
 	}
 
-	nickname, avatar, err := usecase.repository.GetCreatorNameAndAvatar(info.CreatorId)
+	var err error
+
+	result.Companion, result.Text, result.ChatId, err = usecase.repository.GetMessageInfo(info.MessageId)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	result.CreatorNickname = nickname
-	result.CreatorAvatar = avatar
-
-	allow, err := usecase.repository.GetSubUserForPushPost(info.PostId)
-	return allow, result, err
+	result.CompanionAvatar, err = usecase.repository.GetUserAvatar(result.Companion)
+	return []string{info.Companion}, result, err
 }
 
-// PrepareCommentPush with Errors:
+// PrepareGlidePush with Errors:
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (usecase *PushUsecase) PrepareCommentPush(info *push.CommentInfo) ([]int64, *push_models.CommentPush, error) {
-	result := &push_models.CommentPush{
-		CommentId: info.CommentId,
-		AuthorId:  info.AuthorId,
-		PostId:    info.PostId,
+func (usecase *PushUsecase) PrepareGlidePush(info *push.GlideInfo) ([]string, *push_models.GlidePush, error) {
+	result := &push_models.GlidePush{
+		Id: info.GlideId,
 	}
+	var err error
 
-	nickname, avatar, err := usecase.repository.GetCreatorNameAndAvatar(info.AuthorId)
+	result.Author, result.Message, result.Title, result.Country, err = usecase.repository.GetGlideInfo(info.GlideId)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	result.AuthorNickname = nickname
-	result.AuthorAvatar = avatar
-
-	creatroId, title, err := usecase.repository.GetCreatorPostAndTitle(info.PostId)
+	result.AuthorAvatar, err = usecase.repository.GetUserAvatar(result.Author)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	result.PostTitle = title
-
-	allow, err := usecase.repository.CheckCreatorForGetCommentPush(creatroId)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if allow {
-		return []int64{creatroId}, result, err
-	}
-	return []int64{}, result, err
-}
-
-// PrepareSubPush with Errors:
-//		repository.NotFound
-// 		app.GeneralError with Errors:
-// 			repository.DefaultErrDB
-func (usecase *PushUsecase) PrepareSubPush(info *push.SubInfo) ([]int64, *push_models.SubPush, error) {
-	result := &push_models.SubPush{
-		UserId:   info.UserId,
-		AwardsId: info.AwardsId,
-	}
-
-	nickname, avatar, err := usecase.repository.GetCreatorNameAndAvatar(info.UserId)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	result.UserAvatar = nickname
-	result.UserAvatar = avatar
-
-	name, price, err := usecase.repository.GetAwardsNameAndPrice(info.AwardsId)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	result.AwardsName = name
-	result.AwardsPrice = price
-
-	allow, err := usecase.repository.CheckCreatorForGetCommentPush(info.CreatorId)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if allow {
-		return []int64{info.CreatorId}, result, err
-	}
-	return []int64{}, result, err
+	return []string{info.Companion}, result, err
 }

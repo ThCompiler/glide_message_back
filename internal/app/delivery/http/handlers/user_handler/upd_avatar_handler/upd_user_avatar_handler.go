@@ -32,7 +32,7 @@ func NewUpdateUserAvatarHandler(log *logrus.Logger,
 }
 
 func (h *UpdateUserAvatarHandler) PUT(w http.ResponseWriter, r *http.Request) {
-	file, filename, code, err := h.GerFilesFromRequest(w, r, handlers.MAX_UPLOAD_SIZE,
+	file, filename, code, err := h.GetFilesFromRequest(w, r, handlers.MAX_UPLOAD_SIZE,
 		"avatar", []string{"image/png", "image/jpeg", "image/jpg"})
 	if err != nil {
 		h.HandlerError(w, r, code, err)

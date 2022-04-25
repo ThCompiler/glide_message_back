@@ -1,11 +1,9 @@
 package middleware
 
 import (
+	"glide/internal/pkg/utilits"
 	"net/http"
-	"glide/internal/app/utilits"
-	"glide/internal/pkg/monitoring"
 	"runtime/debug"
-	"strconv"
 	"time"
 
 	"github.com/urfave/negroni"
@@ -17,33 +15,23 @@ import (
 )
 
 type UtilitiesMiddleware struct {
-	log     utilits.LogObject
-	metrics monitoring.Monitoring
+	log utilits.LogObject
 }
 
-func NewUtilitiesMiddleware(log *logrus.Logger, metrics monitoring.Monitoring) UtilitiesMiddleware {
+func NewUtilitiesMiddleware(log *logrus.Logger) UtilitiesMiddleware {
 	return UtilitiesMiddleware{
-		log:     utilits.NewLogObject(log),
-		metrics: metrics,
+		log: utilits.NewLogObject(log),
 	}
 }
 
 func (mw *UtilitiesMiddleware) CheckPanic(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func(log *logrus.Entry, metrics monitoring.Monitoring, w http.ResponseWriter) {
+		defer func(log *logrus.Entry, w http.ResponseWriter) {
 			if err := recover(); err != nil {
-				responseErr := http.StatusInternalServerError
-				metrics.GetErrorsHits().WithLabelValues(
-					strconv.Itoa(responseErr),
-					r.URL.String(),
-					r.Method,
-				)
-				metrics.GetRequestCounter().Inc()
-
 				log.Errorf("detacted critical error: %v, with stack: %s", err, debug.Stack())
-				w.WriteHeader(responseErr)
+				w.WriteHeader(http.StatusInternalServerError)
 			}
-		}(mw.log.Log(r), mw.metrics, w)
+		}(mw.log.Log(r), w)
 		handler.ServeHTTP(w, r)
 	})
 }
@@ -65,25 +53,7 @@ func (mw *UtilitiesMiddleware) UpgradeLogger(handler http.Handler) http.Handler 
 		wrappedWriter := negroni.NewResponseWriter(w)
 		handler.ServeHTTP(wrappedWriter, r)
 
-		statusCode := wrappedWriter.Status()
-
 		executeTime := time.Since(start).Milliseconds()
 		upgradeLogger.Infof("work time [ms]: %v", executeTime)
-
-		mw.metrics.GetRequestCounter().Inc()
-
-		if statusCode < 300 {
-			mw.metrics.GetSuccessHits().WithLabelValues(
-				strconv.Itoa(statusCode),
-				r.URL.String(),
-				r.Method,
-			).Inc()
-		} else {
-			mw.metrics.GetErrorsHits().WithLabelValues(
-				strconv.Itoa(statusCode),
-				r.URL.String(),
-				r.Method,
-			).Inc()
-		}
 	})
 }

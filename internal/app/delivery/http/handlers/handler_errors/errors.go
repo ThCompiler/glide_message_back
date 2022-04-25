@@ -10,7 +10,7 @@ import (
 /// NOT FOUND
 var (
 	PayTokenNotFound         = errors.New("pay token not found")
-	CreatorNotFound          = errors.New("creator not found")
+	ChatNotFound             = errors.New("chat not found")
 	UserNotFound             = errors.New("user not found")
 	UserWithNicknameNotFound = errors.New("user with this nickname not found")
 	AwardNotFound            = errors.New("award with this id not found")
@@ -25,8 +25,7 @@ var (
 /// File parse error
 var (
 	IncorrectType = errors.New(
-		fmt.Sprintf("Not allow type, allowed type is: %s, %s, %s, %s, %s",
-			models.Music, models.Video, models.Files, models.Text, models.Image))
+		fmt.Sprintf("Not allow type, allowed type is: image"))
 	IncorrectIdAttach = errors.New("Not valid attach id")
 	IncorrectStatus   = errors.New(fmt.Sprintf("Not allow status, allowed status is: %s, %s",
 		http_models.AddStatus, http_models.UpdateStatus))
@@ -56,7 +55,7 @@ var (
 	LikesAlreadyExists       = errors.New("this user already add like for this post")
 	AwardsAlreadyExists      = errors.New("awards with this name already exists")
 	AwardsPriceAlreadyExists = errors.New("awards with this price already exists")
-	UserAlreadyExist         = errors.New("user already exist")
+	ChatAlreadyExist         = errors.New("chat already exist")
 	NicknameAlreadyExist     = errors.New("nickname already exist")
 	CreatorAlreadyExist      = errors.New("creator already exist")
 	CommentAlreadyExist      = errors.New("comment already exist")
@@ -91,7 +90,8 @@ var (
 	SubscribesNotFound    = errors.New("subscribes on the creator not found")
 	InvalidUserNickname   = errors.New(fmt.Sprintf("invalid nickname in body len must be from %v to %v",
 		models.MIN_NICKNAME_LENGTH, models.MAX_NICKNAME_LENGTH))
-	InvalidUserPayToken = errors.New("this user was not given this token")
+	InvalidUserPayToken  = errors.New("this user was not given this token")
+	IncorrectUserForChat = errors.New("this chat not belongs this user")
 )
 
 var InternalError = errors.New("server error")

@@ -3,7 +3,6 @@ package push_server
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
-	"net/http"
 	"glide/internal/microservices/auth/delivery/grpc/client"
 	"glide/internal/microservices/push"
 	push_models "glide/internal/microservices/push/push"
@@ -11,6 +10,7 @@ import (
 	"glide/internal/microservices/push/push/usecase"
 	"glide/internal/microservices/push/utils"
 	prometheus_monitoring "glide/internal/pkg/monitoring/prometheus-monitoring"
+	"net/http"
 	"time"
 
 	"google.golang.org/grpc/connectivity"
@@ -82,11 +82,6 @@ func (s *Server) Start() error {
 	}
 
 	router := mux.NewRouter()
-	monitoringHandler := prometheus_monitoring.NewPrometheusMetrics("push")
-	err := monitoringHandler.SetupMonitoring()
-	if err != nil {
-		return err
-	}
 	sManager := client.NewSessionClient(s.connections.SessionGrpcConnection)
 	routerApi := router.PathPrefix("/api/v1/").Subrouter()
 
@@ -97,7 +92,7 @@ func (s *Server) Start() error {
 	h := NewPushHandler(s.logger, sManager, senderHub, upgrader)
 	h.Connect(routerApi.Path("/user/push"))
 
-	utilitsMiddleware := middleware.NewUtilitiesMiddleware(s.logger, monitoringHandler)
+	utilitsMiddleware := middleware.NewUtilitiesMiddleware(s.logger)
 	routerApi.Use(utilitsMiddleware.CheckPanic, utilitsMiddleware.UpgradeLogger)
 
 	cors := middleware.NewCorsMiddleware(&s.config.Cors, router)

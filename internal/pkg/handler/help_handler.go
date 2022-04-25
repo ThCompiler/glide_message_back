@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/mailru/easyjson"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/pkg/errors"
 	"glide/internal/app"
 	repFiles "glide/internal/app/repository/files"
@@ -26,6 +27,11 @@ const (
 	EmptyQuery   = -2
 	DefaultLimit = 100
 )
+
+type Sanitizable interface {
+	easyjson.Unmarshaler
+	Sanitize(sanitizer bluemonday.Policy)
+}
 
 type HelpHandlers struct {
 	delivery.ErrorConvertor
@@ -140,7 +146,7 @@ func (h *HelpHandlers) GetArrayStringFromQueries(w http.ResponseWriter, r *http.
 	return strings.Split(values, ","), app.InvalidInt
 }
 
-func (h *HelpHandlers) GetRequestBody(r *http.Request, reqStruct easyjson.Unmarshaler) error {
+func (h *HelpHandlers) GetRequestBody(r *http.Request, reqStruct Sanitizable, sanitizer bluemonday.Policy) error {
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
 	}(r.Body)
@@ -148,15 +154,17 @@ func (h *HelpHandlers) GetRequestBody(r *http.Request, reqStruct easyjson.Unmars
 	if err := easyjson.UnmarshalFromReader(r.Body, reqStruct); err != nil {
 		return err
 	}
+
+	reqStruct.Sanitize(sanitizer)
 	return nil
 }
 
-// GerFilesFromRequest http Errors:
+// GetFilesFromRequest http Errors:
 // 		Status 400 handler_errors.FileSizeError
 // 		Status 400 handler_errors.InvalidFormFieldName
 // 		Status 400 handler_errors.InvalidImageExt
 // 		Status 500 handler_errors.InternalError
-func (h *HelpHandlers) GerFilesFromRequest(w http.ResponseWriter, r *http.Request, maxSize int64,
+func (h *HelpHandlers) GetFilesFromRequest(w http.ResponseWriter, r *http.Request, maxSize int64,
 	name string, validTypes []string) (io.Reader, repFiles.FileName, int, error) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -188,6 +196,7 @@ func (h *HelpHandlers) GerFilesFromRequest(w http.ResponseWriter, r *http.Reques
 			Err:         handler_errors.InternalError,
 		}
 	}
+
 	sort.Strings(validTypes)
 	fType := http.DetectContentType(buff)
 	if pos := sort.SearchStrings(validTypes, fType); pos == len(validTypes) || validTypes[pos] != fType {

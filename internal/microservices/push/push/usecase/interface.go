@@ -6,21 +6,15 @@ import (
 )
 
 type Usecase interface {
-	// PreparePostPush with Errors:
+	// PrepareMessagePush with Errors:
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	PreparePostPush(info *push.PostInfo) ([]int64, *push_models.PostPush, error)
+	PrepareMessagePush(info *push.MessageInfo) ([]string, *push_models.MessagePush, error)
 
-	// PrepareCommentPush with Errors:
+	// PrepareGlidePush with Errors:
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	PrepareCommentPush(info *push.CommentInfo) ([]int64, *push_models.CommentPush, error)
-
-	// PrepareSubPush with Errors:
-	//		repository.NotFound
-	// 		app.GeneralError with Errors:
-	// 			repository.DefaultErrDB
-	PrepareSubPush(info *push.SubInfo) ([]int64, *push_models.SubPush, error)
+	PrepareGlidePush(info *push.GlideInfo) ([]string, *push_models.GlidePush, error)
 }

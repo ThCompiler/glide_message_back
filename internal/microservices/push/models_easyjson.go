@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonD2b7633eDecodePatreonInternalMicroservicesPush(in *jlexer.Lexer, out *SubInfo) {
+func easyjsonD2b7633eDecodeGlideInternalMicroservicesPush(in *jlexer.Lexer, out *MessageInfo) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -36,16 +36,10 @@ func easyjsonD2b7633eDecodePatreonInternalMicroservicesPush(in *jlexer.Lexer, ou
 			continue
 		}
 		switch key {
-		case "awards_id":
-			out.AwardsId = int64(in.Int64())
-		case "user_id":
-			out.UserId = int64(in.Int64())
-		case "creator_id":
-			out.CreatorId = int64(in.Int64())
-		case "date":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.Date).UnmarshalJSON(data))
-			}
+		case "companion":
+			out.Companion = string(in.String())
+		case "message_id":
+			out.MessageId = int64(in.Int64())
 		default:
 			in.AddError(&jlexer.LexerError{
 				Offset: in.GetPos(),
@@ -60,57 +54,47 @@ func easyjsonD2b7633eDecodePatreonInternalMicroservicesPush(in *jlexer.Lexer, ou
 		in.Consumed()
 	}
 }
-func easyjsonD2b7633eEncodePatreonInternalMicroservicesPush(out *jwriter.Writer, in SubInfo) {
+func easyjsonD2b7633eEncodeGlideInternalMicroservicesPush(out *jwriter.Writer, in MessageInfo) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"awards_id\":"
+		const prefix string = ",\"companion\":"
 		out.RawString(prefix[1:])
-		out.Int64(int64(in.AwardsId))
+		out.String(string(in.Companion))
 	}
 	{
-		const prefix string = ",\"user_id\":"
+		const prefix string = ",\"message_id\":"
 		out.RawString(prefix)
-		out.Int64(int64(in.UserId))
-	}
-	{
-		const prefix string = ",\"creator_id\":"
-		out.RawString(prefix)
-		out.Int64(int64(in.CreatorId))
-	}
-	{
-		const prefix string = ",\"date\":"
-		out.RawString(prefix)
-		out.Raw((in.Date).MarshalJSON())
+		out.Int64(int64(in.MessageId))
 	}
 	out.RawByte('}')
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v SubInfo) MarshalJSON() ([]byte, error) {
+func (v MessageInfo) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonD2b7633eEncodePatreonInternalMicroservicesPush(&w, v)
+	easyjsonD2b7633eEncodeGlideInternalMicroservicesPush(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v SubInfo) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD2b7633eEncodePatreonInternalMicroservicesPush(w, v)
+func (v MessageInfo) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonD2b7633eEncodeGlideInternalMicroservicesPush(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *SubInfo) UnmarshalJSON(data []byte) error {
+func (v *MessageInfo) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD2b7633eDecodePatreonInternalMicroservicesPush(&r, v)
+	easyjsonD2b7633eDecodeGlideInternalMicroservicesPush(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *SubInfo) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD2b7633eDecodePatreonInternalMicroservicesPush(l, v)
+func (v *MessageInfo) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonD2b7633eDecodeGlideInternalMicroservicesPush(l, v)
 }
-func easyjsonD2b7633eDecodePatreonInternalMicroservicesPush1(in *jlexer.Lexer, out *PostInfo) {
+func easyjsonD2b7633eDecodeGlideInternalMicroservicesPush1(in *jlexer.Lexer, out *GlideInfo) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -129,16 +113,10 @@ func easyjsonD2b7633eDecodePatreonInternalMicroservicesPush1(in *jlexer.Lexer, o
 			continue
 		}
 		switch key {
-		case "creator_id":
-			out.CreatorId = int64(in.Int64())
-		case "post_id":
-			out.PostId = int64(in.Int64())
-		case "post_title":
-			out.PostTitle = string(in.String())
-		case "date":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.Date).UnmarshalJSON(data))
-			}
+		case "companion":
+			out.Companion = string(in.String())
+		case "glide_id":
+			out.GlideId = int64(in.Int64())
 		default:
 			in.AddError(&jlexer.LexerError{
 				Offset: in.GetPos(),
@@ -153,146 +131,43 @@ func easyjsonD2b7633eDecodePatreonInternalMicroservicesPush1(in *jlexer.Lexer, o
 		in.Consumed()
 	}
 }
-func easyjsonD2b7633eEncodePatreonInternalMicroservicesPush1(out *jwriter.Writer, in PostInfo) {
+func easyjsonD2b7633eEncodeGlideInternalMicroservicesPush1(out *jwriter.Writer, in GlideInfo) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"creator_id\":"
+		const prefix string = ",\"companion\":"
 		out.RawString(prefix[1:])
-		out.Int64(int64(in.CreatorId))
+		out.String(string(in.Companion))
 	}
 	{
-		const prefix string = ",\"post_id\":"
+		const prefix string = ",\"glide_id\":"
 		out.RawString(prefix)
-		out.Int64(int64(in.PostId))
-	}
-	{
-		const prefix string = ",\"post_title\":"
-		out.RawString(prefix)
-		out.String(string(in.PostTitle))
-	}
-	{
-		const prefix string = ",\"date\":"
-		out.RawString(prefix)
-		out.Raw((in.Date).MarshalJSON())
+		out.Int64(int64(in.GlideId))
 	}
 	out.RawByte('}')
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v PostInfo) MarshalJSON() ([]byte, error) {
+func (v GlideInfo) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonD2b7633eEncodePatreonInternalMicroservicesPush1(&w, v)
+	easyjsonD2b7633eEncodeGlideInternalMicroservicesPush1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v PostInfo) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD2b7633eEncodePatreonInternalMicroservicesPush1(w, v)
+func (v GlideInfo) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonD2b7633eEncodeGlideInternalMicroservicesPush1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *PostInfo) UnmarshalJSON(data []byte) error {
+func (v *GlideInfo) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonD2b7633eDecodePatreonInternalMicroservicesPush1(&r, v)
+	easyjsonD2b7633eDecodeGlideInternalMicroservicesPush1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *PostInfo) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD2b7633eDecodePatreonInternalMicroservicesPush1(l, v)
-}
-func easyjsonD2b7633eDecodePatreonInternalMicroservicesPush2(in *jlexer.Lexer, out *CommentInfo) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "comment_id":
-			out.CommentId = int64(in.Int64())
-		case "author_id":
-			out.AuthorId = int64(in.Int64())
-		case "post_id":
-			out.PostId = int64(in.Int64())
-		case "date":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.Date).UnmarshalJSON(data))
-			}
-		default:
-			in.AddError(&jlexer.LexerError{
-				Offset: in.GetPos(),
-				Reason: "unknown field",
-				Data:   key,
-			})
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjsonD2b7633eEncodePatreonInternalMicroservicesPush2(out *jwriter.Writer, in CommentInfo) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"comment_id\":"
-		out.RawString(prefix[1:])
-		out.Int64(int64(in.CommentId))
-	}
-	{
-		const prefix string = ",\"author_id\":"
-		out.RawString(prefix)
-		out.Int64(int64(in.AuthorId))
-	}
-	{
-		const prefix string = ",\"post_id\":"
-		out.RawString(prefix)
-		out.Int64(int64(in.PostId))
-	}
-	{
-		const prefix string = ",\"date\":"
-		out.RawString(prefix)
-		out.Raw((in.Date).MarshalJSON())
-	}
-	out.RawByte('}')
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v CommentInfo) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjsonD2b7633eEncodePatreonInternalMicroservicesPush2(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v CommentInfo) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonD2b7633eEncodePatreonInternalMicroservicesPush2(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *CommentInfo) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjsonD2b7633eDecodePatreonInternalMicroservicesPush2(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *CommentInfo) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonD2b7633eDecodePatreonInternalMicroservicesPush2(l, v)
+func (v *GlideInfo) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonD2b7633eDecodeGlideInternalMicroservicesPush1(l, v)
 }

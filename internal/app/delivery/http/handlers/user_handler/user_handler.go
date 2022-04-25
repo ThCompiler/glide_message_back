@@ -1,6 +1,7 @@
 package user_handler
 
 import (
+	"github.com/microcosm-cc/bluemonday"
 	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/delivery/http/models"
 	models_http "glide/internal/app/delivery/http/models"
@@ -34,10 +35,10 @@ func NewProfileHandler(log *logrus.Logger,
 		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckNotAuthorizedFunc,
 	)
 
-	h.AddMethod(http.MethodGet, h.GET,
+	h.AddMethod(http.MethodGet, h.PUT,
 		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 	)
-	
+
 	return h
 }
 
@@ -62,7 +63,7 @@ func (h *ProfileHandler) GET(w http.ResponseWriter, r *http.Request) {
 func (h *ProfileHandler) POST(w http.ResponseWriter, r *http.Request) {
 	req := &http_models.RequestRegistration{}
 
-	err := h.GetRequestBody(r, req)
+	err := h.GetRequestBody(r, req, *bluemonday.UGCPolicy())
 	if err != nil {
 		h.Log(r).Warnf("can not parse request %s", err)
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
@@ -84,7 +85,7 @@ func (h *ProfileHandler) POST(w http.ResponseWriter, r *http.Request) {
 func (h *ProfileHandler) PUT(w http.ResponseWriter, r *http.Request) {
 	req := &http_models.RequestUserUpdate{}
 
-	err := h.GetRequestBody(r, req)
+	err := h.GetRequestBody(r, req, *bluemonday.UGCPolicy())
 	if err != nil {
 		h.Log(r).Warnf("can not parse request %s", err)
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)

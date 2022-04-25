@@ -1,0 +1,22 @@
+@startuml
+namespace models {
+    class Log << (S,Aquamarine) >> {
+        + Level string
+        + Method string
+        + Msg string
+        + Adr string
+        + Url url.URL
+        + Time time.Time
+        + WorkTime int64
+        + ReqID string
+
+        + MarshalJSON() ([]byte, error)
+        + MarshalEasyJSON(w *jwriter.Writer) 
+        + UnmarshalJSON(data []byte) error
+        + UnmarshalEasyJSON(l *jlexer.Lexer) 
+
+    }
+}
+
+
+@enduml

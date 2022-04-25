@@ -18,6 +18,14 @@ func NewPushSender(session *rabbit.Session) *PushSender {
 	}
 }
 
+func (ph *PushSender) NewMessage(messageId int64, companion string) error {
+
+}
+
+func (ph *PushSender) NewGlideMessage(companion int64, glideId int64) error {
+
+}
+
 func (ph *PushSender) NewPost(creatorId int64, postId int64, postTitle string) error {
 	push := &models.PostInfo{
 		CreatorId: creatorId,
