@@ -2,80 +2,79 @@ WITH json (doc) AS (
    values
        ('[
          {
-           "language": "Australia",
+           "country_name": "Australia",
            "picture": "."
          },
          {
-           "language": "Armenia",
+           "country_name": "Armenia",
            "picture": "."
          },
          {
-           "language": "Belarus",
+           "country_name": "Belarus",
            "picture": "."
          },
          {
-           "language": "Brazil",
+           "country_name": "Brazil",
            "picture": "."
          },
          {
-           "language": "Canada",
+           "country_name": "Canada",
            "picture": "."
          },
          {
-           "language": "France",
+           "country_name": "France",
            "picture": "."
          },
          {
-           "language": "Germany",
+           "country_name": "Germany",
            "picture": "."
          },
          {
-           "language": "India",
+           "country_name": "India",
            "picture": "."
          },
          {
-           "language": "Japan",
+           "country_name": "Japan",
            "picture": "."
          },
          {
-           "language": "Republic_of_China",
+           "country_name": "Republic_of_China",
            "picture": "."
          },
          {
-           "language": "Russia",
+           "country_name": "Russia",
            "picture": "."
          },
          {
-           "language": "Spain",
+           "country_name": "Spain",
            "picture": "."
          },
          {
-           "language": "Switzerland",
+           "country_name": "Switzerland",
            "picture": "."
          },
          {
-           "language": "Turkey",
+           "country_name": "Turkey",
            "picture": "."
          },
          {
-           "language": "UK",
+           "country_name": "UK",
            "picture": "."
          },
          {
-           "language": "Ukraine",
+           "country_name": "Ukraine",
            "picture": "."
          },
          {
-           "language": "USA",
+           "country_name": "USA",
            "picture": "."
          },
          {
-           "language": "Vietnam",
+           "country_name": "Vietnam",
            "picture": "."
          }
        ]'::json)
 )
-
 INSERT INTO countries (country_name, picture)
 SELECT p.country_name, p.picture
 from json l cross join lateral json_populate_recordset(null::countries, doc) as p;
@@ -85,71 +84,71 @@ WITH json (doc) AS (
     values
         ('[
           {
-            "country_name": "Chinese",
+            "language": "Chinese",
             "picture": "."
           },
           {
-            "country_name": "English",
+            "language": "English",
             "picture": "."
           },
           {
-            "country_name": "Spanish",
+            "language": "Spanish",
             "picture": "."
           },
           {
-            "country_name": "Arabian",
+            "language": "Arabian",
             "picture": "."
           },
           {
-            "country_name": "Russian",
+            "language": "Russian",
             "picture": "."
           },
           {
-            "country_name": "Portuguese",
+            "language": "Portuguese",
             "picture": "."
           },
           {
-            "country_name": "French",
+            "language": "French",
             "picture": "."
           },
           {
-            "country_name": "German",
+            "language": "German",
             "picture": "."
           },
           {
-            "country_name": "Hindi",
+            "language": "Hindi",
             "picture": "."
           },
           {
-            "country_name": "Bengali",
+            "language": "Bengali",
             "picture": "."
           },
           {
-            "country_name": "Japanese",
+            "language": "Japanese",
             "picture": "."
           },
           {
-            "country_name": "Italian",
+            "language": "Italian",
             "picture": "."
           },
           {
-            "country_name": "Belarusian",
+            "language": "Belarusian",
             "picture": "."
           },
           {
-            "country_name": "Ukrainian",
+            "language": "Ukrainian",
             "picture": "."
           },
           {
-            "country_name": "Vietnamese",
+            "language": "Vietnamese",
             "picture": "."
           },
           {
-            "country_name": "Armenian",
+            "language": "Armenian",
             "picture": "."
           },
           {
-            "country_name": "Turkish",
+            "language": "Turkish",
             "picture": "."
           }
         ]'::json)
