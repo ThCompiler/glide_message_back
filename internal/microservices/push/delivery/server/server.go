@@ -9,7 +9,6 @@ import (
 	"glide/internal/microservices/push/push/repository"
 	"glide/internal/microservices/push/push/usecase"
 	"glide/internal/microservices/push/utils"
-	prometheus_monitoring "glide/internal/pkg/monitoring/prometheus-monitoring"
 	"net/http"
 	"time"
 
@@ -17,7 +16,6 @@ import (
 
 	"glide/internal/app/middleware"
 
-	//_ "glide/docs"
 	"glide/internal/app"
 
 	"github.com/gorilla/mux"
@@ -56,23 +54,11 @@ func (s *Server) checkConnection() error {
 	return nil
 }
 
-// @title Patreon
-// @version 1.0
-// @description Server for Patreon application.
-
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
-
-// @host localhost:8080
-// @BasePath /api/v1/
-
-// @x-extension-openapi {"example": "value on a json format"}
-
 func (s *Server) Start() error {
 	if err := s.checkConnection(); err != nil {
 		return err
 	}
+
 	upgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -90,7 +76,7 @@ func (s *Server) Start() error {
 	go senderHub.Run()
 
 	h := NewPushHandler(s.logger, sManager, senderHub, upgrader)
-	h.Connect(routerApi.Path("/user/push"))
+	h.Connect(routerApi.Path("/push"))
 
 	utilitsMiddleware := middleware.NewUtilitiesMiddleware(s.logger)
 	routerApi.Use(utilitsMiddleware.CheckPanic, utilitsMiddleware.UpgradeLogger)
@@ -103,9 +89,8 @@ func (s *Server) Start() error {
 		s.connections.RabbitSession, senderHub, pushUsecase)
 
 	defer processingPush.Stop()
-	go processingPush.RunProcessPost()
-	go processingPush.RunProcessComment()
-	go processingPush.RunProcessSub()
+	go processingPush.RunProcessMessage()
+	go processingPush.RunProcessGlide()
 
 	done := make(chan bool)
 	go func() {
@@ -116,18 +101,18 @@ func (s *Server) Start() error {
 			case <-done:
 				return
 			case <-ticker.C:
-				keys := make([]int64, len(h.hub.Clients))
+				keys := make([]string, len(h.hub.Clients))
 				i := 0
 				for k := range h.hub.Clients {
 					keys[i] = k
 					i++
 				}
-				h.hub.SendMessage(keys, &utils.PushResponse{Type: push.PostPush, Push: &push_models.PostPush{
-					PostId:          1,
-					PostTitle:       "Привет",
-					CreatorId:       2,
-					CreatorNickname: "Человек",
-					CreatorAvatar:   "tude",
+				h.hub.SendMessage(keys, &utils.PushResponse{Type: push.MessagePush, Push: &push_models.MessagePush{
+					ChatId:          1,
+					Companion:       "Человек",
+					MessageId:       2,
+					Text:            "Привет",
+					CompanionAvatar: "tude",
 				}})
 			}
 		}
@@ -137,5 +122,5 @@ func (s *Server) Start() error {
 		done <- true
 	}()
 	s.logger.Info("start no production http server")
-	return http.ListenAndServe(s.config.BindHttpAddr, routerCors)
+	return http.ListenAndServe(s.config.Port, routerCors)
 }

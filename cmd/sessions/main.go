@@ -38,7 +38,7 @@ func main() {
 	}
 	logger.SetLevel(level)
 
-	sessionRedisPool := utilits.NewRedisPool(config.ServerRepository.SessionRedisUrl)
+	sessionRedisPool := utilits.NewRedisPool(config.Repository.SessionRedisUrl)
 	logger.Info("Session-service new redis pool create")
 
 	conn, err := sessionRedisPool.Dial()
@@ -50,9 +50,7 @@ func main() {
 	}
 	logger.Info("Session-service new redis pool success check")
 
-
 	grpc := grpc2.NewServer()
-
 
 	sessionRepository := repository.NewRedisRepository(sessionRedisPool, logger)
 	logger.Info("Session-service create repository")

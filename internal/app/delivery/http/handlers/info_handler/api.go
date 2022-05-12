@@ -1,5 +1,6 @@
 package info_handler
 
+/*
 import (
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -12,3 +13,4 @@ var codesByErrors = base_handler.CodeMap{
 	repository.DefaultErrDB: {
 		http.StatusInternalServerError, handler_errors.BDError, logrus.ErrorLevel},
 }
+*/

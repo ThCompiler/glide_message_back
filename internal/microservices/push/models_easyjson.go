@@ -40,6 +40,10 @@ func easyjsonD2b7633eDecodeGlideInternalMicroservicesPush(in *jlexer.Lexer, out 
 			out.Companion = string(in.String())
 		case "message_id":
 			out.MessageId = int64(in.Int64())
+		case "date":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Date).UnmarshalJSON(data))
+			}
 		default:
 			in.AddError(&jlexer.LexerError{
 				Offset: in.GetPos(),
@@ -67,6 +71,11 @@ func easyjsonD2b7633eEncodeGlideInternalMicroservicesPush(out *jwriter.Writer, i
 		const prefix string = ",\"message_id\":"
 		out.RawString(prefix)
 		out.Int64(int64(in.MessageId))
+	}
+	{
+		const prefix string = ",\"date\":"
+		out.RawString(prefix)
+		out.Raw((in.Date).MarshalJSON())
 	}
 	out.RawByte('}')
 }
@@ -117,6 +126,10 @@ func easyjsonD2b7633eDecodeGlideInternalMicroservicesPush1(in *jlexer.Lexer, out
 			out.Companion = string(in.String())
 		case "glide_id":
 			out.GlideId = int64(in.Int64())
+		case "date":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Date).UnmarshalJSON(data))
+			}
 		default:
 			in.AddError(&jlexer.LexerError{
 				Offset: in.GetPos(),
@@ -144,6 +157,11 @@ func easyjsonD2b7633eEncodeGlideInternalMicroservicesPush1(out *jwriter.Writer, 
 		const prefix string = ",\"glide_id\":"
 		out.RawString(prefix)
 		out.Int64(int64(in.GlideId))
+	}
+	{
+		const prefix string = ",\"date\":"
+		out.RawString(prefix)
+		out.Raw((in.Date).MarshalJSON())
 	}
 	out.RawByte('}')
 }

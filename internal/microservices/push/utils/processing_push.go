@@ -22,7 +22,8 @@ type ProcessingPush struct {
 	stop    chan bool
 }
 
-func NewProcessingPush(logger *logrus.Entry, session *rabbit.Session, sendMsg SendMessager, usecase usecase.Usecase) *ProcessingPush {
+func NewProcessingPush(logger *logrus.Entry, session *rabbit.Session,
+	sendMsg SendMessager, usecase usecase.Usecase) *ProcessingPush {
 	return &ProcessingPush{
 		session: session,
 		sendMsg: sendMsg,

@@ -1,5 +1,6 @@
 package info_handler
 
+/*
 import (
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -43,3 +44,4 @@ func (s *InfoHandler) GET(w http.ResponseWriter, r *http.Request) {
 	s.Log(r).Debug("get info")
 	s.Respond(w, r, http.StatusOK, http_models.ToResponseInfo(*info))
 }
+*/

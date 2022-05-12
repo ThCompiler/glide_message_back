@@ -2,6 +2,7 @@ package login_handler
 
 import (
 	"context"
+	"github.com/microcosm-cc/bluemonday"
 	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/delivery/http/models"
 	usecase_user "glide/internal/app/usecase/user"
@@ -35,7 +36,7 @@ func NewLoginHandler(log *logrus.Logger, sClient sessionclient.AuthCheckerClient
 
 func (h *LoginHandler) POST(w http.ResponseWriter, r *http.Request) {
 	req := &http_models.RequestLogin{}
-	err := h.GetRequestBody(r, req)
+	err := h.GetRequestBody(r, req, *bluemonday.UGCPolicy())
 	if err != nil || len(req.Password) == 0 || len(req.Login) == 0 {
 		h.Log(r).Warnf("can not decode body %s", err)
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)

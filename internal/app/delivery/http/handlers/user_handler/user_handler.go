@@ -31,11 +31,11 @@ func NewProfileHandler(log *logrus.Logger,
 		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 	)
 
-	h.AddMethod(http.MethodGet, h.POST,
+	h.AddMethod(http.MethodPost, h.POST,
 		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckNotAuthorizedFunc,
 	)
 
-	h.AddMethod(http.MethodGet, h.PUT,
+	h.AddMethod(http.MethodPut, h.PUT,
 		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 	)
 

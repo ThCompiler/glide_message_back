@@ -12,10 +12,6 @@ EXPOSE 8080
 
 RUN make build
 
-ARG RUN_HTTPS
-
-ENV HTTPS=$RUN_HTTPS
-
 RUN chmod +x ./wait
 
-CMD ./wait && ./server.out -server-run $HTTPS
+CMD ./wait && ./server.out

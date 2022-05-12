@@ -49,7 +49,7 @@ func (h *PushHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId, ok := r.Context().Value("user_id").(int64)
+	userId, ok := r.Context().Value("user_id").(string)
 	if !ok {
 		h.Log(r).Errorf("not found user_id in context")
 		w.WriteHeader(http.StatusInternalServerError)

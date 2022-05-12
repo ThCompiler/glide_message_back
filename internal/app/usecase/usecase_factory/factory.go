@@ -1,20 +1,17 @@
 package usecase_factory
 
 import (
-	"glide/internal/app"
 	useUser "glide/internal/app/usecase/user"
 )
 
 type UsecaseFactory struct {
-	paymentsConfig    app.Payments
 	repositoryFactory RepositoryFactory
 	userUsecase       useUser.Usecase
 }
 
-func NewUsecaseFactory(repositoryFactory RepositoryFactory, paymentsConf app.Payments) *UsecaseFactory {
+func NewUsecaseFactory(repositoryFactory RepositoryFactory) *UsecaseFactory {
 	return &UsecaseFactory{
 		repositoryFactory: repositoryFactory,
-		paymentsConfig:    paymentsConf,
 	}
 }
 

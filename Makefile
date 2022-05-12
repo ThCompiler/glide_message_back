@@ -10,37 +10,30 @@ MICROSERVICE_DIR=$(PWD)/internal/microservices
 
 stop-redis:
 	systemctl stop redis
+
 stop-postgres:
 	systemctl stop postgresql
+
 run-posgres-redis:
 	systemctl start redis
 	systemctl start postgresql
 
-generate-api:
-	go install github.com/swaggo/swag/cmd/swag@latest
-	swag init --parseDependency --parseInternal --parseDepth 1 -g ./cmd/server/main.go -o docs
-
-build: generate-api
+build:
 	mkdir -p ./glide-secrt
 	go build -o server.out -v ./cmd/server
+
 build-sessions:
 	go build -o sessions.out -v ./cmd/sessions
-build-files:
-	go build -o files.out -v ./cmd/files
 build-push:
 	go build -o push.out -v ./cmd/push
 
 build-docker-server: # запуск обычного http servera
 	docker build --no-cache --network host -f ./docker/builder.Dockerfile . --tag glide
-build-docker-server-https: # запуск https serverа
-	docker build --build-arg RUN_HTTPS=-run-https --no-cache --network host -f ./docker/builder.Dockerfile . --tag glide
 
 build-docker-pg: # сборка образа базы
 	docker build --no-cache --network host -f ./docker/postgresql.Dockerfile . --tag pg-14
 build-docker-sessions: # сборка образа сервиса авторизаций
 	docker build --no-cache --network host -f ./docker/session-service.Dockerfile . --tag session-service
-build-docker-files: # сборка образа сервиса файлов
-	docker build --no-cache --network host -f ./docker/files-service.Dockerfile . --tag files-service
 build-docker-push: # сборка образа сервиса файлов
 	docker build --no-cache --network host -f ./docker/push-service.Dockerfile . --tag push-service
 build-docker-nginx: # сборка образа сервиса nginx
@@ -56,30 +49,24 @@ run-init:
 run-https: run-init # запустить https сервер
 	docker-compose -f docker-compose.yml --env-file ./configs/run-https.env up --build --no-deps
 
-run-https-back: run-init # запустить https сервер
-	docker-compose  -f docker-compose.yml --env-file ./configs/run-https.env up -d --build --no-deps
-
 run-http: run-init # запустить http сервер
-	docker-compose -f docker-compose-dev.yml --env-file ./configs/run-http.env up --build --no-deps
+	docker-compose -f docker-compose.yml --env-file ./configs/run-http.env up --build --no-deps
 
 stop:  # остановить сервер
 	docker-compose stop
 
-# запустить http сервер с http nginx
-run-with-build-http: build-docker-server build-docker-sessions build-docker-files build-docker-pg run-http
+# запустить http сервер
+run-with-build-http: build-docker-server build-docker-sessions build-docker-nginx build-docker-push build-docker-pg run-http
 
-# запустить https сервер с http nginx
-run-with-build-https: build-docker-server-https build-docker-sessions build-docker-files build-docker-pg run-http
-
-# запустить http сервер с https nginx
-run-with-build: build-docker-server build-docker-sessions build-docker-files build-docker-pg run-https
+# запустить https сервер
+run-with-build-https: build-docker-server build-docker-sessions build-docker-nginx build-docker-push build-docker-pg run-https
 
 
 open-last-log:
 	cat $(LOG_DIR)/`ls -t $(LOG_DIR) | head -1 `
 
 watch-postgress-log:
-	docker attach 2021_2_pyaterochka_patreon-bd_1
+	docker attach 2021_2_pyaterochka_glide-bd_1
 
 clear-logs:
 	rm -rf $(LOG_DIR)/*.log
@@ -100,14 +87,9 @@ build-utils:
 parse-last-log: build-utils
 	./utils.out -search-url=${search_url}
 
-gen-mock:
-	go generate -n $$(go list ./internal/...)
-
 gen-proto-sessions:
 	protoc --proto_path=${MICROSERVICE_DIR}/auth/delivery/grpc/protobuf session.proto --go_out=plugins=grpc:${MICROSERVICE_DIR}/auth/delivery/grpc/protobuf
 
-test:
-	go test -v -race ./internal/...
 
 
 DATABASE_URL:=$(shell cat ./configs/migrate.config | jq '.database_server')

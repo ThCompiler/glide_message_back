@@ -24,13 +24,13 @@ const (
 type Client struct {
 	logger   *logrus.Entry
 	hub      *SendHub
-	clientId int64
+	clientId string
 	conn     *websocket.Conn
 	send     chan easyjson.Marshaler
 	close    chan bool
 }
 
-func NewClient(hub *SendHub, clientId int64, conn *websocket.Conn, logger *logrus.Entry) *Client {
+func NewClient(hub *SendHub, clientId string, conn *websocket.Conn, logger *logrus.Entry) *Client {
 	return &Client{
 		hub:      hub,
 		clientId: clientId,
@@ -106,7 +106,7 @@ func (c *Client) SenderProcesses() {
 }
 
 type SendHub struct {
-	Clients    map[int64][]*Client
+	Clients    map[string][]*Client
 	broadcast  chan *message
 	register   chan *Client
 	unregister chan *Client
@@ -114,7 +114,7 @@ type SendHub struct {
 }
 
 type message struct {
-	users   []int64
+	users   []string
 	message easyjson.Marshaler
 }
 
@@ -123,7 +123,7 @@ func NewHub() *SendHub {
 		broadcast:  make(chan *message),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		Clients:    make(map[int64][]*Client),
+		Clients:    make(map[string][]*Client),
 		stopHub:    make(chan bool),
 	}
 }
@@ -136,7 +136,7 @@ func (h *SendHub) UnregisterClient(client *Client) {
 	h.unregister <- client
 }
 
-func (h *SendHub) SendMessage(users []int64, hsg easyjson.Marshaler) {
+func (h *SendHub) SendMessage(users []string, hsg easyjson.Marshaler) {
 	h.broadcast <- &(message{users: users, message: hsg})
 }
 
