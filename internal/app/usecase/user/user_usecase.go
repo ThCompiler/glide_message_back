@@ -57,12 +57,19 @@ func (usecase *UserUsecase) GetProfile(nickname string) (*models.User, error) {
 //			BadEncrypt
 func (usecase *UserUsecase) Create(user *models.User) (*models.User, error) {
 	if err := user.Validate(); err != nil {
-		if errors.Is(err, models.IncorrectNicknameOrPassword) || errors.Is(err, models.IncorrectAge) {
-			return nil, err
+		originalError := err
+		var generalError *app.GeneralError
+		if errors.As(err, &generalError) {
+			err = errors.Cause(err).(*app.GeneralError).Err
 		}
+
+		if errors.Is(err, models.IncorrectNicknameOrPassword) || errors.Is(err, models.IncorrectAge) {
+			return nil, originalError
+		}
+
 		return nil, &app.GeneralError{
 			Err:         app.UnknownError,
-			ExternalErr: errors.Wrap(err, "failed process of validation user"),
+			ExternalErr: errors.Wrap(originalError, "failed process of validation user"),
 		}
 	}
 

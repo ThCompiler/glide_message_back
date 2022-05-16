@@ -3,8 +3,8 @@ package delivery
 import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"net/http"
 	"glide/internal/app"
+	"net/http"
 )
 
 type RespondError struct {
@@ -21,7 +21,7 @@ type ErrorConvertor struct {
 
 func (h *ErrorConvertor) UsecaseError(w http.ResponseWriter, r *http.Request, usecaseErr error, codeByErr CodeMap) {
 	var generalError *app.GeneralError
-	//orginalError := usecaseErr
+	orginalError := usecaseErr
 	if errors.As(usecaseErr, &generalError) {
 		usecaseErr = errors.Cause(usecaseErr).(*app.GeneralError).Err
 	}
@@ -36,12 +36,12 @@ func (h *ErrorConvertor) UsecaseError(w http.ResponseWriter, r *http.Request, us
 		}
 	}
 
-	//h.Log(w, r).Logf(respond.Level, "Gotted error: %v", orginalError)
+	h.Log(r).Logf(respond.Level, "Gotted error: %v", orginalError)
 	h.Error(w, r, respond.Code, respond.Error)
 }
 
 func (h *ErrorConvertor) HandlerError(w http.ResponseWriter, r *http.Request, code int, err error) {
-	//h.Log(w, r).Errorf("Gotted error: %v", err)
+	h.Log(r).Errorf("Gotted error: %v", err)
 
 	var generalError *app.GeneralError
 	if errors.As(err, &generalError) {

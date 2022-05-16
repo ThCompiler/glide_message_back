@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"glide/internal/app"
 	"glide/internal/pkg/utilits/models"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -65,8 +66,8 @@ func (u *User) Validate() error {
 	err := validation.Errors{
 		"password": validation.Validate(u.Password, validation.By(models_utilits.RequiredIf(u.EncryptedPassword == "")),
 			validation.Length(MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH)),
-		"nickname": validation.Validate(u.Nickname, validation.Required, validation.Length(MIN_NICKNAME_LENGTH, MAX_NICKNAME_LENGTH)),
-		"age":      validation.Validate(u.Nickname, validation.Min(EmptyAge)),
+		"nickname": validation.Validate(u.Nickname, validation.Required, validation.RuneLength(MIN_NICKNAME_LENGTH, MAX_NICKNAME_LENGTH)),
+		"age":      validation.Validate(u.Age, validation.Min(EmptyAge)),
 	}.Filter()
 	if err == nil {
 		return nil
@@ -78,7 +79,10 @@ func (u *User) Validate() error {
 	}
 
 	if knowError = models_utilits.ExtractValidateError(userValidError(), mapOfErr); knowError != nil {
-		return knowError
+		return &app.GeneralError{
+			Err:         knowError,
+			ExternalErr: err,
+		}
 	}
 
 	return err

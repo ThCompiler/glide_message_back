@@ -69,7 +69,7 @@ func (h *ProfileHandler) POST(w http.ResponseWriter, r *http.Request) {
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
-
+	h.Log(r).Infof("%s;%s;%s;%s;%s;%d", req.Nickname, req.Country, req.About, req.Fullname, req.Password, req.Age)
 	u := req.ToUser()
 
 	us, err := h.userUsecase.Create(u)

@@ -47,8 +47,8 @@ type RequestRegistration struct {
 	Fullname  string   `json:"fullname"`
 	About     string   `json:"about,omitempty"`
 	Age       int64    `json:"age"`
-	Country   string   `json:"country"`
-	Languages []string `json:"languages"`
+	Country   string   `json:"country,omitempty"`
+	Languages []string `json:"languages,omitempty"`
 	Password  string   `json:"password"`
 }
 

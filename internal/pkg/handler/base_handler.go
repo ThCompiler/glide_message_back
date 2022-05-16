@@ -93,7 +93,7 @@ func (h *BaseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if ok {
 		hndlr(w, r)
 	} else {
-		//h.Log(w, r).Errorf("Unexpected http method: %s", w, r.Method())
+		h.Log(r).Errorf("Unexpected http method: %s", w, r.Method)
 		r.Header.Set("Allow", strings.Join(h.getListMethods(), ", "))
 		w.WriteHeader(http.StatusInternalServerError)
 	}

@@ -38,7 +38,7 @@ type HelpHandlers struct {
 }
 
 func (h *HelpHandlers) PrintRequest(w http.ResponseWriter, r *http.Request) {
-	//h.Log(w, r).Infof("Request: %s. From URL: %s", w, r.Method(), string(w, r.URI().Host())+string(w, r.Path()))
+	h.Log(r).Infof("Request: %s. With method: %s. From URL: %s", w, r.Method, r.Host+r.URL.Path)
 }
 
 // GetInt64FromParam HTTPErrors
@@ -48,7 +48,7 @@ func (h *HelpHandlers) GetInt64FromParam(w http.ResponseWriter, r *http.Request,
 	number := vars[name]
 	numberInt, err := strconv.ParseInt(number, 10, 64)
 	if number == "" || err != nil {
-		//h.Log(w, r).Infof("can't get parametrs %s, was got %v)", name, number)
+		h.Log(r).Infof("can't get parametrs %s, was got %v)", name, number)
 		return app.InvalidInt, http.StatusBadRequest, handler_errors.InvalidParameters
 	}
 	return numberInt, app.InvalidInt, nil

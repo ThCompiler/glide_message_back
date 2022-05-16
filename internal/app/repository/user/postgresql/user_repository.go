@@ -73,6 +73,10 @@ func (repo *UserRepository) Create(u *models.User) (*models.User, error) {
 
 	var have_conflict = 0
 
+	country := sql.NullString{u.Country,
+		u.Country != "",
+	}
+
 	if err = tx.QueryRow(
 		createQuery,
 		u.Nickname,
@@ -80,15 +84,21 @@ func (repo *UserRepository) Create(u *models.User) (*models.User, error) {
 		u.About,
 		u.EncryptedPassword,
 		u.Age,
-		u.Country).
+		country).
 		Scan(&u.Nickname,
 			&u.Fullname,
 			&u.About,
 			&u.Age,
-			&u.Country,
+			&country,
 			&have_conflict); err != nil {
 		_ = tx.Rollback()
 		return nil, parsePQError(err.(*pq.Error))
+	}
+
+	if country.Valid {
+		u.Country = country.String
+	} else {
+		u.Country = ""
 	}
 
 	if have_conflict == 1 {
@@ -119,16 +129,24 @@ func (repo *UserRepository) Create(u *models.User) (*models.User, error) {
 func (repo *UserRepository) FindByNickname(nickname string) (*models.User, error) {
 	user := models.User{}
 
+	country := sql.NullString{}
+
 	if err := repo.store.QueryRow(findByNicknameQuery, nickname).
 		Scan(&user.Nickname,
 			&user.Fullname,
 			&user.About,
 			&user.Age,
-			&user.Country); err != nil {
+			&country); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, repository.NotFound
 		}
 		return nil, repository.NewDBError(err)
+	}
+
+	if country.Valid {
+		user.Country = country.String
+	} else {
+		user.Country = ""
 	}
 
 	if err := repo.store.Select(&user.Languages, findByNicknameGetLanguagesQuery, nickname); err != nil {
@@ -192,20 +210,30 @@ func (repo *UserRepository) Update(u *models.User) (*models.User, error) {
 		return nil, repository.NewDBError(err)
 	}
 
+	country := sql.NullString{u.Country,
+		u.Country != "",
+	}
+
 	if err = tx.QueryRow(
 		updateUserQuery,
 		u.Fullname,
 		u.About,
 		u.Age,
-		u.Country,
+		country,
 		u.Nickname).
 		Scan(&u.Nickname,
 			&u.Fullname,
 			&u.About,
 			&u.Age,
-			&u.Country); err != nil {
+			&country); err != nil {
 		_ = tx.Rollback()
 		return nil, parsePQError(err.(*pq.Error))
+	}
+
+	if country.Valid {
+		u.Country = country.String
+	} else {
+		u.Country = ""
 	}
 
 	if len(u.Languages) != 0 {
