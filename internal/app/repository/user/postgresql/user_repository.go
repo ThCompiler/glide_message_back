@@ -15,6 +15,8 @@ const (
 
 	updateAvatarQuery = `UPDATE users SET avatar = $1 WHERE nickname = $2`
 
+	getPasswordQuery = `SELECT password FROM users WHERE nickname=$1`
+
 	findByNicknameQuery             = `SELECT nickname, fullname, about, age, country FROM users WHERE nickname=$1`
 	findByNicknameGetLanguagesQuery = `SELECT language FROM user_language WHERE nickname=$1`
 
@@ -157,6 +159,24 @@ func (repo *UserRepository) FindByNickname(nickname string) (*models.User, error
 	}
 
 	return &user, nil
+}
+
+// GetPassword Errors:
+// 		repository.NotFound
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
+func (repo *UserRepository) GetPassword(nickname string) (string, error) {
+	password := ""
+
+	if err := repo.store.QueryRow(getPasswordQuery, nickname).
+		Scan(&password); err != nil {
+		if err == sql.ErrNoRows {
+			return "", repository.NotFound
+		}
+		return "", repository.NewDBError(err)
+	}
+
+	return password, nil
 }
 
 // UpdatePassword Errors:

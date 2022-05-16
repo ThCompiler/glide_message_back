@@ -98,15 +98,18 @@ func (usecase *UserUsecase) Create(user *models.User) (*models.User, error) {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (usecase *UserUsecase) Check(nickname string, password string) (string, error) {
-	u, err := usecase.repository.FindByNickname(nickname)
+	encPassword, err := usecase.repository.GetPassword(nickname)
 	if err != nil {
 		return "", err
 	}
 
+	u := models.User{
+		EncryptedPassword: encPassword,
+	}
 	if !u.ComparePassword(password) {
 		return "", models.IncorrectNicknameOrPassword
 	}
-	return u.Nickname, nil
+	return nickname, nil
 }
 
 // Update Errors:

@@ -19,6 +19,12 @@ type Repository interface {
 	// 			repository.DefaultErrDB
 	FindByNickname(nickname string) (*models.User, error)
 
+	// GetPassword Errors:
+	// 		repository.NotFound
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	GetPassword(nickname string) (string, error)
+
 	// Update Errors:
 	//		repository_postgresql.IncorrectCounty
 	//		repository_postgresql.IncorrectLanguage
