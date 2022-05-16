@@ -28,7 +28,7 @@ func NewSessionManager(sessionRep sessions.SessionRepository) *SessionManager {
 }
 
 func (manager *SessionManager) Create(nickname string) (models.Result, error) {
-	strUserID := fmt.Sprintf("%d", nickname)
+	strUserID := fmt.Sprintf("%s", nickname)
 
 	session := &models.Session{
 		UserID:     strUserID,

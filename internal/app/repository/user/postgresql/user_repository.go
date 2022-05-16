@@ -107,7 +107,7 @@ func (repo *UserRepository) Create(u *models.User) (*models.User, error) {
 		return u, NicknameAlreadyExist
 	}
 
-	for lang := range u.Languages {
+	for _, lang := range u.Languages {
 		if _, err = tx.Exec(
 			addLanguagesToUsersQuery,
 			lang,
@@ -262,7 +262,7 @@ func (repo *UserRepository) Update(u *models.User) (*models.User, error) {
 			return nil, repository.NewDBError(err)
 		}
 
-		for lang := range u.Languages {
+		for _, lang := range u.Languages {
 			if _, err = tx.Exec(
 				addLanguagesToUsersQuery,
 				lang,
