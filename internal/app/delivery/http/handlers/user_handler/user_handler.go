@@ -5,7 +5,6 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/delivery/http/models"
-	models_http "glide/internal/app/delivery/http/models"
 	usecase_user "glide/internal/app/usecase/user"
 	session_client "glide/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "glide/internal/microservices/auth/sessions/middleware"
@@ -60,7 +59,7 @@ func (h *ProfileHandler) GET(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.Log(r).Debugf("get user %s", u)
-	h.Respond(w, r, http.StatusOK, models_http.ToProfileResponse(*u))
+	h.Respond(w, r, http.StatusOK, http_models.ToProfileResponse(*u))
 }
 
 func (h *ProfileHandler) POST(w http.ResponseWriter, r *http.Request) {
@@ -83,7 +82,7 @@ func (h *ProfileHandler) POST(w http.ResponseWriter, r *http.Request) {
 
 	u.MakeEmptyPassword()
 	res, err := h.sessionClient.Create(context.Background(), us.Nickname)
-	if err != nil || res.UserID != us.Nickname {
+	if err == nil && res.UserID == us.Nickname {
 		cookie := &http.Cookie{
 			Name:     "session_id",
 			Value:    res.UniqID,
@@ -92,8 +91,11 @@ func (h *ProfileHandler) POST(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: true,
 		}
 		http.SetCookie(w, cookie)
+	} else {
+		h.Log(r).Warnf("not created cookies %v", err)
 	}
-	h.Respond(w, r, http.StatusCreated, models_http.ToProfileResponse(*us))
+
+	h.Respond(w, r, http.StatusCreated, http_models.ToProfileResponse(*us))
 }
 
 func (h *ProfileHandler) PUT(w http.ResponseWriter, r *http.Request) {
@@ -123,5 +125,5 @@ func (h *ProfileHandler) PUT(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Respond(w, r, http.StatusCreated, models_http.ToProfileResponse(*us))
+	h.Respond(w, r, http.StatusCreated, http_models.ToProfileResponse(*us))
 }

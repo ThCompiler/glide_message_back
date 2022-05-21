@@ -14,6 +14,8 @@ func (req *RequestLogin) Sanitize(sanitizer bluemonday.Policy) {
 	req.Password = sanitizer.Sanitize(req.Password)
 }
 
+func (req *RequestMessageIds) Sanitize(_ bluemonday.Policy) {}
+
 func (req *RequestChangePassword) Sanitize(sanitizer bluemonday.Policy) {
 	req.OldPassword = sanitizer.Sanitize(req.OldPassword)
 	req.NewPassword = sanitizer.Sanitize(req.NewPassword)

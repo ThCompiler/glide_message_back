@@ -51,7 +51,7 @@ type ChatRepository struct {
 
 var _ = repository_chat.Repository(&ChatRepository{})
 
-func NewPostsRepository(st *sqlx.DB) *ChatRepository {
+func NewChatRepository(st *sqlx.DB) *ChatRepository {
 	return &ChatRepository{
 		store: st,
 	}

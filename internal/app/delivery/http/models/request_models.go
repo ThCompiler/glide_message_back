@@ -12,6 +12,13 @@ import (
 //go:generate easyjson -all -disallow_unknown_fields request_models.go
 
 //easyjson:json
+type RequestMessageIds []int64
+
+func (req *RequestMessageIds) ToArray() []int64 {
+	return *req
+}
+
+//easyjson:json
 type RequestCreator struct {
 	Category    string `json:"category"`
 	Description string `json:"description"`

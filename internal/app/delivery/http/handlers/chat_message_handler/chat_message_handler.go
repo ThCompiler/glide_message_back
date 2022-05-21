@@ -1,8 +1,10 @@
 package chat_message_handler
 
 import (
+	"github.com/microcosm-cc/bluemonday"
+	"glide/internal/app/delivery/http/handlers"
 	"glide/internal/app/delivery/http/handlers/handler_errors"
-	models_http "glide/internal/app/delivery/http/models"
+	"glide/internal/app/delivery/http/models"
 	usecase_chats "glide/internal/app/usecase/chats"
 	session_client "glide/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "glide/internal/microservices/auth/sessions/middleware"
@@ -33,21 +35,28 @@ func NewChatMessageHandler(log *logrus.Logger,
 }
 
 func (h *ChatMessageHandler) PUT(w http.ResponseWriter, r *http.Request) {
-	h.GetArrayStringFromQueries(w, r, "id")
+	req := &http_models.RequestMessageIds{}
 
-	userID := r.Context().Value("user_id")
-	if userID == nil {
-		h.Log(r).Error("can not get user_id from context")
-		h.Error(w, r, http.StatusInternalServerError, handler_errors.InternalError)
+	err := h.GetRequestBody(r, req, *bluemonday.UGCPolicy())
+	if err != nil {
+		h.Log(r).Warnf("can not parse request %s", err)
+		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
 		return
 	}
 
-	u, err := h.userUsecase.GetProfile(userID.(string))
+	chatId, code, err := h.GetInt64FromParam(w, r, handlers.ChatId)
+
+	if err != nil {
+		h.Error(w, r, code, err)
+		return
+	}
+
+	err = h.chatsUsecase.MarkMessages(chatId, req.ToArray())
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByErrorGET)
 		return
 	}
 
-	h.Log(r).Debugf("get user %s", u)
-	h.Respond(w, r, http.StatusOK, models_http.ToProfileResponse(*u))
+	h.Log(r).Debugf("sussess mark messages %v", req)
+	w.WriteHeader(http.StatusOK)
 }

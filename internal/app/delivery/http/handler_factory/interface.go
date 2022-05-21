@@ -1,6 +1,7 @@
 package handler_factory
 
 import (
+	useChat "glide/internal/app/usecase/chats"
 	useUser "glide/internal/app/usecase/user"
 )
 
@@ -8,4 +9,5 @@ import (
 
 type UsecaseFactory interface {
 	GetUserUsecase() useUser.Usecase
+	GetChatUsecase() useChat.Usecase
 }
