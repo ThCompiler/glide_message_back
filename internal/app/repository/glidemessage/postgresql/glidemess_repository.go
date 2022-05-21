@@ -43,7 +43,12 @@ const (
 
 	searchUserQuery = `
 				WITH usr AS (
-				    SELECT nickname FROM users as usr WHERE usr.country in (SELECT gmc.county FROM glide_message_countries as gmc)
+				    SELECT usr.nickname FROM users as usr 
+				    JOIN user_language ul ON usr.nickname = ul.nickname 
+				                        	AND ul.language in (SELECT gml.language FROM glide_message_languages as gml WHERE gml.glide_message = $1)
+					WHERE usr.country in (SELECT gmc.country FROM glide_message_countries as gmc WHERE gmc.glide_message = $1) 
+					  and usr.nickname not in (SELECT visited_user FROM glide_users WHERE glide_users.glide_message = $1)
+				
 				)
 			`
 
