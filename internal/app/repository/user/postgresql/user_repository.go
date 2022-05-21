@@ -18,16 +18,18 @@ const (
 	getPasswordQuery = `SELECT password FROM users WHERE nickname=$1`
 
 	findByNicknameQuery             = `SELECT nickname, fullname, about, age, country FROM users WHERE nickname=$1`
-	findByNicknameGetLanguagesQuery = `SELECT language FROM user_language WHERE nickname=$1`
+	findByNicknameGetLanguagesQuery = `SELECT lower(language) FROM user_language WHERE nickname=$1`
 
 	createQuery = `    
-						WITH sel AS (
+						WITH cnt AS (
+						    SELECT country_name as country_nm FROM countries WHERE lower(country_name) = lower($6)
+						), sel AS (
 						    SELECT nickname, fullname, about, password, age, country
 							FROM users
 							WHERE nickname = $1 LIMIT 1
 						), ins as (
 							INSERT INTO users (nickname, fullname, about, password, age, country)
-								SELECT $1, $2, $3, $4, $5, $6
+								SELECT $1, $2, $3, $4, $5, cnt.country_nm
 								WHERE not exists (select 1 from sel)
 							RETURNING nickname, fullname, about, age, country
 						)
@@ -37,16 +39,23 @@ const (
 						SELECT nickname, fullname, about, age, country, 1
 						FROM sel
 					`
-	addLanguagesToUsersQuery = `INSERT INTO user_language (language, nickname) VALUES ($1, $2)`
+	addLanguagesToUsersQuery = `
+						WITH lng AS (
+						    SELECT language as lng_name FROM languages WHERE lower(language) = lower($1)
+						)
+						INSERT INTO user_language (language, nickname) VALUES (lng.lng_name, $2)`
 
 	deleteLanguagesForUsersQuery = `DELETE FROM user_language WHERE nickname = $1`
 
 	updateUserQuery = `
+					WITH cnt AS (
+						SELECT country_name as country_nm FROM countries WHERE lower(country_name) = lower($4)
+					)
 					UPDATE users SET 
 					    fullname = COALESCE(NULLIF(TRIM($1), ''), fullname),
 					    about = COALESCE(NULLIF(TRIM($2), ''), about),
 					    age = COALESCE(NULLIF($3, 0), age),
-						country = COALESCE(NULLIF(TRIM($4), ''), country),
+						country = COALESCE(NULLIF(TRIM(cnt.country_nm), ''), country),
 					WHERE nickname = $5
 					RETURNING nickname, fullname, about, age, country`
 )

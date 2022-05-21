@@ -1,6 +1,7 @@
 package user_handler
 
 import (
+	"context"
 	"github.com/microcosm-cc/bluemonday"
 	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/delivery/http/models"
@@ -8,8 +9,10 @@ import (
 	usecase_user "glide/internal/app/usecase/user"
 	session_client "glide/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "glide/internal/microservices/auth/sessions/middleware"
+	"glide/internal/microservices/auth/sessions/sessions_manager"
 	bh "glide/internal/pkg/handler"
 	"net/http"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -79,6 +82,17 @@ func (h *ProfileHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	u.MakeEmptyPassword()
+	res, err := h.sessionClient.Create(context.Background(), us.Nickname)
+	if err != nil || res.UserID != us.Nickname {
+		cookie := &http.Cookie{
+			Name:     "session_id",
+			Value:    res.UniqID,
+			Path:     "/",
+			Expires:  time.Now().Add(sessions_manager.ExpiredCookiesTime),
+			HttpOnly: true,
+		}
+		http.SetCookie(w, cookie)
+	}
 	h.Respond(w, r, http.StatusCreated, models_http.ToProfileResponse(*us))
 }
 
