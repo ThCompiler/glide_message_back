@@ -33,6 +33,8 @@ func NewChatMessageHandler(log *logrus.Logger,
 }
 
 func (h *ChatMessageHandler) PUT(w http.ResponseWriter, r *http.Request) {
+	h.GetArrayStringFromQueries(w, r, "id")
+
 	userID := r.Context().Value("user_id")
 	if userID == nil {
 		h.Log(r).Error("can not get user_id from context")

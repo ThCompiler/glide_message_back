@@ -17,7 +17,7 @@ const (
 
 	getPasswordQuery = `SELECT password FROM users WHERE nickname=$1`
 
-	findByNicknameQuery             = `SELECT nickname, fullname, about, age, country FROM users WHERE nickname=$1`
+	findByNicknameQuery             = `SELECT nickname, fullname, about, age, lower(country) FROM users WHERE nickname=$1`
 	findByNicknameGetLanguagesQuery = `SELECT lower(language) FROM user_language WHERE nickname=$1`
 
 	createQuery = `    
@@ -29,7 +29,7 @@ const (
 							WHERE nickname = $1 LIMIT 1
 						), ins as (
 							INSERT INTO users (nickname, fullname, about, password, age, country)
-								SELECT $1, $2, $3, $4, $5, cnt.country_nm
+								SELECT $1, $2, $3, $4, $5, (select country_nm from cnt limit 1)
 								WHERE not exists (select 1 from sel)
 							RETURNING nickname, fullname, about, age, country
 						)
@@ -43,7 +43,7 @@ const (
 						WITH lng AS (
 						    SELECT language as lng_name FROM languages WHERE lower(language) = lower($1)
 						)
-						INSERT INTO user_language (language, nickname) VALUES (lng.lng_name, $2)`
+						INSERT INTO user_language (language, nickname) VALUES ((select lng_name from lng limit 1), $2)`
 
 	deleteLanguagesForUsersQuery = `DELETE FROM user_language WHERE nickname = $1`
 
@@ -55,7 +55,7 @@ const (
 					    fullname = COALESCE(NULLIF(TRIM($1), ''), fullname),
 					    about = COALESCE(NULLIF(TRIM($2), ''), about),
 					    age = COALESCE(NULLIF($3, 0), age),
-						country = COALESCE(NULLIF(TRIM(cnt.country_nm), ''), country),
+						country = COALESCE(NULLIF(TRIM((select country_nm from cnt limit 1)), ''), country)
 					WHERE nickname = $5
 					RETURNING nickname, fullname, about, age, country`
 )
