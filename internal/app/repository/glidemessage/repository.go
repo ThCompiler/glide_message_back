@@ -6,41 +6,43 @@ import (
 
 type Repository interface {
 	// Create Errors:
-	//		ChatAlreadyExists
+	//		IncorrectCounty
+	//		IncorrectLanguage
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
-	Create(user string, with string) (*models.Chat, error)
+	Create(message *models.GlideMessage, languages []string, counties []string) (*models.GlideMessage, error)
 
-	// CheckChat Errors:
+	// GetGotten Errors:
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	GetGotten(user string) ([]models.GlideMessage, error)
+
+	// GetSent Errors:
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	GetSent(user string) ([]models.GlideMessage, error)
+
+	// UpdatePicture Errors:
 	//		repository.NotFound
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
-	CheckChat(chatId int64) error
+	UpdatePicture(msgId int64, picture string) error
 
-	// CheckAllow Errors:
-	// 		app.GeneralError with Errors
-	// 			repository.DefaultErrDB
-	CheckAllow(user string, chatId int64) error
-
-	// GetChats Errors:
+	// Check Errors:
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	GetChats(userId string) ([]models.Chat, error)
+	Check(id int64) error
 
-	// GetMessages Errors:
-	// 		app.GeneralError with Errors:
-	// 			repository.DefaultErrDB
-	GetMessages(chatId int64, pag *models.Pagination) ([]models.Message, error)
-
-	// MarkMessages Errors:
+	// Get Errors:
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	MarkMessages(chatId int64, messageIds []int64) error
+	Get(id int64) (*models.GlideMessage, error)
 
-	// CreateMessage Errors:
+	// ChangeUser Errors:
+	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	CreateMessage(text string, chatId int64, image string, user string) (*models.Message, error)
+	ChangeUser(id int64) error
 }

@@ -49,13 +49,13 @@ const (
 
 	updateUserQuery = `
 					WITH cnt AS (
-						SELECT country_name as country_nm FROM countries WHERE lower(country_name) = lower($4)
+						SELECT country_name as country_nm FROM countries WHERE lower(country_name) = lower(NULLIF(TRIM($4), ''))
 					)
 					UPDATE users SET 
 					    fullname = COALESCE(NULLIF(TRIM($1), ''), fullname),
 					    about = COALESCE(NULLIF(TRIM($2), ''), about),
 					    age = COALESCE(NULLIF($3, 0), age),
-						country = COALESCE(NULLIF(TRIM((select country_nm from cnt limit 1)), ''), country)
+						country = COALESCE((select country_nm from cnt limit 1), country)
 					WHERE nickname = $5
 					RETURNING nickname, fullname, about, age, country`
 )

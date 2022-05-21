@@ -1,0 +1,2 @@
+DROP TABLE glide_message_countries;
+DROP TABLE glide_message_languages;
