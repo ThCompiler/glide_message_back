@@ -39,11 +39,11 @@ const (
 
 	createQueryCountriesEnd = `?)
 						)
-						INSERT INTO glide_message_countries (county, glide_message) SELECT cnt_name, ? FROM cnt`
+						INSERT INTO glide_message_countries (country, glide_message) SELECT cnt_name, ? FROM cnt`
 
 	searchUserQuery = `
 				WITH usr AS (
-				    SELECT nickname FROM users WHERE country in (SELECT country )
+				    SELECT nickname FROM users as usr WHERE usr.country in (SELECT gmc.county FROM glide_message_countries as gmc)
 				)
 			`
 
