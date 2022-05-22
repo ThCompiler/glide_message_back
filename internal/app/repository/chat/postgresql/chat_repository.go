@@ -3,6 +3,7 @@ package repository_postgresql
 import (
 	"database/sql"
 	"github.com/lib/pq"
+	"glide/internal/app"
 	"glide/internal/app/models"
 	"glide/internal/app/repository"
 	repository_chat "glide/internal/app/repository/chat"
@@ -91,7 +92,6 @@ func (repo *ChatRepository) GetChat(chatId int64, author string) (*models.Chat, 
 		Scan(
 			&chat.ID,
 			&chat.Companion,
-			&chat.CompanionAvatar,
 		); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, repository.NotFound
@@ -277,8 +277,22 @@ func (repo *ChatRepository) MarkMessages(chatId int64, messageIds []int64) error
 // 			repository.DefaultErrDB
 func (repo *ChatRepository) CreateMessage(text string, chatId int64, image string, user string) (*models.Message, error) {
 	ms := &models.Message{}
-	if err := repo.store.QueryRowx(createMessageQuery, text, chatId, image, user).
-		Scan(&ms.ID, &ms.Text, &ms.Picture, &ms.Author, &ms.IsViewed, &ms.Created); err != nil {
+	if image == app.LoadFileUrl {
+		image = app.DefaultImage
+	}
+	if err := repo.store.QueryRowx(createMessageQuery,
+		text,
+		chatId,
+		image,
+		user,
+	).
+		Scan(&ms.ID,
+			&ms.Text,
+			&ms.Picture,
+			&ms.Author,
+			&ms.IsViewed,
+			&ms.Created,
+		); err != nil {
 		return nil, repository.NewDBError(err)
 	}
 

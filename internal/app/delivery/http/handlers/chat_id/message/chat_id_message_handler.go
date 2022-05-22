@@ -94,6 +94,8 @@ func (h *ChatIdMessageHandler) POST(w http.ResponseWriter, r *http.Request) {
 			if !errors.Is(err.(*app.GeneralError).Err, handler_errors.InvalidFormFieldName) {
 				h.HandlerError(w, r, code, err)
 				return
+			} else {
+				file = nil
 			}
 		} else {
 			h.HandlerError(w, r, code, err)

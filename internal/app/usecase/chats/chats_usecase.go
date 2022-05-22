@@ -102,17 +102,20 @@ func (usecase *ChatsUsecase) CreateMessage(log *logrus.Entry, text string, chatI
 		return nil, err
 	}
 
-	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed convert to webp of update post cover")
-	}
+	var path = ""
+	if data != nil {
+		data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed convert to webp of update post cover")
+		}
 
-	path, err := usecase.filesRepository.SaveFile(data, name, repoFiles.Image)
-	if err != nil {
-		return nil, app.GeneralError{
-			Err: FileSystemError,
-			ExternalErr: errors.Wrap(err, "error with file for message: "+
-				string(name)+" for chat: "+fmt.Sprintf("%d", chatId)),
+		path, err = usecase.filesRepository.SaveFile(data, name, repoFiles.Image)
+		if err != nil {
+			return nil, app.GeneralError{
+				Err: FileSystemError,
+				ExternalErr: errors.Wrap(err, "error with file for message: "+
+					string(name)+" for chat: "+fmt.Sprintf("%d", chatId)),
+			}
 		}
 	}
 
@@ -125,5 +128,5 @@ func (usecase *ChatsUsecase) CreateMessage(log *logrus.Entry, text string, chatI
 		log.Errorf("can't send new message to %s with id %d, gotten err %s", chat.Companion, res.ID, err)
 	}
 
-	return usecase.repository.CreateMessage(text, chatId, app.LoadFileUrl+path, user)
+	return res, err
 }
