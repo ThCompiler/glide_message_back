@@ -36,13 +36,13 @@ const (
 			), countView as (
 			    SELECT count(*) as cnt, chat FROM messages WHERE messages.author = $1 GROUP BY chat
 			)
-				SELECT chat.id, chat.author, cv.cnt, u.avatar, m.id, m.message, m.picture, m.author, m.is_viewed, m.created FROM chat
+				SELECT chat.id, chat.author, u.avatar, cv.cnt, m.id, m.message, m.picture, m.author, m.is_viewed, m.created FROM chat
 					 LEFT JOIN messages m on chat.id = m.chat and m.created in(SELECT data FROM latest_messages)
 				     LEFT JOIN countView cv on cv.chat = m.chat
 					 JOIN users u on chat.author = u.nickname
 				WHERE chat.companion = $1
 				UNION
-				SELECT chat.id, chat.companion, cv.cnt, u.avatar, m.id, m.message, m.picture, m.author, m.is_viewed, m.created FROM chat
+				SELECT chat.id, chat.companion, u.avatar, cv.cnt, m.id, m.message, m.picture, m.author, m.is_viewed, m.created FROM chat
 					LEFT JOIN messages m on chat.id = m.chat and m.created in(SELECT data FROM latest_messages)
 				    LEFT JOIN countView cv on cv.chat = m.chat
 					JOIN users u on chat.companion = u.nickname
