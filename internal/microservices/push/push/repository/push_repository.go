@@ -9,11 +9,11 @@ import (
 )
 
 const (
-	GetUserAvatarQuery = `SELECT nickname, avatar FROM users WHERE nickname = $1`
+	GetUserAvatarQuery = `SELECT avatar FROM users WHERE nickname = $1`
 
 	GetMessageInfoQuery = `SELECT author, message, chat FROM messages WHERE id = $1`
 
-	GetGlideInfoQuery = `SELECT author, message, title, country  FROM glide_message where id = $1`
+	GetGlideInfoQuery = `SELECT author, message, title, country FROM glide_message where id = $1`
 )
 
 type PushRepository struct {
