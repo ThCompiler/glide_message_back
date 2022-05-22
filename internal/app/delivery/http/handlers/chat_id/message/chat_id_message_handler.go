@@ -86,7 +86,7 @@ func (h *ChatIdMessageHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	file, filename, code, err := h.GetFilesFromRequest(w, r, handlers.MAX_UPLOAD_SIZE,
-		"avatar", []string{"image/png", "image/jpeg", "image/jpg"})
+		"image", []string{"image/png", "image/jpeg", "image/jpg"})
 
 	if err != nil {
 		if _, can := err.(*app.GeneralError); can {

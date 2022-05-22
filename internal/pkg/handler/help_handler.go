@@ -175,7 +175,7 @@ func (h *HelpHandlers) GetFilesFromRequest(w http.ResponseWriter, r *http.Reques
 
 	r.Body = http.MaxBytesReader(w, r.Body, maxSize)
 	if err := r.ParseMultipartForm(maxSize); err != nil {
-		return nil, "", http.StatusBadRequest, app.GeneralError{
+		return nil, "", http.StatusBadRequest, &app.GeneralError{
 			ExternalErr: errors.Wrapf(err, "max size is : %d ", maxSize),
 			Err:         handler_errors.FileSizeError,
 		}
@@ -183,7 +183,7 @@ func (h *HelpHandlers) GetFilesFromRequest(w http.ResponseWriter, r *http.Reques
 
 	f, fHeader, err := r.FormFile(name)
 	if err != nil {
-		return nil, "", http.StatusBadRequest, app.GeneralError{
+		return nil, "", http.StatusBadRequest, &app.GeneralError{
 			ExternalErr: err,
 			Err:         handler_errors.InvalidFormFieldName,
 		}
@@ -191,7 +191,7 @@ func (h *HelpHandlers) GetFilesFromRequest(w http.ResponseWriter, r *http.Reques
 
 	buff := make([]byte, 512)
 	if _, err = f.Read(buff); err != nil {
-		return nil, "", http.StatusInternalServerError, app.GeneralError{
+		return nil, "", http.StatusInternalServerError, &app.GeneralError{
 			ExternalErr: err,
 			Err:         handler_errors.InternalError,
 		}
@@ -205,7 +205,7 @@ func (h *HelpHandlers) GetFilesFromRequest(w http.ResponseWriter, r *http.Reques
 	}
 
 	if _, err = f.Seek(0, io.SeekStart); err != nil {
-		return nil, "", http.StatusInternalServerError, app.GeneralError{
+		return nil, "", http.StatusInternalServerError, &app.GeneralError{
 			ExternalErr: err,
 			Err:         handler_errors.InternalError,
 		}
