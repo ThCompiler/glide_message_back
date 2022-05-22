@@ -13,7 +13,7 @@ var (
 )
 
 const (
-	codeNullErrorVal    = "22004"
+	codeNullErrorVal    = "23502"
 	columnName          = "country"
 	codeForeignKeyVal   = "23503"
 	countryConstraint   = "glide_message_countries_country_fkey"

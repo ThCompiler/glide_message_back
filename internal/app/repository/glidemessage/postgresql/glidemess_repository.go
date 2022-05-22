@@ -145,19 +145,28 @@ func (repo *GlideMessageRepository) Create(message *models.GlideMessage,
 			&message.Created,
 			&message.Country); err != nil {
 		_ = tx.Rollback()
-		return nil, "", parsePQError(err.(*pq.Error))
+		if _, can := err.(*pq.Error); can {
+			return nil, "", parsePQError(err.(*pq.Error))
+		}
+		return nil, "", repository.NewDBError(err)
 	}
 
 	query, args := repo.addToInsert(createQueryLanguagesStart, createQueryLanguagesEnd, languages, message.ID)
 	if _, err = tx.Exec(query, args); err != nil {
 		_ = tx.Rollback()
-		return nil, "", parsePQError(err.(*pq.Error))
+		if _, can := err.(*pq.Error); can {
+			return nil, "", parsePQError(err.(*pq.Error))
+		}
+		return nil, "", repository.NewDBError(err)
 	}
 
 	query, args = repo.addToInsert(createQueryCountriesStart, createQueryCountriesEnd, counties, message.ID)
 	if _, err = tx.Exec(query, args); err != nil {
 		_ = tx.Rollback()
-		return nil, "", parsePQError(err.(*pq.Error))
+		if _, can := err.(*pq.Error); can {
+			return nil, "", parsePQError(err.(*pq.Error))
+		}
+		return nil, "", repository.NewDBError(err)
 	}
 
 	if _, err = tx.Exec(updateVisitedUserQuery, message.ID); err != nil {
