@@ -69,7 +69,7 @@ func (ph *PushSender) NewGlideMessage(companion string, glideId int64) error {
 
 	err = ch.Publish(
 		ph.session.GetName(),
-		models.MessagePush,
+		models.GlidePush,
 		false,
 		false,
 		publish,
