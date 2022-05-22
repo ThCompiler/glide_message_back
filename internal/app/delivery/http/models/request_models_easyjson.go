@@ -85,32 +85,51 @@ func easyjson7df0efccEncodeGlideInternalAppDeliveryHttpModels(out *jwriter.Write
 	out.RawByte('{')
 	first := true
 	_ = first
-	{
+	if in.Fullname != "" {
 		const prefix string = ",\"fullname\":"
+		first = false
 		out.RawString(prefix[1:])
 		out.String(string(in.Fullname))
 	}
 	if in.About != "" {
 		const prefix string = ",\"about\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.About))
 	}
-	{
+	if in.Age != 0 {
 		const prefix string = ",\"age\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.Int64(int64(in.Age))
 	}
-	{
+	if in.Country != "" {
 		const prefix string = ",\"country\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.Country))
 	}
-	{
+	if len(in.Languages) != 0 {
 		const prefix string = ",\"languages\":"
-		out.RawString(prefix)
-		if in.Languages == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
+		if first {
+			first = false
+			out.RawString(prefix[1:])
 		} else {
+			out.RawString(prefix)
+		}
+		{
 			out.RawByte('[')
 			for v2, v3 := range in.Languages {
 				if v2 > 0 {

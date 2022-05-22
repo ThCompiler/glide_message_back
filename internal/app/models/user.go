@@ -39,8 +39,12 @@ func (u *User) String() string {
 //		IncorrectAge
 // Important can return some other error
 func (u *User) ValidateUpdate() error {
+	if u.Age == EmptyAge {
+		return nil
+	}
+
 	err := validation.Errors{
-		"age": validation.Validate(u.Nickname, validation.Min(EmptyAge)),
+		"age": validation.Validate(u.Age, validation.Min(EmptyAge)),
 	}.Filter()
 	if err == nil {
 		return nil
