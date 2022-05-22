@@ -3,6 +3,7 @@ package chat_id_message_handler
 import (
 	"github.com/gorilla/mux"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/pkg/errors"
 	"glide/internal/app"
 	"glide/internal/app/delivery/http/handlers"
 	"glide/internal/app/delivery/http/handlers/handler_errors"
@@ -90,8 +91,7 @@ func (h *ChatIdMessageHandler) POST(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if _, can := err.(*app.GeneralError); can {
-			h.Log(r).Info(err.(*app.GeneralError).Err != handler_errors.InvalidFormFieldName)
-			if err.(*app.GeneralError).Err != handler_errors.InvalidFormFieldName {
+			if !errors.Is(err.(*app.GeneralError).Err, handler_errors.InvalidFormFieldName) {
 				h.HandlerError(w, r, code, err)
 				return
 			}
