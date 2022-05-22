@@ -89,12 +89,15 @@ func (h *ChatIdMessageHandler) POST(w http.ResponseWriter, r *http.Request) {
 		"avatar", []string{"image/png", "image/jpeg", "image/jpg"})
 
 	if err != nil {
-		if err.(*app.GeneralError).Err == handler_errors.InvalidFormFieldName {
-			h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidBody)
+		if _, can := err.(*app.GeneralError); can {
+			if err.(*app.GeneralError).Err != handler_errors.InvalidFormFieldName {
+				h.HandlerError(w, r, code, err)
+				return
+			}
+		} else {
+			h.HandlerError(w, r, code, err)
 			return
 		}
-		h.HandlerError(w, r, code, err)
-		return
 	}
 
 	text := r.FormValue("text")

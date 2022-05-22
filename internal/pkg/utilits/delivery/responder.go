@@ -26,7 +26,7 @@ func (h *Responder) Respond(w http.ResponseWriter, r *http.Request, code int, da
 	if data != nil {
 		_, _, err := easyjson.MarshalToHTTPResponseWriter(data, w)
 		if err != nil {
-			//h.Log(w, r).Error(jw.Error)
+			h.Log(r).Error(err)
 		}
 	}
 	//logUser, _ := easyjson.Marshal(data)
