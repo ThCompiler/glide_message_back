@@ -29,8 +29,8 @@ func NewGlideIdApplyHandler(log *logrus.Logger,
 		BaseHandler:         *bh.NewBaseHandler(log),
 	}
 	h.AddMethod(http.MethodPut, h.PUT,
-		middleware.NewGlideMessageMiddleware(log, ucGlideMessage).CheckCorrectUserFunc,
 		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
+		middleware.NewGlideMessageMiddleware(log, ucGlideMessage).CheckCorrectUserFunc,
 	)
 
 	return h
