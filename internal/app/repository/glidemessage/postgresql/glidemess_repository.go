@@ -29,7 +29,7 @@ const (
 
 	createQueryLanguagesEnd = `)
 						)
-						INSERT INTO glide_message_countries (language, glide_message) SELECT lng_name, ? FROM lng`
+						INSERT INTO glide_message_languages (language, glide_message) SELECT lng_name, ? FROM lng`
 
 	createQueryCountriesStart = `
 						WITH cnt AS (
@@ -55,7 +55,7 @@ const (
 	searchUserQuery = `
 				WITH usr_f AS (
 					SELECT usr.nickname as nick FROM users as usr
-														 JOIN user_language ul ON usr.nickname = ul.nickname
+					 JOIN user_language ul ON usr.nickname = ul.nickname
 						AND ul.language in (SELECT gml.language FROM glide_message_languages as gml WHERE gml.glide_message = $1)
 					WHERE usr.country in (SELECT gmc.country FROM glide_message_countries as gmc WHERE gmc.glide_message = $1)
 					  and usr.nickname not in (SELECT visited_user FROM glide_users WHERE glide_users.glide_message = $1)
@@ -81,6 +81,9 @@ const (
 
 	checkAllowUserQuery = `
 				SELECT glide_message FROM glide_users where glide_message = $1 and visited_user = $2 and is_actual`
+
+	addVisitedUserQuery = `
+				INSERT INTO glide_users (visited_user, glide_message, is_actual) VALUES ($2, $1, false)`
 
 	checkAllowAuthorQuery = `
 				SELECT id FROM glide_message where id = $1 and author = $2`
@@ -171,6 +174,11 @@ func (repo *GlideMessageRepository) Create(message *models.GlideMessage,
 			}
 			return nil, "", repository.NewDBError(err)
 		}
+	}
+
+	if _, err = tx.Exec(addVisitedUserQuery, message.ID, message.Author); err != nil {
+		_ = tx.Rollback()
+		return nil, "", repository.NewDBError(err)
 	}
 
 	if _, err = tx.Exec(updateVisitedUserQuery, message.ID); err != nil {
