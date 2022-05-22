@@ -1,9 +1,9 @@
 package glide_id_picture_handler
 
 import (
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/repository"
 	repository_os "glide/internal/app/repository/files/os"
+	"glide/internal/pkg/handler/handler_errors"
 	"glide/internal/pkg/utilits"
 	"glide/internal/pkg/utilits/delivery"
 	"net/http"

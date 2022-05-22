@@ -1,12 +1,12 @@
 package glide_gotten_handler
 
 import (
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	models_http "glide/internal/app/delivery/http/models"
 	ucGlideMessage "glide/internal/app/usecase/glidemessage"
 	session_client "glide/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "glide/internal/microservices/auth/sessions/middleware"
 	bh "glide/internal/pkg/handler"
+	"glide/internal/pkg/handler/handler_errors"
 	"net/http"
 
 	"github.com/sirupsen/logrus"

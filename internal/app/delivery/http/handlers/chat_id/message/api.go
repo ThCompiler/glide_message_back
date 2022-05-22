@@ -1,10 +1,10 @@
 package chat_id_message_handler
 
 import (
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/repository"
 	repository_os "glide/internal/app/repository/files/os"
 	usercase_chat "glide/internal/app/usecase/chats"
+	"glide/internal/pkg/handler/handler_errors"
 	"glide/internal/pkg/utilits"
 	"glide/internal/pkg/utilits/delivery"
 	"net/http"

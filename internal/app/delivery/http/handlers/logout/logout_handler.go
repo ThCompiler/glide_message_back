@@ -2,10 +2,10 @@ package logout_handler
 
 import (
 	"context"
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	session_client "glide/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "glide/internal/microservices/auth/sessions/middleware"
 	bh "glide/internal/pkg/handler"
+	"glide/internal/pkg/handler/handler_errors"
 	"net/http"
 	"time"
 

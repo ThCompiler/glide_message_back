@@ -1,9 +1,9 @@
 package glide_create_handler
 
 import (
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/repository"
 	repository_glidemess "glide/internal/app/repository/glidemessage/postgresql"
+	"glide/internal/pkg/handler/handler_errors"
 	"glide/internal/pkg/utilits/delivery"
 	"net/http"
 

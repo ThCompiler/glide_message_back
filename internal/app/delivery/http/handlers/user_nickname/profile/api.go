@@ -1,8 +1,8 @@
 package user_nickname_profile_handler
 
 import (
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/repository"
+	"glide/internal/pkg/handler/handler_errors"
 	"glide/internal/pkg/utilits/delivery"
 	"net/http"
 

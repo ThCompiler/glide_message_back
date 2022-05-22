@@ -6,7 +6,6 @@ import (
 	"github.com/pkg/errors"
 	"glide/internal/app"
 	"glide/internal/app/delivery/http/handlers"
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	models_http "glide/internal/app/delivery/http/models"
 	"glide/internal/app/middleware"
 	"glide/internal/app/models"
@@ -14,6 +13,7 @@ import (
 	session_client "glide/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "glide/internal/microservices/auth/sessions/middleware"
 	bh "glide/internal/pkg/handler"
+	"glide/internal/pkg/handler/handler_errors"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
@@ -91,14 +91,11 @@ func (h *ChatIdMessageHandler) POST(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if _, can := err.(*app.GeneralError); can {
-			h.Log(r).Info(!errors.Is(err.(*app.GeneralError).Err, handler_errors.InvalidFormFieldName))
 			if !errors.Is(err.(*app.GeneralError).Err, handler_errors.InvalidFormFieldName) {
 				h.HandlerError(w, r, code, err)
 				return
 			}
-			h.Log(r).Info(!errors.Is(err.(*app.GeneralError).Err, handler_errors.InvalidFormFieldName))
 		} else {
-			h.Log(r).Info(!errors.Is(err.(*app.GeneralError).Err, handler_errors.InvalidFormFieldName))
 			h.HandlerError(w, r, code, err)
 			return
 		}

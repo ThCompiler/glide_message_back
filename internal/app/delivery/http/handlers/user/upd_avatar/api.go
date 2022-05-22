@@ -1,9 +1,9 @@
 package upd_user_avatar_handler
 
 import (
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/repository"
 	"glide/internal/app/repository/files/os"
+	"glide/internal/pkg/handler/handler_errors"
 	"glide/internal/pkg/utilits"
 	"glide/internal/pkg/utilits/delivery"
 	"net/http"

@@ -3,12 +3,12 @@ package user_nickname_profile_handler
 import (
 	"github.com/gorilla/mux"
 	"glide/internal/app/delivery/http/handlers"
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	models_http "glide/internal/app/delivery/http/models"
 	usecase_user "glide/internal/app/usecase/user"
 	session_client "glide/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "glide/internal/microservices/auth/sessions/middleware"
 	bh "glide/internal/pkg/handler"
+	"glide/internal/pkg/handler/handler_errors"
 	"net/http"
 
 	"github.com/sirupsen/logrus"

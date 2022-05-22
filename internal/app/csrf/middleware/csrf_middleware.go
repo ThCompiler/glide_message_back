@@ -3,8 +3,8 @@ package middleware
 import (
 	usecase_csrf "glide/internal/app/csrf/usecase"
 	hf "glide/internal/app/delivery/http/handlers/base_handler/handler_interfaces"
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/utilits"
+	"glide/internal/pkg/handler/handler_errors"
 	"net/http"
 
 	"github.com/sirupsen/logrus"

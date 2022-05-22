@@ -1,12 +1,12 @@
 package chat_handler
 
 import (
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	models_http "glide/internal/app/delivery/http/models"
 	usecase_chats "glide/internal/app/usecase/chats"
 	session_client "glide/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "glide/internal/microservices/auth/sessions/middleware"
 	bh "glide/internal/pkg/handler"
+	"glide/internal/pkg/handler/handler_errors"
 	"net/http"
 
 	"github.com/sirupsen/logrus"

@@ -1,11 +1,11 @@
 package user_handler
 
 import (
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/models"
 	"glide/internal/app/repository"
 	repository_user "glide/internal/app/repository/user/postgresql"
 	usercase_user "glide/internal/app/usecase/user"
+	"glide/internal/pkg/handler/handler_errors"
 	"glide/internal/pkg/utilits/delivery"
 	"net/http"
 

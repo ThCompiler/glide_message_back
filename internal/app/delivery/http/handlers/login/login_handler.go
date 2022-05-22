@@ -3,13 +3,13 @@ package login_handler
 import (
 	"context"
 	"github.com/microcosm-cc/bluemonday"
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/delivery/http/models"
 	usecase_user "glide/internal/app/usecase/user"
 	sessionclient "glide/internal/microservices/auth/delivery/grpc/client"
 	"glide/internal/microservices/auth/sessions/middleware"
 	"glide/internal/microservices/auth/sessions/sessions_manager"
 	bh "glide/internal/pkg/handler"
+	"glide/internal/pkg/handler/handler_errors"
 	"net/http"
 	"time"
 

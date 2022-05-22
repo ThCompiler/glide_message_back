@@ -3,9 +3,9 @@ package middleware
 import (
 	"errors"
 	"glide/internal/app/delivery/http/handlers"
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/repository"
 	ucGlideMessage "glide/internal/app/usecase/glidemessage"
+	"glide/internal/pkg/handler/handler_errors"
 	hf "glide/internal/pkg/handler/handler_interfaces"
 	"glide/internal/pkg/utilits"
 	"glide/internal/pkg/utilits/delivery"

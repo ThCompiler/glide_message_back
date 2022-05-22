@@ -2,11 +2,11 @@ package upd_user_avatar_handler
 
 import (
 	"glide/internal/app/delivery/http/handlers"
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	usecase_user "glide/internal/app/usecase/user"
 	session_client "glide/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "glide/internal/microservices/auth/sessions/middleware"
 	bh "glide/internal/pkg/handler"
+	"glide/internal/pkg/handler/handler_errors"
 	"net/http"
 
 	"github.com/gorilla/mux"

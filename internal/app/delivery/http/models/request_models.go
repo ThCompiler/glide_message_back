@@ -2,8 +2,8 @@ package http_models
 
 import (
 	validation "github.com/go-ozzo/ozzo-validation"
-	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/models"
+	"glide/internal/pkg/handler/handler_errors"
 	models_utilits "glide/internal/pkg/utilits/models"
 	"image/color"
 )
