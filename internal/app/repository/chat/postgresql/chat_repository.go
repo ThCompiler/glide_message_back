@@ -33,15 +33,19 @@ const (
 	getChatsQuery = `
 			WITH latest_messages as (
 				SELECT min(created) as data FROM messages GROUP BY chat
+			), countView as (
+			    SELECT count(*) as cnt, chat FROM messages WHERE messages.author = $1 GROUP BY chat
 			)
-				SELECT chat.id, chat.author, u.avatar, m.id, m.message, m.picture, m.author, m.is_viewed, m.created FROM chat 
-					JOIN messages m on chat.id = m.chat and m.created in(latest_messages)
-					JOIN users u on chat.author = u.nickname
+				SELECT chat.id, chat.author, cv.cnt, u.avatar, m.id, m.message, m.picture, m.author, m.is_viewed, m.created FROM chat
+					 LEFT JOIN messages m on chat.id = m.chat and m.created in(SELECT data FROM latest_messages)
+				     LEFT JOIN countView cv on cv.chat = m.chat
+					 JOIN users u on chat.author = u.nickname
 				WHERE chat.companion = $1
-			UNION 
-				SELECT chat.id, chat.companion, u.avatar, m.id, m.message, m.picture, m.author, m.is_viewed, m.created FROM chat
-					JOIN messages m on chat.id = m.chat and m.created in(latest_messages)
-				    JOIN users u on chat.companion = u.nickname
+				UNION
+				SELECT chat.id, chat.companion, cv.cnt, u.avatar, m.id, m.message, m.picture, m.author, m.is_viewed, m.created FROM chat
+					LEFT JOIN messages m on chat.id = m.chat and m.created in(SELECT data FROM latest_messages)
+				    LEFT JOIN countView cv on cv.chat = m.chat
+					JOIN users u on chat.companion = u.nickname
 				WHERE chat.author = $1
 	`
 
@@ -144,16 +148,45 @@ func (repo *ChatRepository) GetChats(userId string) ([]models.Chat, error) {
 
 	for rows.Next() {
 		var chat models.Chat
+
+		msgId := sql.NullInt64{}
+		chatCountNotViewed := sql.NullInt64{}
+		msgText := sql.NullString{}
+		msgPicture := sql.NullString{}
+		msgAuthor := sql.NullString{}
+		msgViwed := sql.NullBool{}
+		msgCreated := sql.NullTime{}
 		err = rows.Scan(
 			&chat.ID,
 			&chat.Companion,
 			&chat.CompanionAvatar,
-			&chat.LastMessage.ID,
-			&chat.LastMessage.Text,
-			&chat.LastMessage.Picture,
-			&chat.LastMessage.Author,
-			&chat.LastMessage.IsViewed,
-			&chat.LastMessage.Created)
+			&chatCountNotViewed,
+			&msgId,
+			&msgText,
+			&msgPicture,
+			&msgAuthor,
+			&msgViwed,
+			&msgCreated,
+		)
+
+		if chatCountNotViewed.Valid {
+			chat.CountNotViewed = chatCountNotViewed.Int64
+		} else {
+			chat.CountNotViewed = 0
+		}
+
+		if msgId.Valid {
+			chat.LastMessage = &models.Message{
+				ID:       msgId.Int64,
+				Text:     msgText.String,
+				Picture:  msgPicture.String,
+				Author:   msgAuthor.String,
+				IsViewed: msgViwed.Bool,
+				Created:  msgCreated.Time,
+			}
+		} else {
+			chat.LastMessage = nil
+		}
 
 		if err != nil {
 			_ = rows.Close()

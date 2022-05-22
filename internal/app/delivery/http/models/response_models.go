@@ -60,10 +60,11 @@ type ResponseMessage struct {
 
 //easyjson:json
 type ResponseChat struct {
-	ID              int64           `json:"id"`
-	Companion       string          `json:"companion"`
-	CompanionAvatar string          `json:"companion_avatar"`
-	LastMessage     ResponseMessage `json:"last_message"`
+	ID              int64            `json:"id"`
+	Companion       string           `json:"companion"`
+	CompanionAvatar string           `json:"companion_avatar"`
+	CountNotViewed  int64            `json:"count_not_viewed"`
+	LastMessage     *ResponseMessage `json:"last_message,omitempty"`
 }
 
 //easyjson:json
@@ -128,8 +129,8 @@ func LanguagesToInfos(msgs []models.InfoLanguage) ResponseInfos {
 	return respondInfos
 }
 
-func ToResponseMessage(msg models.Message) ResponseMessage {
-	return ResponseMessage{
+func ToResponseMessage(msg models.Message) *ResponseMessage {
+	return &ResponseMessage{
 		ID:       msg.ID,
 		Author:   msg.Author,
 		Text:     msg.Text,
@@ -142,17 +143,27 @@ func ToResponseMessage(msg models.Message) ResponseMessage {
 func ToResponseMessages(msgs []models.Message) ResponseMessages {
 	respondMessages := make([]ResponseMessage, len(msgs))
 	for i, msg := range msgs {
-		respondMessages[i] = ToResponseMessage(msg)
+		respondMessages[i] = *ToResponseMessage(msg)
 	}
 	return respondMessages
 }
 
 func ToResponseChat(cht models.Chat) ResponseChat {
+	if cht.LastMessage == nil {
+		return ResponseChat{
+			ID:              cht.ID,
+			Companion:       cht.Companion,
+			CompanionAvatar: cht.CompanionAvatar,
+			CountNotViewed:  cht.CountNotViewed,
+			LastMessage:     nil,
+		}
+	}
 	return ResponseChat{
 		ID:              cht.ID,
 		Companion:       cht.Companion,
 		CompanionAvatar: cht.CompanionAvatar,
-		LastMessage:     ToResponseMessage(cht.LastMessage),
+		CountNotViewed:  cht.CountNotViewed,
+		LastMessage:     ToResponseMessage(*cht.LastMessage),
 	}
 }
 

@@ -33,10 +33,11 @@ func (ps *GlideMessage) String() string {
 }
 
 type Chat struct {
-	ID              int64   `json:"id"`
-	Companion       string  `json:"companion"`
-	CompanionAvatar string  `json:"companion_avatar"`
-	LastMessage     Message `json:"last_message"`
+	ID              int64    `json:"id"`
+	Companion       string   `json:"companion"`
+	CompanionAvatar string   `json:"companion_avatar"`
+	CountNotViewed  int64    `json:"count_not_viewed"`
+	LastMessage     *Message `json:"last_message"`
 }
 
 func (ps *Message) String() string {
