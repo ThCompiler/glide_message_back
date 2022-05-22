@@ -27,7 +27,7 @@ const (
     						SELECT language as lng_name FROM languages WHERE lower(language) in (
 							`
 
-	createQueryLanguagesEnd = `?)
+	createQueryLanguagesEnd = `)
 						)
 						INSERT INTO glide_message_countries (language, glide_message) SELECT lng_name, ? FROM lng`
 
@@ -36,7 +36,7 @@ const (
     						SELECT country_name as cnt_name FROM countries WHERE lower(country_name) in (
 							`
 
-	createQueryCountriesEnd = `?)
+	createQueryCountriesEnd = `)
 						)
 						INSERT INTO glide_message_countries (country, glide_message) SELECT cnt_name, ? FROM cnt`
 
