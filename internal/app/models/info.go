@@ -1,6 +1,11 @@
 package models
 
-type Info struct {
-	Category     []string `json:"category"`
-	TypePostData []string `json:"type_post_data"`
+type InfoCountry struct {
+	CountryName string `json:"country_name"`
+	Picture     string `json:"picture"`
+}
+
+type InfoLanguage struct {
+	Language string `json:"language"`
+	Picture  string `json:"picture"`
 }

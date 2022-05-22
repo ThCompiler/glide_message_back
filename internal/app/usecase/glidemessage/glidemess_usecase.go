@@ -24,7 +24,8 @@ type GlideMessageUsecase struct {
 	pusher          push_client.Pusher
 }
 
-func NewGlideMessageUsecase(repository repoGlideMess.Repository, fileRepository repoFiles.Repository,
+func NewGlideMessageUsecase(repository repoGlideMess.Repository, repositoryChats repoChats.Repository,
+	fileRepository repoFiles.Repository,
 	pusher push_client.Pusher, convector ...utilits.ImageConverter) *GlideMessageUsecase {
 	conv := utilits.ImageConverter(&utilits.ConverterToWebp{})
 	if len(convector) != 0 {
@@ -34,6 +35,7 @@ func NewGlideMessageUsecase(repository repoGlideMess.Repository, fileRepository 
 		repository:      repository,
 		imageConvector:  conv,
 		filesRepository: fileRepository,
+		repositoryChats: repositoryChats,
 		pusher:          pusher,
 	}
 }

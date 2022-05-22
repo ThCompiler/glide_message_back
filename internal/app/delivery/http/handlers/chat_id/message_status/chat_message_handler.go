@@ -1,6 +1,7 @@
 package chat_message_handler
 
 import (
+	"github.com/gorilla/mux"
 	"github.com/microcosm-cc/bluemonday"
 	"glide/internal/app/delivery/http/handlers"
 	"glide/internal/app/delivery/http/handlers/handler_errors"
@@ -49,6 +50,12 @@ func (h *ChatMessageHandler) PUT(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		h.Error(w, r, code, err)
+		return
+	}
+
+	if len(mux.Vars(r)) > 1 {
+		h.Log(r).Warnf("Too many parametres %v", mux.Vars(r))
+		h.Error(w, r, http.StatusBadRequest, handler_errors.InvalidParameters)
 		return
 	}
 

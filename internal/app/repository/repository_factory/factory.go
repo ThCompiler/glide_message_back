@@ -7,18 +7,24 @@ import (
 	repChatsPsql "glide/internal/app/repository/chat/postgresql"
 	repoFiles "glide/internal/app/repository/files"
 	repository_os "glide/internal/app/repository/files/os"
+	repoGlideMess "glide/internal/app/repository/glidemessage"
+	repoGlideMessPsql "glide/internal/app/repository/glidemessage/postgresql"
+	repInfo "glide/internal/app/repository/info"
+	repInfoPsql "glide/internal/app/repository/info/postgresql"
 	repUser "glide/internal/app/repository/user"
 	repUserPsql "glide/internal/app/repository/user/postgresql"
 	push_client "glide/internal/microservices/push/delivery/client"
 )
 
 type RepositoryFactory struct {
-	expectedConnections app.ExpectedConnections
-	logger              *logrus.Logger
-	userRepository      repUser.Repository
-	fileRepository      repoFiles.Repository
-	chatRepository      repoChats.Repository
-	pusher              push_client.Pusher
+	expectedConnections    app.ExpectedConnections
+	logger                 *logrus.Logger
+	userRepository         repUser.Repository
+	fileRepository         repoFiles.Repository
+	chatRepository         repoChats.Repository
+	glideMessageRepository repoGlideMess.Repository
+	infoRepository         repInfo.Repository
+	pusher                 push_client.Pusher
 }
 
 func NewRepositoryFactory(logger *logrus.Logger, expectedConnections app.ExpectedConnections) *RepositoryFactory {
@@ -54,4 +60,18 @@ func (f *RepositoryFactory) GetPusher() push_client.Pusher {
 		f.pusher = push_client.NewPushSender(f.expectedConnections.RabbitSession)
 	}
 	return f.pusher
+}
+
+func (f *RepositoryFactory) GetGlideMessageRepository() repoGlideMess.Repository {
+	if f.glideMessageRepository == nil {
+		f.glideMessageRepository = repoGlideMessPsql.NewGlideMessageRepository(f.expectedConnections.SqlConnection)
+	}
+	return f.glideMessageRepository
+}
+
+func (f *RepositoryFactory) GetInfoRepository() repInfo.Repository {
+	if f.infoRepository == nil {
+		f.infoRepository = repInfoPsql.NewInfoRepository(f.expectedConnections.SqlConnection)
+	}
+	return f.infoRepository
 }

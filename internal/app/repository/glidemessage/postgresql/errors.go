@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	IncorrectCounty   = errors.New("unknown county")
+	IncorrectCountry  = errors.New("unknown county")
 	IncorrectLanguage = errors.New("unknown language")
 )
 
@@ -24,9 +24,9 @@ const (
 func parsePQError(err *pq.Error) error {
 	switch {
 	case err.Code == codeNullErrorVal && err.Column == columnName:
-		return IncorrectCounty
+		return IncorrectCountry
 	case err.Code == codeForeignKeyVal && err.Column == countryConstraint:
-		return IncorrectCounty
+		return IncorrectCountry
 	case err.Code == codeForeignKeyVal && err.Column == languageConstraint:
 		return IncorrectLanguage
 	case err.Code == codeForeignKeyVal && err.Column == glideMessConstraint:

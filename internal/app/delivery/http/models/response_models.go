@@ -41,8 +41,12 @@ type ProfileResponse struct {
 
 //easyjson:json
 type ResponseInfo struct {
-	models.Info
+	Name    string `json:"name"`
+	Picture string `json:"picture"`
 }
+
+//easyjson:json
+type ResponseInfos []ResponseInfo
 
 //easyjson:json
 type ResponseMessage struct {
@@ -94,10 +98,34 @@ func ToProfileResponse(us models.User) ProfileResponse {
 	}
 }
 
-func ToResponseInfo(info models.Info) ResponseInfo {
+func LanguageToResponseInfo(info models.InfoLanguage) ResponseInfo {
 	return ResponseInfo{
-		info,
+		Name:    info.Language,
+		Picture: info.Picture,
 	}
+}
+
+func CountryToResponseInfo(info models.InfoCountry) ResponseInfo {
+	return ResponseInfo{
+		Name:    info.CountryName,
+		Picture: info.Picture,
+	}
+}
+
+func CountriesToInfos(msgs []models.InfoCountry) ResponseInfos {
+	respondInfos := make([]ResponseInfo, len(msgs))
+	for i, msg := range msgs {
+		respondInfos[i] = CountryToResponseInfo(msg)
+	}
+	return respondInfos
+}
+
+func LanguagesToInfos(msgs []models.InfoLanguage) ResponseInfos {
+	respondInfos := make([]ResponseInfo, len(msgs))
+	for i, msg := range msgs {
+		respondInfos[i] = LanguageToResponseInfo(msg)
+	}
+	return respondInfos
 }
 
 func ToResponseMessage(msg models.Message) ResponseMessage {

@@ -1,10 +1,10 @@
-package repository_info
+package info
 
 import "glide/internal/app/models"
 
-//go:generate mockgen -destination=mocks/mock_info_repository.go -package=mock_repository -mock_names=Repository=InfoRepository . Repository
+//go:generate mockgen -destination=mocks/mock_statistics_usecase.go -package=mock_usecase -mock_names=Usecase=StatisticsUsecase . Usecase
 
-type Repository interface {
+type Usecase interface {
 	// GetCountries Errors:
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB

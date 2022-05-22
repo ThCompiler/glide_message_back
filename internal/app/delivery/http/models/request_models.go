@@ -1,12 +1,11 @@
 package http_models
 
 import (
+	validation "github.com/go-ozzo/ozzo-validation"
 	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/models"
 	models_utilits "glide/internal/pkg/utilits/models"
 	"image/color"
-
-	validation "github.com/go-ozzo/ozzo-validation"
 )
 
 //go:generate easyjson -all -disallow_unknown_fields request_models.go
@@ -19,21 +18,9 @@ func (req *RequestMessageIds) ToArray() []int64 {
 }
 
 //easyjson:json
-type RequestCreator struct {
-	Category    string `json:"category"`
-	Description string `json:"description"`
-}
-
-//easyjson:json
 type RequestLogin struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
-}
-
-//easyjson:json
-type RequestComment struct {
-	Body      string `json:"body"`
-	AsCreator bool   `json:"as_creator,omitempty"`
 }
 
 //easyjson:json
@@ -57,6 +44,23 @@ type RequestRegistration struct {
 	Country   string   `json:"country,omitempty"`
 	Languages []string `json:"languages,omitempty"`
 	Password  string   `json:"password"`
+}
+
+//easyjson:json
+type RequestGlideMessage struct {
+	Title   string `json:"title"`
+	Message string `json:"message"`
+	Author  string `json:"author,omitempty"`
+	Country string `json:"country"`
+}
+
+func (rr *RequestGlideMessage) ToGlideMessage() *models.GlideMessage {
+	return &models.GlideMessage{
+		Title:   rr.Title,
+		Message: rr.Message,
+		Author:  rr.Author,
+		Country: rr.Country,
+	}
 }
 
 func (rr *RequestRegistration) ToUser() *models.User {
@@ -105,41 +109,6 @@ func NewColor(rgba color.RGBA) Color {
 		B: rgba.B,
 		A: rgba.A,
 	}
-}
-
-//easyjson:json
-type RequestAwards struct {
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	Price       int64  `json:"price"`
-	Color       Color  `json:"color,omitempty"`
-}
-
-//easyjson:json
-type RequestPosts struct {
-	Title       string `json:"title,omitempty"`
-	AwardsId    int64  `json:"awards_id,omitempty"`
-	Description string `json:"description,omitempty"`
-	IsDraft     bool   `json:"is_draft,omitempty"`
-}
-
-//easyjson:json
-type RequestText struct {
-	Text string `json:"text"`
-}
-
-type SubscribeRequest struct {
-	Token string `json:"pay_token"`
-}
-
-func (req *SubscribeRequest) Validate() error {
-	err := validation.Errors{
-		"pay_token": validation.Validate(req.Token, validation.Required, validation.Length(1, 0)),
-	}.Filter()
-	if err != nil {
-		return TokenValidateError
-	}
-	return nil
 }
 
 func (req *RequestChangeNickname) Validate() error {

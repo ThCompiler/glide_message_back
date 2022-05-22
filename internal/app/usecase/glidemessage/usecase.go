@@ -66,4 +66,11 @@ type Usecase interface {
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
 	CheckAllowAuthor(id int64, user string) error
+
+	// Apply Errors:
+	//		repository.NotFound
+	//		repository_postgresql.ChatAlreadyExists
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	Apply(log *logrus.Entry, user string, msgId int64) (*models.Chat, error)
 }

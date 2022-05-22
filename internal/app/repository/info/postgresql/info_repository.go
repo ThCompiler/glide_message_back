@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	queryCategoryGet = `SELECT DISTINCT name FROM creator_category ORDER BY name`
-	queryTypeDataGet = `SELECT DISTINCT type FROM posts_type ORDER BY type`
+	queryCountriesGet = `SELECT country_name, picture FROM countries`
+	queryLanguagesGet = `SELECT language, picture FROM languages`
 )
 
 type InfoRepository struct {
@@ -21,48 +21,24 @@ func NewInfoRepository(st *sqlx.DB) *InfoRepository {
 	}
 }
 
-// Get Errors:
+// GetCountries Errors:
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *InfoRepository) Get() (*models.Info, error) {
-	rowCaregory, err := repo.store.Query(queryCategoryGet)
-	if err != nil {
+func (repo *InfoRepository) GetCountries() ([]models.InfoCountry, error) {
+	var res []models.InfoCountry
+	if err := repo.store.Select(&res, queryCountriesGet); err != nil {
 		return nil, repository.NewDBError(err)
 	}
+	return res, nil
+}
 
-	var categories []string
-	for rowCaregory.Next() {
-		category := ""
-		if err = rowCaregory.Scan(&category); err != nil {
-			_ = rowCaregory.Close()
-			return nil, repository.NewDBError(err)
-		}
-		categories = append(categories, category)
-	}
-
-	if err = rowCaregory.Err(); err != nil {
+// GetLanguages Errors:
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (repo *InfoRepository) GetLanguages() ([]models.InfoLanguage, error) {
+	var res []models.InfoLanguage
+	if err := repo.store.Select(&res, queryLanguagesGet); err != nil {
 		return nil, repository.NewDBError(err)
 	}
-
-	rowType, err := repo.store.Query(queryTypeDataGet)
-	if err != nil {
-		return nil, repository.NewDBError(err)
-	}
-
-	var dataTypes []string
-
-	for rowType.Next() {
-		dataType := ""
-		if err = rowType.Scan(&dataType); err != nil {
-			_ = rowType.Close()
-			return nil, repository.NewDBError(err)
-		}
-		dataTypes = append(dataTypes, dataType)
-	}
-
-	if err = rowType.Err(); err != nil {
-		return nil, repository.NewDBError(err)
-	}
-
-	return &models.Info{Category: categories, TypePostData: dataTypes}, nil
+	return res, nil
 }

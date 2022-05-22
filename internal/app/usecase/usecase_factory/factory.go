@@ -2,13 +2,17 @@ package usecase_factory
 
 import (
 	useChat "glide/internal/app/usecase/chats"
+	useGlideMess "glide/internal/app/usecase/glidemessage"
+	"glide/internal/app/usecase/info"
 	useUser "glide/internal/app/usecase/user"
 )
 
 type UsecaseFactory struct {
-	repositoryFactory RepositoryFactory
-	userUsecase       useUser.Usecase
-	chatUsecase       useChat.Usecase
+	repositoryFactory   RepositoryFactory
+	userUsecase         useUser.Usecase
+	chatUsecase         useChat.Usecase
+	glideMessageUsecase useGlideMess.Usecase
+	infoUsecase         info.Usecase
 }
 
 func NewUsecaseFactory(repositoryFactory RepositoryFactory) *UsecaseFactory {
@@ -31,4 +35,20 @@ func (f *UsecaseFactory) GetChatUsecase() useChat.Usecase {
 			f.repositoryFactory.GetFileRepository(), f.repositoryFactory.GetPusher())
 	}
 	return f.chatUsecase
+}
+
+func (f *UsecaseFactory) GetInfoUsecase() info.Usecase {
+	if f.infoUsecase == nil {
+		f.infoUsecase = info.NewInfoUsecase(f.repositoryFactory.GetInfoRepository())
+	}
+	return f.infoUsecase
+}
+
+func (f *UsecaseFactory) GetGlideMessageUsecase() useGlideMess.Usecase {
+	if f.glideMessageUsecase == nil {
+		f.glideMessageUsecase = useGlideMess.NewGlideMessageUsecase(f.repositoryFactory.GetGlideMessageRepository(),
+			f.repositoryFactory.GetChatRepository(), f.repositoryFactory.GetFileRepository(),
+			f.repositoryFactory.GetPusher())
+	}
+	return f.glideMessageUsecase
 }
