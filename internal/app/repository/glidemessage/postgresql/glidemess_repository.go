@@ -59,17 +59,47 @@ const (
 						AND ul.language in (SELECT gml.language FROM glide_message_languages as gml WHERE gml.glide_message = $1)
 					WHERE usr.country in (SELECT gmc.country FROM glide_message_countries as gmc WHERE gmc.glide_message = $1)
 					  and usr.nickname not in (SELECT visited_user FROM glide_users WHERE glide_users.glide_message = $1)
-				), usr_s AS (
+				), usr_l AS (
+					SELECT usr.nickname as nick FROM users as usr
+					 JOIN user_language ul ON usr.nickname = ul.nickname
+						AND ul.language in (SELECT gml.language FROM glide_message_languages as gml WHERE gml.glide_message = $1)
+					WHERE usr.nickname not in (
+					  	SELECT visited_user FROM glide_users WHERE glide_users.glide_message = $1
+					  	UNION
+						SELECT nick FROM usr_f
+					  )
+				), usr_c AS (
+					SELECT usr.nickname as nick FROM users as usr
+					WHERE usr.country in (SELECT gmc.country FROM glide_message_countries as gmc WHERE gmc.glide_message = $1)
+					  and usr.nickname not in (
+					  	SELECT visited_user FROM glide_users WHERE glide_users.glide_message = $1
+					  	UNION
+						SELECT nick FROM usr_l
+						UNION
+						SELECT nick FROM usr_f                                     
+					 )
+				), usr_o AS (
 					SELECT usr.nickname as nick FROM users as usr
 					WHERE usr.nickname not in (
 						SELECT visited_user FROM glide_users WHERE glide_users.glide_message = $1
 						UNION
+						SELECT nick FROM usr_l
+						UNION
+						SELECT nick FROM usr_c
+						UNION
 						SELECT nick FROM usr_f
 					)
 				)
-				INSERT INTO glide_users (visited_user, glide_message) SELECT COALESCE(
-								(SELECT usr_f.nick FROM usr_f OFFSET random() * (SELECT count(*) from usr_f) LIMIT 1),
-								(SELECT usr_s.nick FROM usr_s OFFSET random() * (SELECT count(*) from usr_s) LIMIT 1)
+				INSERT INTO glide_users (visited_user, glide_message) SELECT 
+				COALESCE(
+				    COALESCE(
+				    	COALESCE(
+								(SELECT usr_f.nick FROM usr_f OFFSET floor(random() * (SELECT count(*) from usr_f)) LIMIT 1),
+								(SELECT usr_l.nick FROM usr_l OFFSET floor(random() * (SELECT count(*) from usr_l)) LIMIT 1)
+				    	    ),
+						(SELECT usr_c.nick FROM usr_c OFFSET floor(random() * (SELECT count(*) from usr_c)) LIMIT 1)
+				        ),
+					(SELECT usr_o.nick FROM usr_o OFFSET floor(random() * (SELECT count(*) from usr_o)) LIMIT 1)
             	), $1 RETURNING visited_user
  			`
 
