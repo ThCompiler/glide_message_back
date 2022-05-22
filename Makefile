@@ -4,6 +4,8 @@ GRAFANA_DIR=./grafana
 LOG_DIR=./logs
 LOG_SESSION_DIR = ./logs-sessions
 LOG_SESSION_DIR = ./logs-files
+LOG_PUSH_DIR = ./logs-push
+LOG_NGINX_DIR = ./logs-nginx
 CHECK_DIR=go list ./... | grep -v /cmd/utilits
 SQL_DIR=./scripts
 MICROSERVICE_DIR=$(PWD)/internal/microservices
@@ -72,6 +74,8 @@ clear-logs:
 	rm -rf $(LOG_DIR)/*.log
 	rm -rf $(LOG_SESSION_DIR)/*.log
 	rm -rf $(LOG_FILES_DIR)/*.log
+	rm -rf $(LOG_NGINX_DIR)/*.log
+	rm -rf $(LOG_PUSH_DIR)/*.log
 
 rm-docker:
 	docker rm -vf $$(docker ps -a -q) || true
