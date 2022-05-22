@@ -90,8 +90,7 @@ func (h *ChatIdMessageHandler) POST(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if _, can := err.(*app.GeneralError); can {
-			h.Log(r).Info(can)
-			h.Log(r).Info(err.(*app.GeneralError).Err)
+			h.Log(r).Info(err.(*app.GeneralError).Err != handler_errors.InvalidFormFieldName)
 			if err.(*app.GeneralError).Err != handler_errors.InvalidFormFieldName {
 				h.HandlerError(w, r, code, err)
 				return
