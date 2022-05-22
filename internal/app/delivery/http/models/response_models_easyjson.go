@@ -593,7 +593,7 @@ func easyjson316682a0DecodeGlideInternalAppDeliveryHttpModels7(in *jlexer.Lexer,
 		in.Delim('[')
 		if *out == nil {
 			if !in.IsDelim(']') {
-				*out = make(ResponseChats, 0, 0)
+				*out = make(ResponseChats, 0, 1)
 			} else {
 				*out = ResponseChats{}
 			}
@@ -675,8 +675,18 @@ func easyjson316682a0DecodeGlideInternalAppDeliveryHttpModels8(in *jlexer.Lexer,
 			out.Companion = string(in.String())
 		case "companion_avatar":
 			out.CompanionAvatar = string(in.String())
+		case "count_not_viewed":
+			out.CountNotViewed = int64(in.Int64())
 		case "last_message":
-			(out.LastMessage).UnmarshalEasyJSON(in)
+			if in.IsNull() {
+				in.Skip()
+				out.LastMessage = nil
+			} else {
+				if out.LastMessage == nil {
+					out.LastMessage = new(ResponseMessage)
+				}
+				(*out.LastMessage).UnmarshalEasyJSON(in)
+			}
 		default:
 			in.AddError(&jlexer.LexerError{
 				Offset: in.GetPos(),
@@ -711,9 +721,14 @@ func easyjson316682a0EncodeGlideInternalAppDeliveryHttpModels8(out *jwriter.Writ
 		out.String(string(in.CompanionAvatar))
 	}
 	{
+		const prefix string = ",\"count_not_viewed\":"
+		out.RawString(prefix)
+		out.Int64(int64(in.CountNotViewed))
+	}
+	if in.LastMessage != nil {
 		const prefix string = ",\"last_message\":"
 		out.RawString(prefix)
-		(in.LastMessage).MarshalEasyJSON(out)
+		(*in.LastMessage).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
 }
