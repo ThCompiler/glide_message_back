@@ -117,6 +117,7 @@ func (repo *GlideMessageRepository) addToInsert(queryStart string, queryEnd stri
 		args = append(args, str)
 	}
 
+	args = append(args, id)
 	query := fmt.Sprintf("%s %s %s", queryStart,
 		strings.Join(argsString, ", "), queryEnd)
 	query = repo.store.Rebind(query)
