@@ -254,8 +254,8 @@ func (repo *ChatRepository) MarkMessages(chatId int64, messageIds []int64) error
 	}
 
 	query = putilits.CustomRebind(2, query)
-
-	res, err := repo.store.Exec(query, chatId, args)
+	args = append([]interface{}{chatId}, args...)
+	res, err := repo.store.Exec(query, args...)
 	if err != nil {
 		return repository.NewDBError(err)
 	}
