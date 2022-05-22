@@ -31,12 +31,12 @@ func NewChatIdMessageHandler(log *logrus.Logger,
 		BaseHandler:   *bh.NewBaseHandler(log),
 	}
 
-	h.AddMiddleware(middleware.NewChatsMiddleware(log, ucChats).CheckCorrectChatId,
-		session_middleware.NewSessionMiddleware(h.sessionClient, log).Check)
+	h.AddMiddleware(session_middleware.NewSessionMiddleware(h.sessionClient, log).Check,
+		middleware.NewChatsMiddleware(log, ucChats).CheckCorrectChatId)
 
 	h.AddMethod(http.MethodGet, h.GET)
 
-	h.AddMethod(http.MethodGet, h.POST)
+	h.AddMethod(http.MethodPost, h.POST)
 
 	return h
 }
@@ -99,7 +99,7 @@ func (h *ChatIdMessageHandler) POST(w http.ResponseWriter, r *http.Request) {
 
 	text = bluemonday.UGCPolicy().Sanitize(text)
 
-	msg, err := h.chatsUsecase.CreateMessage(text, chatId, file, filename, userID.(string))
+	msg, err := h.chatsUsecase.CreateMessage(h.Log(r), text, chatId, file, filename, userID.(string))
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByErrorPOST)
 		return

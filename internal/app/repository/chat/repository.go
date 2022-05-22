@@ -22,6 +22,12 @@ type Repository interface {
 	// 			repository.DefaultErrDB
 	CheckAllow(user string, chatId int64) error
 
+	// GetChat Errors:
+	//		repository.NotFound
+	// 		app.GeneralError with Errors:
+	// 			repository.DefaultErrDB
+	GetChat(chatId int64, author string) (*models.Chat, error)
+
 	// GetChats Errors:
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:

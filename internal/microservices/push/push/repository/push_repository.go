@@ -11,11 +11,9 @@ import (
 const (
 	GetUserAvatarQuery = `SELECT nickname, avatar FROM users WHERE nickname = $1`
 
-	GetMessageInfoQuery = `SELECT u.nickname, cp.avatar FROM creator_profile as cp 
-									JOIN users u on cp.creator_id = u.users_id
-									WHERE cp.creator_id = $1`
+	GetMessageInfoQuery = `SELECT author, message, chat FROM messages WHERE id = $1`
 
-	GetGlideInfoQuery = `SELECT name, price FROM awards where awards_id = $1`
+	GetGlideInfoQuery = `SELECT author, message, title, country  FROM glide_message where id = $1`
 )
 
 type PushRepository struct {
@@ -48,7 +46,11 @@ func (repo *PushRepository) GetUserAvatar(username string) (avatar string, err e
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *PushRepository) GetMessageInfo(messageId int64) (author string, text string, chatId int64, err error) {
-	if err = repo.store.QueryRow(GetMessageInfoQuery, messageId).Scan(&author, &text, &chatId); err != nil {
+	if err = repo.store.QueryRow(GetMessageInfoQuery, messageId).
+		Scan(&author,
+			&text,
+			&chatId,
+		); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", "", app.InvalidInt, repository.NotFound
 		}
@@ -62,8 +64,14 @@ func (repo *PushRepository) GetMessageInfo(messageId int64) (author string, text
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *PushRepository) GetGlideInfo(glideId int64) (author string, message string, title string, country string, err error) {
-	if err = repo.store.QueryRow(GetGlideInfoQuery, glideId).Scan(&author, &message, title, country); err != nil {
+func (repo *PushRepository) GetGlideInfo(glideId int64) (author string, message string, title string,
+	country string, err error) {
+	if err = repo.store.QueryRow(GetGlideInfoQuery, glideId).
+		Scan(&author,
+			&message,
+			&title,
+			&country,
+		); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", "", "", "", repository.NotFound
 		}

@@ -7,7 +7,6 @@ import (
 	"glide/internal/app/models"
 	"glide/internal/app/repository"
 	repository_glidemess "glide/internal/app/repository/glidemessage"
-	putilits "glide/internal/pkg/utilits/postgresql"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
@@ -41,43 +40,57 @@ const (
 						)
 						INSERT INTO glide_message_countries (country, glide_message) SELECT cnt_name, ? FROM cnt`
 
-	searchUserQuery = `
-				WITH usr AS (
-				    SELECT usr.nickname FROM users as usr 
-				    JOIN user_language ul ON usr.nickname = ul.nickname 
-				                        	AND ul.language in (SELECT gml.language FROM glide_message_languages as gml WHERE gml.glide_message = $1)
-					WHERE usr.country in (SELECT gmc.country FROM glide_message_countries as gmc WHERE gmc.glide_message = $1) 
-					  and usr.nickname not in (SELECT visited_user FROM glide_users WHERE glide_users.glide_message = $1)
-				
-				)
+	updateVisitedUserQuery = `
+				UPDATE glide_users SET is_actual = false WHERE glide_message = $1 AND is_actual
 			`
 
-	checkQuery = `SELECT id FROM chat WHERE id = $1`
+	updatePictureQuery = `
+				UPDATE glide_message SET picture = $2 WHERE id = $1
+			`
 
-	checkAllowQuery = `SELECT id FROM chat WHERE id = $1 and (companion = $2 or author = $2)`
+	deleteGlideMessage = `
+				DELETE FROM glide_message WHERE id = $1
+			`
 
-	createMessageQuery = `INSERT INTO messages (message, chat, picture, author) VALUES ($1, $2, $3, $4) 
-		RETURNING id, message, picture, author, is_viewed, created`
-
-	getChatsQuery = `
-			WITH latest_messages as (
-				SELECT min(created) as data FROM messages GROUP BY chat
-			)
-				SELECT chat.id, chat.author, u.avatar, m.id, m.message, m.picture, m.author, m.is_viewed, m.created FROM chat 
-					JOIN messages m on chat.id = m.chat and m.created in(latest_messages)
-					JOIN users u on chat.author = u.nickname
-				WHERE chat.companion = $1
-			UNION 
-				SELECT chat.id, chat.companion, u.avatar, m.id, m.message, m.picture, m.author, m.is_viewed, m.created FROM chat
-					JOIN messages m on chat.id = m.chat and m.created in(latest_messages)
-				    JOIN users u on chat.companion = u.nickname
-				WHERE chat.author = $1
-	`
+	searchUserQuery = `
+				WITH usr_f AS (
+					SELECT usr.nickname as nick FROM users as usr
+														 JOIN user_language ul ON usr.nickname = ul.nickname
+						AND ul.language in (SELECT gml.language FROM glide_message_languages as gml WHERE gml.glide_message = $1)
+					WHERE usr.country in (SELECT gmc.country FROM glide_message_countries as gmc WHERE gmc.glide_message = $1)
+					  and usr.nickname not in (SELECT visited_user FROM glide_users WHERE glide_users.glide_message = $1)
+				), usr_s AS (
+					SELECT usr.nickname as nick FROM users as usr
+					WHERE usr.nickname not in (
+						SELECT visited_user FROM glide_users WHERE glide_users.glide_message = $1
+						UNION
+						SELECT nick FROM usr_f
+					)
+				)
+				INSERT INTO glide_users (visited_user, glide_message) SELECT COALESCE(
+								(SELECT usr_f.nick FROM usr_f OFFSET random() * (SELECT count(*) from usr_f) LIMIT 1),
+								(SELECT usr_s.nick FROM usr_s OFFSET random() * (SELECT count(*) from usr_s) LIMIT 1)
+            	), $1 RETURNING visited_user
+ 			`
 
 	getMessagesQuery = `
-				SELECT id, message, picture, author, is_viewed, created FROM messages WHERE chat = $1`
+				SELECT id, title, message, picture, author, country, created FROM glide_message where id = $1 `
 
-	markMessages = ` UPDATE messages SET is_viewed=true WHERE chat = $1 and id in (?)`
+	checkMessagesQuery = `
+				SELECT id FROM glide_message where id = $1 `
+
+	checkAllowUserQuery = `
+				SELECT glide_message FROM glide_users where glide_message = $1 and visited_user = $2 and is_actual`
+
+	checkAllowAuthorQuery = `
+				SELECT id FROM glide_message where id = $1 and author = $2`
+
+	getGottenMessagesQuery = `
+				SELECT glide_message.id, title, message, picture, author, country, created FROM glide_message
+						JOIN glide_users as gu on gu.glide_message = glide_message.id and gu.visited_user = $1 and gu.is_actual`
+
+	getSentMessagesQuery = `
+				SELECT id, title, message, picture, author, country, created FROM glide_message WHERE author = $1`
 )
 
 type GlideMessageRepository struct {
@@ -112,10 +125,11 @@ func (repo *GlideMessageRepository) addToInsert(queryStart string, queryEnd stri
 //		IncorrectLanguage
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
-func (repo *GlideMessageRepository) Create(message *models.GlideMessage, languages []string, counties []string) (*models.GlideMessage, error) {
+func (repo *GlideMessageRepository) Create(message *models.GlideMessage,
+	languages []string, counties []string) (*models.GlideMessage, string, error) {
 	tx, err := repo.store.Beginx()
 	if err != nil {
-		return nil, repository.NewDBError(err)
+		return nil, "", repository.NewDBError(err)
 	}
 
 	if err = tx.QueryRowx(createQuery,
@@ -131,41 +145,118 @@ func (repo *GlideMessageRepository) Create(message *models.GlideMessage, languag
 			&message.Created,
 			&message.Country); err != nil {
 		_ = tx.Rollback()
-		return nil, parsePQError(err.(*pq.Error))
+		return nil, "", parsePQError(err.(*pq.Error))
 	}
 
 	query, args := repo.addToInsert(createQueryLanguagesStart, createQueryLanguagesEnd, languages, message.ID)
-	if _, err = tx.Exec(createQueryLanguagesStart, args); err != nil {
+	if _, err = tx.Exec(query, args); err != nil {
 		_ = tx.Rollback()
-		return nil, parsePQError(err.(*pq.Error))
+		return nil, "", parsePQError(err.(*pq.Error))
 	}
 
 	query, args = repo.addToInsert(createQueryCountriesStart, createQueryCountriesEnd, counties, message.ID)
 	if _, err = tx.Exec(query, args); err != nil {
 		_ = tx.Rollback()
-		return nil, parsePQError(err.(*pq.Error))
+		return nil, "", parsePQError(err.(*pq.Error))
 	}
 
-	if _, err = tx.Exec(searchUserQuery, message.ID); err != nil {
+	if _, err = tx.Exec(updateVisitedUserQuery, message.ID); err != nil {
 		_ = tx.Rollback()
-		return nil, parsePQError(err.(*pq.Error))
+		return nil, "", repository.NewDBError(err)
 	}
 
-	return message, nil
+	nickname := ""
+
+	if err = tx.QueryRowx(searchUserQuery, message.ID).Scan(&nickname); err != nil {
+		_ = tx.Rollback()
+		return nil, "", repository.NewDBError(err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return nil, "", repository.NewDBError(err)
+	}
+
+	return message, nickname, nil
 }
 
 // GetGotten Errors:
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *GlideMessageRepository) GetGotten(user string) ([]models.GlideMessage, error) {
+	rows, err := repo.store.Queryx(getGottenMessagesQuery, user)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return []models.GlideMessage{}, nil
+		}
+		return nil, repository.NewDBError(err)
+	}
 
+	var msgs []models.GlideMessage
+
+	for rows.Next() {
+		var msg models.GlideMessage
+		err = rows.Scan(
+			&msg.ID,
+			&msg.Title,
+			&msg.Message,
+			&msg.Picture,
+			&msg.Author,
+			&msg.Country,
+			&msg.Created)
+
+		if err != nil {
+			_ = rows.Close()
+			return nil, repository.NewDBError(err)
+		}
+
+		msgs = append(msgs, msg)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, repository.NewDBError(err)
+	}
+
+	return msgs, nil
 }
 
 // GetSent Errors:
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *GlideMessageRepository) GetSent(user string) ([]models.GlideMessage, error) {
+	rows, err := repo.store.Queryx(getSentMessagesQuery, user)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return []models.GlideMessage{}, nil
+		}
+		return nil, repository.NewDBError(err)
+	}
 
+	var msgs []models.GlideMessage
+
+	for rows.Next() {
+		var msg models.GlideMessage
+		err = rows.Scan(
+			&msg.ID,
+			&msg.Title,
+			&msg.Message,
+			&msg.Picture,
+			&msg.Author,
+			&msg.Country,
+			&msg.Created)
+
+		if err != nil {
+			_ = rows.Close()
+			return nil, repository.NewDBError(err)
+		}
+
+		msgs = append(msgs, msg)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, repository.NewDBError(err)
+	}
+
+	return msgs, nil
 }
 
 // UpdatePicture Errors:
@@ -173,7 +264,43 @@ func (repo *GlideMessageRepository) GetSent(user string) ([]models.GlideMessage,
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *GlideMessageRepository) UpdatePicture(msgId int64, picture string) error {
+	res, err := repo.store.Exec(updatePictureQuery, msgId, picture)
+	if err != nil {
+		return repository.NewDBError(err)
+	}
 
+	rw, err := res.RowsAffected()
+	if err != nil {
+		return repository.NewDBError(err)
+	}
+
+	if rw == 0 {
+		return repository.NotFound
+	}
+
+	return nil
+}
+
+// Delete Errors:
+//		repository.NotFound
+// 		app.GeneralError with Errors
+// 			repository.DefaultErrDB
+func (repo *GlideMessageRepository) Delete(msgId int64) error {
+	res, err := repo.store.Exec(deleteGlideMessage, msgId)
+	if err != nil {
+		return repository.NewDBError(err)
+	}
+
+	rw, err := res.RowsAffected()
+	if err != nil {
+		return repository.NewDBError(err)
+	}
+
+	if rw == 0 {
+		return repository.NotFound
+	}
+
+	return nil
 }
 
 // Check Errors:
@@ -181,7 +308,15 @@ func (repo *GlideMessageRepository) UpdatePicture(msgId int64, picture string) e
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *GlideMessageRepository) Check(id int64) error {
+	if err := repo.store.QueryRowx(checkMessagesQuery, id).
+		Scan(&id); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return repository.NotFound
+		}
+		return repository.NewDBError(err)
+	}
 
+	return nil
 }
 
 // Get Errors:
@@ -189,22 +324,67 @@ func (repo *GlideMessageRepository) Check(id int64) error {
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
 func (repo *GlideMessageRepository) Get(id int64) (*models.GlideMessage, error) {
+	msg := &models.GlideMessage{}
 
+	if err := repo.store.QueryRowx(getMessagesQuery, id).
+		Scan(
+			&msg.ID,
+			&msg.Title,
+			&msg.Message,
+			&msg.Picture,
+			&msg.Author,
+			&msg.Country,
+			&msg.Created,
+		); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, repository.NotFound
+		}
+		return nil, repository.NewDBError(err)
+	}
+
+	return msg, nil
 }
 
 // ChangeUser Errors:
 //		repository.NotFound
 // 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *GlideMessageRepository) ChangeUser(id int64) error {
+func (repo *GlideMessageRepository) ChangeUser(id int64) (string, error) {
+	if err := repo.Check(id); err != nil {
+		return "", err
+	}
 
+	tx, err := repo.store.Beginx()
+	if err != nil {
+		return "", repository.NewDBError(err)
+	}
+
+	if _, err = tx.Exec(updateVisitedUserQuery, id); err != nil {
+		_ = tx.Rollback()
+		return "", repository.NewDBError(err)
+	}
+
+	nickname := ""
+
+	if err = tx.QueryRowx(searchUserQuery, id).Scan(&nickname); err != nil {
+		_ = tx.Rollback()
+		return "", repository.NewDBError(err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return "", repository.NewDBError(err)
+	}
+
+	return nickname, nil
 }
 
-// CheckAllow Errors:
-// 		app.GeneralError with Errors
+// CheckAllowUser Errors:
+//		repository.NotFound
+// 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *GlideMessageRepository) CheckAllow(user string, chatId int64) error {
-	if err := repo.store.QueryRowx(checkAllowQuery, chatId, user).Scan(&chatId); err != nil {
+func (repo *GlideMessageRepository) CheckAllowUser(id int64, user string) error {
+	if err := repo.store.QueryRowx(checkAllowUserQuery, id, user).
+		Scan(&id); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return repository.NotFound
 		}
@@ -214,12 +394,13 @@ func (repo *GlideMessageRepository) CheckAllow(user string, chatId int64) error 
 	return nil
 }
 
-// CheckChat Errors:
+// CheckAllowAuthor Errors:
 //		repository.NotFound
-// 		app.GeneralError with Errors
+// 		app.GeneralError with Errors:
 // 			repository.DefaultErrDB
-func (repo *GlideMessageRepository) CheckChat(chatId int64) error {
-	if err := repo.store.QueryRowx(checkQuery, chatId).Scan(&chatId); err != nil {
+func (repo *GlideMessageRepository) CheckAllowAuthor(id int64, user string) error {
+	if err := repo.store.QueryRowx(checkAllowAuthorQuery, id, user).
+		Scan(&id); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return repository.NotFound
 		}
@@ -227,129 +408,4 @@ func (repo *GlideMessageRepository) CheckChat(chatId int64) error {
 	}
 
 	return nil
-}
-
-// GetChats Errors:
-//		repository.NotFound
-// 		app.GeneralError with Errors:
-// 			repository.DefaultErrDB
-func (repo *GlideMessageRepository) GetChats(userId string) ([]models.Chat, error) {
-	rows, err := repo.store.Queryx(getChatsQuery, userId)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, repository.NotFound
-		}
-		return nil, repository.NewDBError(err)
-	}
-
-	var chats []models.Chat
-
-	for rows.Next() {
-		var chat models.Chat
-		err = rows.Scan(
-			&chat.ID,
-			&chat.Companion,
-			&chat.CompanionAvatar,
-			&chat.LastMessage.ID,
-			&chat.LastMessage.Text,
-			&chat.LastMessage.Picture,
-			&chat.LastMessage.Author,
-			&chat.LastMessage.IsViewed,
-			&chat.LastMessage.Created)
-
-		if err != nil {
-			_ = rows.Close()
-			return nil, repository.NewDBError(err)
-		}
-
-		chats = append(chats, chat)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, repository.NewDBError(err)
-	}
-
-	return chats, nil
-}
-
-// GetMessages Errors:
-//		repository.NotFound
-// 		app.GeneralError with Errors:
-// 			repository.DefaultErrDB
-func (repo *GlideMessageRepository) GetMessages(chatId int64, pag *models.Pagination) ([]models.Message, error) {
-	rows, err := repo.store.Queryx(getMessagesQuery, chatId)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, repository.NotFound
-		}
-		return nil, repository.NewDBError(err)
-	}
-
-	var chats []models.Message
-
-	for rows.Next() {
-		var chat models.Message
-		err = rows.Scan(
-			&chat.ID,
-			&chat.Text,
-			&chat.Picture,
-			&chat.Author,
-			&chat.IsViewed,
-			&chat.Created)
-
-		if err != nil {
-			_ = rows.Close()
-			return nil, repository.NewDBError(err)
-		}
-
-		chats = append(chats, chat)
-	}
-
-	if err = rows.Err(); err != nil {
-		return nil, repository.NewDBError(err)
-	}
-
-	return chats, nil
-}
-
-// MarkMessages Errors:
-//		repository.NotFound
-// 		app.GeneralError with Errors:
-// 			repository.DefaultErrDB
-func (repo *GlideMessageRepository) MarkMessages(chatId int64, messageIds []int64) error {
-	query, args, err := sqlx.In(markMessages, messageIds)
-	if err != nil {
-		return repository.NewDBError(err)
-	}
-
-	query = putilits.CustomRebind(2, query)
-
-	res, err := repo.store.Exec(query, chatId, args)
-	if err != nil {
-		return repository.NewDBError(err)
-	}
-
-	n, err := res.RowsAffected()
-	if err != nil {
-		return repository.NewDBError(err)
-	}
-
-	if n == 0 {
-		return repository.NotFound
-	}
-
-	return nil
-}
-
-// CreateMessage Errors:
-// 		app.GeneralError with Errors:
-// 			repository.DefaultErrDB
-func (repo *GlideMessageRepository) CreateMessage(text string, chatId int64, image string, user string) (*models.Message, error) {
-	ms := &models.Message{}
-	if err := repo.store.QueryRowx(createMessageQuery, text, chatId, image, user).
-		Scan(&ms.ID, &ms.Text, &ms.Picture, &ms.Author, &ms.IsViewed, &ms.Created); err != nil {
-		return nil, repository.NewDBError(err)
-	}
-
-	return ms, nil
 }

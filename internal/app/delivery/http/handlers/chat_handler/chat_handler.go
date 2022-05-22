@@ -29,7 +29,7 @@ func NewChatHandler(log *logrus.Logger,
 		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 	)
 
-	h.AddMethod(http.MethodGet, h.POST,
+	h.AddMethod(http.MethodPost, h.POST,
 		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
 	)
 
@@ -50,7 +50,6 @@ func (h *ChatHandler) GET(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Log(r).Debugf("get user %s", u)
 	h.Respond(w, r, http.StatusOK, models_http.ToResponseChats(u))
 }
 

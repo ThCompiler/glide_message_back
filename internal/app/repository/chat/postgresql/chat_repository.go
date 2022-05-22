@@ -24,6 +24,12 @@ const (
 	createMessageQuery = `INSERT INTO messages (message, chat, picture, author) VALUES ($1, $2, $3, $4) 
 		RETURNING id, message, picture, author, is_viewed, created`
 
+	getChatQuery = `
+			SELECT id, companion FROM chat WHERE id = $1 and author = $2
+			UNION 
+			SELECT id, author FROM chat WHERE id = $1 and companion = $2
+			`
+
 	getChatsQuery = `
 			WITH latest_messages as (
 				SELECT min(created) as data FROM messages GROUP BY chat
@@ -69,6 +75,27 @@ func (repo *ChatRepository) Create(user string, with string) (*models.Chat, erro
 	}
 
 	return &models.Chat{ID: id, Companion: with}, nil
+}
+
+// GetChat Errors:
+//		repository.NotFound
+// 		app.GeneralError with Errors:
+// 			repository.DefaultErrDB
+func (repo *ChatRepository) GetChat(chatId int64, author string) (*models.Chat, error) {
+	chat := &models.Chat{}
+	if err := repo.store.QueryRowx(getChatQuery, chatId, author).
+		Scan(
+			&chat.ID,
+			&chat.Companion,
+			&chat.CompanionAvatar,
+		); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, repository.NotFound
+		}
+		return nil, repository.NewDBError(err)
+	}
+
+	return chat, nil
 }
 
 // CheckAllow Errors:

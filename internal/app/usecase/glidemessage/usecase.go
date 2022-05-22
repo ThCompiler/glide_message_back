@@ -1,17 +1,22 @@
-package repository_glidemess
+package glidemessage
 
 import (
+	"github.com/sirupsen/logrus"
 	"glide/internal/app/models"
+	repoFiles "glide/internal/app/repository/files"
+	"io"
 )
 
-type Repository interface {
+//go:generate mockgen -destination=mocks/mock_posts_usecase.go -package=mock_usecase -mock_names=Usecase=PostsUsecase . Usecase
+
+type Usecase interface {
 	// Create Errors:
-	//		IncorrectCounty
-	//		IncorrectLanguage
+	//		repository_postgresql.IncorrectCounty
+	//		repository_postgresql.IncorrectLanguage
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
-	Create(message *models.GlideMessage,
-		languages []string, counties []string) (*models.GlideMessage, string, error)
+	Create(log *logrus.Entry, message *models.GlideMessage,
+		languages []string, counties []string) (*models.GlideMessage, error)
 
 	// GetGotten Errors:
 	// 		app.GeneralError with Errors
@@ -26,14 +31,11 @@ type Repository interface {
 	// UpdatePicture Errors:
 	//		repository.NotFound
 	// 		app.GeneralError with Errors
+	//			FileSystemError
 	// 			repository.DefaultErrDB
-	UpdatePicture(msgId int64, picture string) error
-
-	// Delete Errors:
-	//		repository.NotFound
-	// 		app.GeneralError with Errors
-	// 			repository.DefaultErrDB
-	Delete(msgId int64) error
+	//			utilits.ConvertErr
+	//  		utilits.UnknownExtOfFileName
+	UpdatePicture(msgId int64, data io.Reader, name repoFiles.FileName) error
 
 	// Check Errors:
 	//		repository.NotFound
@@ -51,7 +53,7 @@ type Repository interface {
 	//		repository.NotFound
 	// 		app.GeneralError with Errors:
 	// 			repository.DefaultErrDB
-	ChangeUser(id int64) (string, error)
+	ChangeUser(log *logrus.Entry, id int64) error
 
 	// CheckAllowUser Errors:
 	//		repository.NotFound

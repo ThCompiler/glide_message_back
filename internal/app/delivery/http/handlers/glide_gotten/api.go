@@ -1,4 +1,4 @@
-package chat_message_handler
+package glide_gotten_handler
 
 import (
 	"glide/internal/app/delivery/http/handlers/handler_errors"
@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var codeByErrorPUT = delivery.CodeMap{
+var codeByErrorGET = delivery.CodeMap{
 	repository.NotFound: {
 		http.StatusNotFound, handler_errors.UserNotFound, logrus.WarnLevel},
 	repository.DefaultErrDB: {

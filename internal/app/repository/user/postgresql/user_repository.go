@@ -17,7 +17,7 @@ const (
 
 	getPasswordQuery = `SELECT password FROM users WHERE nickname=$1`
 
-	findByNicknameQuery             = `SELECT nickname, fullname, about, age, lower(country) FROM users WHERE nickname=$1`
+	findByNicknameQuery             = `SELECT nickname, fullname, about, age, avatar, lower(country) FROM users WHERE nickname=$1`
 	findByNicknameGetLanguagesQuery = `SELECT lower(language) FROM user_language WHERE nickname=$1`
 
 	createQuery = `    
@@ -147,6 +147,7 @@ func (repo *UserRepository) FindByNickname(nickname string) (*models.User, error
 			&user.Fullname,
 			&user.About,
 			&user.Age,
+			&user.Avatar,
 			&country); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, repository.NotFound

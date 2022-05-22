@@ -1,6 +1,7 @@
 package chats
 
 import (
+	"github.com/sirupsen/logrus"
 	"glide/internal/app/models"
 	repoFiles "glide/internal/app/repository/files"
 	"io"
@@ -44,5 +45,5 @@ type Usecase interface {
 	// 			repository.DefaultErrDB
 	//			utilits.ConvertErr
 	//  		utilits.UnknownExtOfFileName
-	CreateMessage(text string, chatId int64, data io.Reader, name repoFiles.FileName, user string) (*models.Message, error)
+	CreateMessage(log *logrus.Entry, text string, chatId int64, data io.Reader, name repoFiles.FileName, user string) (*models.Message, error)
 }

@@ -3,6 +3,7 @@ package chats
 import (
 	"context"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"glide/internal/app"
 	"glide/internal/app/models"
 	repoChats "glide/internal/app/repository/chat"
@@ -40,7 +41,12 @@ func NewChatsUsecase(repository repoChats.Repository, fileRepository repoFiles.R
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (usecase *ChatsUsecase) Create(user string, with string) (*models.Chat, error) {
-	return usecase.repository.Create(user, with)
+	res, err := usecase.repository.Create(user, with)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 // CheckAllow Errors:
@@ -89,13 +95,13 @@ func (usecase *ChatsUsecase) MarkMessages(chatId int64, messageIds []int64) erro
 // 			repository.DefaultErrDB
 //			utilits.ConvertErr
 //  		utilits.UnknownExtOfFileName
-func (usecase *ChatsUsecase) CreateMessage(text string, chatId int64, data io.Reader, name repoFiles.FileName,
+func (usecase *ChatsUsecase) CreateMessage(log *logrus.Entry, text string, chatId int64, data io.Reader, name repoFiles.FileName,
 	user string) (*models.Message, error) {
-	if err := usecase.repository.CheckChat(chatId); err != nil {
+	chat, err := usecase.repository.GetChat(chatId, user)
+	if err != nil {
 		return nil, err
 	}
 
-	var err error
 	data, name, err = usecase.imageConvector.Convert(context.Background(), data, name)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed convert to webp of update post cover")
@@ -108,6 +114,15 @@ func (usecase *ChatsUsecase) CreateMessage(text string, chatId int64, data io.Re
 			ExternalErr: errors.Wrap(err, "error with file for message: "+
 				string(name)+" for chat: "+fmt.Sprintf("%d", chatId)),
 		}
+	}
+
+	res, err := usecase.repository.CreateMessage(text, chatId, app.LoadFileUrl+path, user)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = usecase.pusher.NewMessage(res.ID, chat.Companion); err != nil {
+		log.Errorf("can't send new message to %s with id %d, gotten err %s", chat.Companion, res.ID, err)
 	}
 
 	return usecase.repository.CreateMessage(text, chatId, app.LoadFileUrl+path, user)

@@ -5,6 +5,7 @@ import (
 	"glide/internal/app/delivery/http/handlers"
 	"glide/internal/app/delivery/http/handlers/handler_errors"
 	"glide/internal/app/delivery/http/models"
+	"glide/internal/app/middleware"
 	usecase_chats "glide/internal/app/usecase/chats"
 	session_client "glide/internal/microservices/auth/delivery/grpc/client"
 	session_middleware "glide/internal/microservices/auth/sessions/middleware"
@@ -27,8 +28,8 @@ func NewChatMessageHandler(log *logrus.Logger,
 		chatsUsecase:  ucChats,
 		BaseHandler:   *bh.NewBaseHandler(log),
 	}
-	h.AddMethod(http.MethodGet, h.PUT,
-		session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
+	h.AddMethod(http.MethodPut, h.PUT, session_middleware.NewSessionMiddleware(h.sessionClient, log).CheckFunc,
+		middleware.NewChatsMiddleware(log, ucChats).CheckCorrectChatIdFunc,
 	)
 
 	return h
@@ -53,7 +54,7 @@ func (h *ChatMessageHandler) PUT(w http.ResponseWriter, r *http.Request) {
 
 	err = h.chatsUsecase.MarkMessages(chatId, req.ToArray())
 	if err != nil {
-		h.UsecaseError(w, r, err, codeByErrorGET)
+		h.UsecaseError(w, r, err, codeByErrorPUT)
 		return
 	}
 
