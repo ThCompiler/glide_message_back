@@ -476,8 +476,6 @@ func easyjson7df0efccDecodeGlideInternalAppDeliveryHttpModels4(in *jlexer.Lexer,
 			out.Message = string(in.String())
 		case "author":
 			out.Author = string(in.String())
-		case "country":
-			out.Country = string(in.String())
 		default:
 			in.AddError(&jlexer.LexerError{
 				Offset: in.GetPos(),
@@ -510,11 +508,6 @@ func easyjson7df0efccEncodeGlideInternalAppDeliveryHttpModels4(out *jwriter.Writ
 		const prefix string = ",\"author\":"
 		out.RawString(prefix)
 		out.String(string(in.Author))
-	}
-	{
-		const prefix string = ",\"country\":"
-		out.RawString(prefix)
-		out.String(string(in.Country))
 	}
 	out.RawByte('}')
 }

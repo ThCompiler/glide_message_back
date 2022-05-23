@@ -11,7 +11,7 @@ type Repository interface {
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
 	Create(message *models.GlideMessage,
-		languages []string, counties []string) (*models.GlideMessage, string, error)
+		languages []string, counties []string, age int64) (*models.GlideMessage, string, error)
 
 	// GetGotten Errors:
 	// 		app.GeneralError with Errors

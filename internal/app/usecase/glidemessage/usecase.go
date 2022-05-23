@@ -16,7 +16,7 @@ type Usecase interface {
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
 	Create(log *logrus.Entry, message *models.GlideMessage,
-		languages []string, counties []string) (*models.GlideMessage, error)
+		languages []string, counties []string, age int64) (*models.GlideMessage, error)
 
 	// GetGotten Errors:
 	// 		app.GeneralError with Errors

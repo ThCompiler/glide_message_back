@@ -2,6 +2,7 @@ package glide_create_handler
 
 import (
 	"github.com/microcosm-cc/bluemonday"
+	"glide/internal/app"
 	"glide/internal/app/delivery/http/models"
 	ucGlideMessage "glide/internal/app/usecase/glidemessage"
 	session_client "glide/internal/microservices/auth/delivery/grpc/client"
@@ -43,10 +44,15 @@ func (h *GlideIdApplyHandler) POST(w http.ResponseWriter, r *http.Request) {
 
 	languages, _ := h.GetArrayStringFromQueries(w, r, "languages")
 	countries, _ := h.GetArrayStringFromQueries(w, r, "countries")
+	age, code, err := h.GetInt64FromQueries(w, r, "age")
+
+	if age == app.InvalidInt {
+		h.Error(w, r, code, err)
+	}
 
 	req := &http_models.RequestGlideMessage{}
 
-	err := h.GetRequestBody(r, req, *bluemonday.UGCPolicy())
+	err = h.GetRequestBody(r, req, *bluemonday.UGCPolicy())
 	if err != nil {
 		h.Log(r).Warnf("can not parse request %s", err)
 		h.Error(w, r, http.StatusUnprocessableEntity, handler_errors.InvalidBody)
@@ -54,7 +60,7 @@ func (h *GlideIdApplyHandler) POST(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req.Author = userID.(string)
-	msg, err := h.glideMessageUsecase.Create(h.Log(r), req.ToGlideMessage(), languages, countries)
+	msg, err := h.glideMessageUsecase.Create(h.Log(r), req.ToGlideMessage(), languages, countries, age)
 	if err != nil {
 		h.UsecaseError(w, r, err, codeByErrorPOST)
 		return

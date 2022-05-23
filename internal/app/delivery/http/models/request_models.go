@@ -51,7 +51,6 @@ type RequestGlideMessage struct {
 	Title   string `json:"title"`
 	Message string `json:"message"`
 	Author  string `json:"author,omitempty"`
-	Country string `json:"country"`
 }
 
 func (rr *RequestGlideMessage) ToGlideMessage() *models.GlideMessage {
@@ -59,7 +58,6 @@ func (rr *RequestGlideMessage) ToGlideMessage() *models.GlideMessage {
 		Title:   rr.Title,
 		Message: rr.Message,
 		Author:  rr.Author,
-		Country: rr.Country,
 	}
 }
 

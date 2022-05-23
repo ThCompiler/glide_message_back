@@ -46,8 +46,8 @@ func NewGlideMessageUsecase(repository repoGlideMess.Repository, repositoryChats
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (usecase *GlideMessageUsecase) Create(log *logrus.Entry, message *models.GlideMessage,
-	languages []string, counties []string) (*models.GlideMessage, error) {
-	res, recipient, err := usecase.repository.Create(message, languages, counties)
+	languages []string, counties []string, age int64) (*models.GlideMessage, error) {
+	res, recipient, err := usecase.repository.Create(message, languages, counties, age)
 	if err != nil {
 		return nil, err
 	}

@@ -16,10 +16,8 @@ import (
 
 const (
 	createQuery = `
-		WITH cnt AS (
-		    SELECT country_name as cnt_name FROM countries WHERE lower(country_name) = lower($4)
-		)
-		INSERT INTO glide_message (title, message, author, country) VALUES ($1, $2, $3, (SELECT cnt_name FROM cnt LIMIT 1)) 
+		INSERT INTO glide_message (title, message, author, country, age) 
+			VALUES ($1, $2, $3, (SELECT users.country FROM users where nickname = $3), $4) 
 		RETURNING id, title, message, author, created, country`
 
 	createQueryLanguagesStart = `
@@ -59,6 +57,7 @@ const (
 						AND ul.language in (SELECT gml.language FROM glide_message_languages as gml WHERE gml.glide_message = $1)
 					WHERE usr.country in (SELECT gmc.country FROM glide_message_countries as gmc WHERE gmc.glide_message = $1)
 					  and usr.nickname not in (SELECT visited_user FROM glide_users WHERE glide_users.glide_message = $1)
+					  and usr.age >= (SELECT glide_message.age FROM glide_message WHERE glide_message.id = $1)
 				), usr_l AS (
 					SELECT usr.nickname as nick FROM users as usr
 					 JOIN user_language ul ON usr.nickname = ul.nickname
@@ -78,6 +77,18 @@ const (
 						UNION
 						SELECT nick FROM usr_f                                     
 					 )
+				), usr_a AS (
+					SELECT usr.nickname as nick FROM users as usr
+					WHERE usr.age >= (SELECT glide_message.age FROM glide_message WHERE glide_message.id = $1)
+					  and usr.nickname not in (
+					  	SELECT visited_user FROM glide_users WHERE glide_users.glide_message = $1
+					    UNION
+						SELECT nick FROM usr_l
+						UNION
+						SELECT nick FROM usr_c
+						UNION
+						SELECT nick FROM usr_f                            
+					 )
 				), usr_o AS (
 					SELECT usr.nickname as nick FROM users as usr
 					WHERE usr.nickname not in (
@@ -88,23 +99,28 @@ const (
 						SELECT nick FROM usr_c
 						UNION
 						SELECT nick FROM usr_f
+						UNION
+						SELECT nick FROM usr_a
 					)
 				)
 				INSERT INTO glide_users (visited_user, glide_message) SELECT 
-				COALESCE(
+				COALESCE( 
 				    COALESCE(
 				    	COALESCE(
-								(SELECT usr_f.nick FROM usr_f OFFSET floor(random() * (SELECT count(*) from usr_f)) LIMIT 1),
-								(SELECT usr_l.nick FROM usr_l OFFSET floor(random() * (SELECT count(*) from usr_l)) LIMIT 1)
-				    	    ),
-						(SELECT usr_c.nick FROM usr_c OFFSET floor(random() * (SELECT count(*) from usr_c)) LIMIT 1)
+				    		COALESCE(
+									(SELECT usr_f.nick FROM usr_f OFFSET floor(random() * (SELECT count(*) from usr_f)) LIMIT 1),
+									(SELECT usr_l.nick FROM usr_l OFFSET floor(random() * (SELECT count(*) from usr_l)) LIMIT 1)
+				    	   		),
+							(SELECT usr_c.nick FROM usr_c OFFSET floor(random() * (SELECT count(*) from usr_c)) LIMIT 1)
 				        ),
-					(SELECT usr_o.nick FROM usr_o OFFSET floor(random() * (SELECT count(*) from usr_o)) LIMIT 1)
+						(SELECT usr_a.nick FROM usr_a OFFSET floor(random() * (SELECT count(*) from usr_a)) LIMIT 1)
+					),
+				    (SELECT usr_o.nick FROM usr_o OFFSET floor(random() * (SELECT count(*) from usr_o)) LIMIT 1)
             	), $1 RETURNING visited_user
  			`
 
 	getMessagesQuery = `
-				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, gm.country, gm.created, u.avatar 
+				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, lower(gm.country), gm.created, u.avatar 
 				FROM glide_message as gm
 					JOIN users u on gm.author = u.nickname
 				WHERE gm.id = $1`
@@ -122,13 +138,13 @@ const (
 				SELECT id FROM glide_message where id = $1 and author = $2`
 
 	getGottenMessagesQuery = `
-				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, gm.country, gm.created, u.avatar
+				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, lower(gm.country), gm.created, u.avatar
 				FROM glide_message as gm
 					JOIN glide_users as gu on gu.glide_message = gm.id and gu.visited_user = $1 and gu.is_actual
 					JOIN users u on gm.author = u.nickname `
 
 	getSentMessagesQuery = `
-				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, gm.country, gm.created, u.avatar 
+				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, lower(gm.country), gm.created, u.avatar 
 				FROM glide_message as gm
 			 		JOIN users u on gm.author = u.nickname 
 				WHERE author = $1`
@@ -146,7 +162,8 @@ func NewGlideMessageRepository(st *sqlx.DB) *GlideMessageRepository {
 	}
 }
 
-func (repo *GlideMessageRepository) addToInsert(queryStart string, queryEnd string, arr []string, id int64) (string, []interface{}) {
+func (repo *GlideMessageRepository) addToInsert(queryStart string, queryEnd string,
+	arr []string, id int64) (string, []interface{}) {
 	var argsString []string
 	var args []interface{}
 	for _, str := range arr {
@@ -168,7 +185,7 @@ func (repo *GlideMessageRepository) addToInsert(queryStart string, queryEnd stri
 // 		app.GeneralError with Errors
 // 			repository.DefaultErrDB
 func (repo *GlideMessageRepository) Create(message *models.GlideMessage,
-	languages []string, counties []string) (*models.GlideMessage, string, error) {
+	languages []string, counties []string, age int64) (*models.GlideMessage, string, error) {
 	tx, err := repo.store.Beginx()
 	if err != nil {
 		return nil, "", repository.NewDBError(err)
@@ -178,7 +195,8 @@ func (repo *GlideMessageRepository) Create(message *models.GlideMessage,
 		message.Title,
 		message.Message,
 		message.Author,
-		message.Country).
+		age,
+	).
 		Scan(
 			&message.ID,
 			&message.Title,

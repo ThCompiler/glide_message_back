@@ -12,7 +12,6 @@ func (req *RequestLogin) Sanitize(sanitizer bluemonday.Policy) {
 func (req *RequestGlideMessage) Sanitize(sanitizer bluemonday.Policy) {
 	req.Title = sanitizer.Sanitize(req.Title)
 	req.Message = sanitizer.Sanitize(req.Message)
-	req.Country = sanitizer.Sanitize(req.Country)
 }
 
 func (req *RequestMessageIds) Sanitize(_ bluemonday.Policy) {}
