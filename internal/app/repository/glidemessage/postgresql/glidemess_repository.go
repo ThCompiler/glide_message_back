@@ -104,7 +104,10 @@ const (
  			`
 
 	getMessagesQuery = `
-				SELECT id, title, message, picture, author, country, created FROM glide_message where id = $1 `
+				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, gm.country, gm.created, u.avatar 
+				FROM glide_message as gm
+					JOIN users u on gm.author = u.nickname
+				WHERE gm.id = $1`
 
 	checkMessagesQuery = `
 				SELECT id FROM glide_message where id = $1 `
@@ -119,11 +122,16 @@ const (
 				SELECT id FROM glide_message where id = $1 and author = $2`
 
 	getGottenMessagesQuery = `
-				SELECT glide_message.id, title, message, picture, author, country, created FROM glide_message
-						JOIN glide_users as gu on gu.glide_message = glide_message.id and gu.visited_user = $1 and gu.is_actual`
+				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, gm.country, gm.created, u.avatar
+				FROM glide_message as gm
+					JOIN glide_users as gu on gu.glide_message = gm.id and gu.visited_user = $1 and gu.is_actual
+					JOIN users u on gm.author = u.nickname `
 
 	getSentMessagesQuery = `
-				SELECT id, title, message, picture, author, country, created FROM glide_message WHERE author = $1`
+				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, gm.country, gm.created, u.avatar 
+				FROM glide_message as gm
+			 		JOIN users u on gm.author = u.nickname 
+				WHERE author = $1`
 )
 
 type GlideMessageRepository struct {
@@ -254,7 +262,9 @@ func (repo *GlideMessageRepository) GetGotten(user string) ([]models.GlideMessag
 			&msg.Picture,
 			&msg.Author,
 			&msg.Country,
-			&msg.Created)
+			&msg.Created,
+			&msg.AuthorAvatar,
+		)
 
 		if err != nil {
 			_ = rows.Close()
@@ -294,7 +304,9 @@ func (repo *GlideMessageRepository) GetSent(user string) ([]models.GlideMessage,
 			&msg.Picture,
 			&msg.Author,
 			&msg.Country,
-			&msg.Created)
+			&msg.Created,
+			&msg.AuthorAvatar,
+		)
 
 		if err != nil {
 			_ = rows.Close()
@@ -387,6 +399,7 @@ func (repo *GlideMessageRepository) Get(id int64) (*models.GlideMessage, error) 
 			&msg.Author,
 			&msg.Country,
 			&msg.Created,
+			&msg.AuthorAvatar,
 		); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, repository.NotFound
