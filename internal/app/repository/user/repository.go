@@ -37,4 +37,20 @@ type Repository interface {
 	// 		app.GeneralError with Errors
 	// 			repository.DefaultErrDB
 	UpdateAvatar(id string, newAvatar string) error
+
+	// GetBlacklist Errors:
+	// 		repository.NotFound
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	GetBlacklist(nickname string) ([]models.User, error)
+
+	// AddToBlacklist Errors:
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	AddToBlacklist(author string, nickname string) error
+
+	// DeleteFromBlacklist Errors:
+	// 		app.GeneralError with Errors
+	// 			repository.DefaultErrDB
+	DeleteFromBlacklist(author string, nickname string) error
 }
