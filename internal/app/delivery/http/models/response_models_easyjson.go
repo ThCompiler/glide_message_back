@@ -503,6 +503,8 @@ func easyjson316682a0DecodeGlideInternalAppDeliveryHttpModels6(in *jlexer.Lexer,
 			}
 		case "author":
 			out.Author = string(in.String())
+		case "author_fullname":
+			out.AuthorFullname = string(in.String())
 		case "author_avatar":
 			out.AuthorAvatar = string(in.String())
 		case "country":
@@ -554,6 +556,11 @@ func easyjson316682a0EncodeGlideInternalAppDeliveryHttpModels6(out *jwriter.Writ
 		const prefix string = ",\"author\":"
 		out.RawString(prefix)
 		out.String(string(in.Author))
+	}
+	{
+		const prefix string = ",\"author_fullname\":"
+		out.RawString(prefix)
+		out.String(string(in.AuthorFullname))
 	}
 	if in.AuthorAvatar != "" {
 		const prefix string = ",\"author_avatar\":"

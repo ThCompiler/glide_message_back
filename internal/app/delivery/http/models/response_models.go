@@ -69,14 +69,15 @@ type ResponseChat struct {
 
 //easyjson:json
 type ResponseGlideMessage struct {
-	ID           int64     `json:"id"`
-	Title        string    `json:"title"`
-	Message      string    `json:"message"`
-	Picture      string    `json:"picture,omitempty"`
-	Created      time.Time `json:"created"`
-	Author       string    `json:"author"`
-	AuthorAvatar string    `json:"author_avatar,omitempty"`
-	Country      string    `json:"country"`
+	ID             int64     `json:"id"`
+	Title          string    `json:"title"`
+	Message        string    `json:"message"`
+	Picture        string    `json:"picture,omitempty"`
+	Created        time.Time `json:"created"`
+	Author         string    `json:"author"`
+	AuthorFullname string    `json:"author_fullname"`
+	AuthorAvatar   string    `json:"author_avatar,omitempty"`
+	Country        string    `json:"country"`
 }
 
 //easyjson:json
@@ -170,14 +171,15 @@ func ToResponseChat(cht models.Chat) ResponseChat {
 
 func ToResponseGlideMessage(msg models.GlideMessage) ResponseGlideMessage {
 	return ResponseGlideMessage{
-		ID:           msg.ID,
-		Author:       msg.Author,
-		AuthorAvatar: msg.AuthorAvatar,
-		Message:      msg.Message,
-		Title:        msg.Title,
-		Created:      msg.Created,
-		Picture:      msg.Picture,
-		Country:      msg.Country,
+		ID:             msg.ID,
+		Author:         msg.Author,
+		AuthorAvatar:   msg.AuthorAvatar,
+		AuthorFullname: msg.AuthorFullname,
+		Message:        msg.Message,
+		Title:          msg.Title,
+		Created:        msg.Created,
+		Picture:        msg.Picture,
+		Country:        msg.Country,
 	}
 }
 

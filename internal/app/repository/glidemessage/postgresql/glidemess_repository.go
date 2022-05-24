@@ -120,7 +120,7 @@ const (
  			`
 
 	getMessagesQuery = `
-				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, lower(gm.country), gm.created, u.avatar 
+				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, lower(gm.country), gm.created, u.avatar, u.fullname
 				FROM glide_message as gm
 					JOIN users u on gm.author = u.nickname
 				WHERE gm.id = $1`
@@ -138,13 +138,13 @@ const (
 				SELECT id FROM glide_message where id = $1 and author = $2`
 
 	getGottenMessagesQuery = `
-				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, lower(gm.country), gm.created, u.avatar
+				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, lower(gm.country), gm.created, u.avatar, u.fullname
 				FROM glide_message as gm
 					JOIN glide_users as gu on gu.glide_message = gm.id and gu.visited_user = $1 and gu.is_actual
 					JOIN users u on gm.author = u.nickname `
 
 	getSentMessagesQuery = `
-				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, lower(gm.country), gm.created, u.avatar 
+				SELECT gm.id, gm.title, gm.message, gm.picture, gm.author, lower(gm.country), gm.created, u.avatar, u.fullname 
 				FROM glide_message as gm
 			 		JOIN users u on gm.author = u.nickname 
 				WHERE author = $1`
@@ -282,6 +282,7 @@ func (repo *GlideMessageRepository) GetGotten(user string) ([]models.GlideMessag
 			&msg.Country,
 			&msg.Created,
 			&msg.AuthorAvatar,
+			&msg.AuthorFullname,
 		)
 
 		if err != nil {
@@ -324,6 +325,7 @@ func (repo *GlideMessageRepository) GetSent(user string) ([]models.GlideMessage,
 			&msg.Country,
 			&msg.Created,
 			&msg.AuthorAvatar,
+			&msg.AuthorFullname,
 		)
 
 		if err != nil {
@@ -418,6 +420,7 @@ func (repo *GlideMessageRepository) Get(id int64) (*models.GlideMessage, error) 
 			&msg.Country,
 			&msg.Created,
 			&msg.AuthorAvatar,
+			&msg.AuthorFullname,
 		); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, repository.NotFound
